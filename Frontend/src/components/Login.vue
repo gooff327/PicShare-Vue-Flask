@@ -2,7 +2,6 @@
 <template>
    <el-form :model="loginForm" hide-required-asterisk status-icon :rules="rules" ref="loginForm" class="demo-loginForm">
      <v-header></v-header>
-
      <el-form-item label="Username"  prop="username" :rules="[
      {required:true,message:'Username can not be empty!',trigger:'blur'},
      {min:5,max:18,message:'Username\'s length is between 5 and 18!',trigger:'blur'}
@@ -92,13 +91,18 @@
         this.$refs[Form].validate((valid) => {
             if (valid) {
               var data = ({
-                username: this.loginForm.username,
-                password: this.loginForm.pass,
+                // username: this.loginForm.username,
+                // password: this.loginForm.pass,
+                // email: this.loginForm.email
+                auth: {
+                  username: `${this.loginForm.username}`,
+                  password: `${this.loginForm.pass}`
+                },
                 email: this.loginForm.email
               })
               console.log(data)
               const path = 'http://127.0.0.1:5000/api/v1/' + actions
-              this.$axios.post(path, data)
+              this.$axios.get(path, data)
                 .then(function (res) {
                   console.log(res)
                   var sflag = res.data.flag
@@ -111,7 +115,7 @@
                     type: 'error'
         })
         } else {
-           this.$router.push({path: '/a'})
+           this.$router.push({path: '/home'})
            this.$notify({
                     title: 'System notifications:',
                     message: 'You are welcom!',
