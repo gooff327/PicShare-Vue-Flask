@@ -22,7 +22,7 @@ class Users(db.Model):
         return custom_app_context.verify(password,self.password)
 
 
-    def generate_auth_token(self,expiration = 600):
+    def generate_auth_token(self,expiration = 6000):
         s = Serializer(config.SECRET_KEY,expires_in=expiration)
         return s.dumps({'id': self.id})
 
@@ -30,7 +30,6 @@ class Users(db.Model):
         s = Serializer(config.SECRET_KEY)
         try:
             data = s.loads(token)
-            print(data)
         except SignatureExpired:
             return None
         except BadSignature:
@@ -42,14 +41,25 @@ class Resource(db.Model):
     __tablename__ =  'resourse'
     id = db.Column(db.Integer,primary_key=True,autoincrement=True)
     title = db.Column(db.String(80))
-    content = db.Column(db.String(300))
+    cls = db.Column(db.String(20))
     img = db.Column(db.String(200))
+    content = db.Column(db.String(300))
     pv = db.Column(db.Integer)
+    author = db.Column(db.String(30))
+    date = db.Column(db.DateTime)
 
-    def __init__(self,title,content,img,pv):
+    def __init__(self,title,cls,img,content,pv,author,date):
         self.title = title
-        self.content = content
+        self.cls = cls
         self.img = img
+        self.content = content
         self.pv = pv
+        self.author = author
+        self.date = date
 
+    def to_json(self):
+        dict = self.__dict__
+        if "_sa_instance_state" in dict:
+            del dict["_sa_instance_state"]
+        return dict
 

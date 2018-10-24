@@ -13,12 +13,9 @@ Vue.prototype.$axios = axios
 Vue.use(VueAxios)
 Vue.use(ElementUI)
 Vue.config.productionTip = false
-
 router.beforeEach((to, from, next) => {
-  console.log('全局路由控制')
-  let token = store.state.token
-  if (to.matched.some(route => route.meta.requireAuth)) {
-    if (token) {
+  if (to.meta.requireAuth) {
+    if (store.state.token) {
       next()
     } else {
       next({
@@ -30,10 +27,24 @@ router.beforeEach((to, from, next) => {
     next()
   }
 })
+
+axios.interceptors.request.use(
+  config => {
+    if (store.state.token) {
+      config.auth = {username: `${store.state.token}`}
+    }
+    return config
+  },
+  error => {
+    return Promise.reject(error)
+  }
+)
+
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
   router,
+  store,
   components: { App },
   template: '<App/>'
 })

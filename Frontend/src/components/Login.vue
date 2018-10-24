@@ -37,6 +37,7 @@
 
 <script>
   import headers from './header/header'
+  import store from '../vuex/user'
   export default {
   name: 'Login',
     components: {
@@ -65,6 +66,7 @@
       loginForm: {
         pass: '',
         username: '',
+        email: '',
         checkPass: '',
         openfullscreen: false
       },
@@ -82,60 +84,79 @@
     },
     methods: {
       submitUser (Form) {
-        var actions = 'login'
-        if (this.btnSwitch === false) {
-          actions = 'login'
-        } else {
-          actions = 'register'
-        }
         this.$refs[Form].validate((valid) => {
-            if (valid) {
-              var data = ({
-                // username: this.loginForm.username,
-                // password: this.loginForm.pass,
-                // email: this.loginForm.email
-                auth: {
-                  username: `${this.loginForm.username}`,
-                  password: `${this.loginForm.pass}`
-                },
-                email: this.loginForm.email
+          if (this.btnSwitch === false) {
+            var logurl = 'http://127.0.0.1:5000/api/v1/login'
+            var data = {
+              'auth': {
+                username: this.loginForm.username,
+                  password: this.loginForm.pass
+              }
+            }
+            this.$axios.get(logurl, data).then(function (response) {
+              console.log(response)
+              var token = response.data.token
+              console.log(token)
+              store.commit('ADD_TOKEN', token)
+              this.$router.push('/home')
+              this.$notify({
+                title: 'Messages:',
+                message: 'Welcome !' + `  ${this.loginForm.username}`,
+                position: 'bottom',
+                type: 'success'
               })
-              console.log(data)
-              const path = 'http://127.0.0.1:5000/api/v1/' + actions
-              this.$axios.get(path, data)
-                .then(function (res) {
-                  console.log(res)
-                  var sflag = res.data.flag
-                  if (actions === 'login') {
-                  if (sflag === -1) {
+            }.bind(this))
+              .catch(function (error) {
+                console.log(error)
+                this.$notify.error({
+                  title: 'Warning:',
+                  message: 'Wrong username or password!',
+                  position: 'bottom',
+                  type: 'error'
+                })
+              }.bind(this))
+          } else {
+            var regurl = 'http://127.0.0.1:5000/api/v1/register'
+            var regdata = {
+              username: this.loginForm.username,
+              password: this.loginForm.pass,
+              email: this.loginForm.email
+            }
+            this.$axios.post(regurl, regdata).then(function (response) {
+              var code = response.data.err_code
+              console.log(typeof code)
+              switch (code) {
+                case 200:
+                  this.$notify({
+                  title: 'Messages:',
+                  message: `${this.loginForm.username},you can log in now!`,
+                  position: 'bottom',
+                  type: 'success'
+                })
+                  this.$router.go(0)
+                break
+                case 402:
                   this.$notify.error({
-                    title: 'Warning',
-                    message: 'Username or password error',
+                    title: 'Messages:',
+                    message: 'This username is unaviliable',
                     position: 'bottom',
                     type: 'error'
-        })
-        } else {
-           this.$router.push({path: '/home'})
-           this.$notify({
-                    title: 'System notifications:',
-                    message: 'You are welcom!',
+                  })
+                  this.$refs[Form].resetFields()
+                break
+                case 403:
+                  this.$notify.error({
+                    title: 'Messages:',
+                    message: 'This email has signed!',
                     position: 'bottom',
-                    type: 'success'
-        })
-        }
-        } else {
-          if (sflag === 2) {
+                    type: 'error'
+                  })
+                  this.$refs[Form].resetFields()
+                break
+              }
+              console.log(response)
+              }.bind(this))
           }
-        }
-        }.bind(this))
-            } else {
-              this.$notify.error({
-          title: 'Warning:',
-          message: 'Please check the form!',
-          position: 'bottom',
-          type: 'error'
-        })
-            }
           }
         )
       }
