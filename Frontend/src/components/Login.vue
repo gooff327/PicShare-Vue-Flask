@@ -108,6 +108,7 @@
             }.bind(this))
               .catch(function (error) {
                 console.log(error)
+                this.store.commit('REMOVE_TOKEN', this.store.state.token)
                 this.$notify.error({
                   title: 'Warning:',
                   message: 'Wrong username or password!',
