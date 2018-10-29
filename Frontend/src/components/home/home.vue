@@ -19,7 +19,6 @@
         }
       },
       created: function () {
-       console.log('created!')
         let url = 'http://127.0.0.1:5000/api/v1/resource'
         this.$axios.get(url).then(function (response) {
           this.content = response.data

@@ -1,31 +1,44 @@
 <template>
   <div class="adminPanel">
     <header class="adminHeaders">Administor Panel</header>
-    <el-form ref="adminForm" :model="form" label-width="80px">
-      <el-form-item label="Title">
-        <el-input v-model="form.title"></el-input>
-      </el-form-item>
-      <el-form-item label="Library">
-        <el-select v-model="form.cls" placeholder="Classify your passage">
-          <el-option label="Tweaks" value="tweaks"></el-option>
-          <el-option label="Skills" value="skills"></el-option>
-          <el-option label="ProxyShare" value="proxy"></el-option>
-          <el-option label="Wallpapers" value="wallpaper"></el-option>
-          <el-option label="SexyGirls" value="sexy"></el-option>
-          <el-option label="Admin'sword" value="admin"></el-option>
-        </el-select>
-      </el-form-item>
-      <el-form-item label="ImageSource">
-        <el-input v-model="form.imgloc"></el-input>
-      </el-form-item>
-      <el-form-item label="Content">
-        <el-input ref="content" type="textarea" autosize="{minRows:4, maxRows:10}" v-model="form.content"></el-input>
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" @click="onSubmit(form)">Submit</el-button>
-        <el-button @click="onCancel">Cancel</el-button>
-      </el-form-item>
-    </el-form>
+    <el-collapse v-model="ActiveMode" @change="handleChange">
+      <el-collapse-item title="Submit new passages" name="1">
+        <br>
+        <el-form ref="adminForm" :model="form" label-width="80px">
+          <el-form-item label="Title">
+            <el-input v-model="form.title"></el-input>
+          </el-form-item>
+          <el-form-item label="Library">
+            <el-select v-model="form.cls" placeholder="Classify your passage">
+              <el-option label="Tweaks" value="tweaks"></el-option>
+              <el-option label="Skills" value="skills"></el-option>
+              <el-option label="ProxyShare" value="proxy"></el-option>
+              <el-option label="Wallpapers" value="wallpaper"></el-option>
+              <el-option label="SexyGirls" value="sexy"></el-option>
+              <el-option label="Admin'sword" value="admin"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="ImageSource">
+            <el-input v-model="form.imgloc"></el-input>
+          </el-form-item>
+          <el-form-item label="Content">
+            <el-input ref="content" type="textarea" autosize="{minRows:4, maxRows:10}" v-model="form.content"></el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="onSubmit(form)">Submit</el-button>
+            <el-button @click="onCancel">Cancel</el-button>
+          </el-form-item>
+        </el-form>
+      </el-collapse-item>
+      <el-collapse-item title="Manage your passages" name="2">
+        <!--<ul><li v-for="item in posted" :key="item">-->
+          <!--<p>{{item.title}}</p>-->
+          <!--<p>{{item.date}}</p>-->
+          <!--<p>{{item.pv}}</p>-->
+        <!--</li></ul>-->
+      </el-collapse-item>
+      <el-collapse-item title="Change your password" name="3"></el-collapse-item>
+    </el-collapse>
   </div>
 </template>
 
@@ -33,14 +46,23 @@
     export default {
       data () {
         return {
+          ActiveMode: '1',
           form: {
             title: '',
             cls: '',
             content: '',
             imgloc: ''
           }
+          // posted: {}
         }
       },
+      // created: function () {
+      //   let url = 'http://127.0.0.1:5000/api/v1/mypassages'
+      //   this.$axios.get(url).then(function (response) {
+      //     this.posted = response.data
+      //     console.log(this.posted)
+      //   }.bind(this))
+      // },
         name: 'admin',
       methods: {
         onSubmit (form) {

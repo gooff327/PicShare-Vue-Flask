@@ -63,6 +63,7 @@ output:
 
 @auth.verify_password
 def verify_password(username_or_token,password):
+    print(username_or_token,password)
     if request.path == '/api/v1/login':
         user = Users.query.filter_by(username = username_or_token).first()
         if not user or not user.verify_password(password):
@@ -89,16 +90,24 @@ input:
     ...
 }
 '''
+# @app.route('/api/v1/mypassages',methods=['GET','POST'])
+# @auth.login_required
+# def getMydata():
+#     datas = []
+#     passages = Resource.query.filter_by(author=g.user.username)
+#     for passage in passages:
+#         datas.append((passage.to_json))
+#     return jsonify(datas)
 
 @app.route('/api/v1/resource',methods=['GET','POST'])
 @auth.login_required
 def resource():
-    data = []
+    datas = []
     passages = Resource.query.all()
     for passage in passages:
-        data.append(passage.to_json())
-    print(data)
-    return jsonify(data)
+        datas.append(passage.to_json())
+    print(datas)
+    return jsonify(datas)
 '''
 Api to logout
 input:

@@ -31,7 +31,7 @@
 }
 .centerText{
   font-family: "DejaVu Sans";
-  position: fixed;
+  position: absolute;
   right: 134px;
   top: 14px;
 
