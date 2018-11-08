@@ -25,7 +25,6 @@
 .brand{
   height: 37px;
   display: block;
-  border-bottom: 1px solid lightgrey;
 }
 .brand,a{
 }

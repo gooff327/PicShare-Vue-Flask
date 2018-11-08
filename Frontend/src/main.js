@@ -8,8 +8,14 @@ import router from './router'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
 import store from './vuex/user.js'
+import global_ from '../config/global.js'
+import preview from 'vue-photo-preview'
+import 'vue-photo-preview/dist/skin.css'
 
+Vue.use(preview)
+Vue.prototype.GLOBAL = global_
 Vue.prototype.$axios = axios
+Vue.use(global_)
 Vue.use(VueAxios)
 Vue.use(ElementUI)
 Vue.config.productionTip = false
