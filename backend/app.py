@@ -33,11 +33,8 @@ output:{
 def getImage():
     username= ((request.form).to_dict()).get('username')
     img = request.files.get('file')
-    if img.filename[-3:]=='peg':
-        imageName = username+img.filename[-5:]
-    else:
-        imageName = username+img.filename[-4:]
-    path = basedir +"/static/img/avatar"
+    imageName = username+img.filename[-4:]
+    path = basedir +"/static/img/avatar/"
     filepath = path +imageName
     img.save(filepath)
     # img_name = '1.jpg'
@@ -60,7 +57,11 @@ def register():
         return jsonify({'username':username,'password':password,'tips':'Reppeat of username!','err_code': 402})
     elif Users.query.filter_by(email=email).first():
         return jsonify({'username': username, 'password': password,'tips':"This email has signed!",'err_code': 403})
-    user = Users(username,email)
+    if(os.path.exists(basedir+"/static/img/avatar/"+username+".jpg")):
+        avatar = username+'.jpg'
+    else:
+        avatar = username + '.png'
+    user = Users(username,email,avatar)
     user.hash_password(password)
     db.session.add(user)
     db.session.commit()
@@ -100,8 +101,14 @@ def verify_password(username_or_token,password):
 @app.route('/api/v1/login',methods=['GET','POST'])
 @auth.login_required
 def get_token():
+    user = {}
     token = g.user.generate_auth_token()
-    return jsonify({'token': token.decode('ascii')})
+    print(g.user.username)
+    avatarPath = config.AVATARDIR + g.user.avatar
+    user['username'] = g.user.username
+    user['uid'] = g.user.uid
+    user['avatar'] = sendImage(avatarPath)
+    return jsonify({'token': token.decode('ascii'),'user': user})
 '''
 Api to get resource
 Content-Type:application/json
@@ -111,14 +118,7 @@ input:
     ...
 }
 '''
-# @app.route('/api/v1/mypassages',methods=['GET','POST'])
-# @auth.login_required
-# def getMydata():
-#     datas = []
-#     passages = Resource.query.filter_by(author=g.user.username)
-#     for passage in passages:
-#         datas.append((passage.to_json))
-#     return jsonify(datas)
+
 
 @app.route('/api/v1/resources',methods=['GET','POST'])
 @auth.login_required
@@ -127,15 +127,9 @@ def resource():
     passages = Resource.query.all()
     for passage in passages:
         avatarPath = config.AVATARDIR+passage.uavatar
-        with open(avatarPath, 'rb') as f:
-            avatar = f.read()
-            avatar = str(base64.b64encode(avatar))
-            passage.uavatar = avatar[2:-1]
+        passage.uavatar = sendImage(avatarPath)
         imgPath = passage.img
-        with open(imgPath, 'rb') as f:
-            image = f.read()
-            image = str(base64.b64encode(image))
-            passage.img = image[2:-1]
+        passage.img = sendImage(imgPath)
 
     for n in range(len(passages)):
         datas[n] = passages[n].to_json()
@@ -154,32 +148,65 @@ output:
 @app.route('/api/v1/admire',methods=['GET','POST'])
 @auth.login_required
 def admire():
-    admire = {}
+    print(g.user.admire)
+    if g.user.admire == None:
+        admire = {}
+    else:
+        admire = json.loads(g.user.admire)
+    print(admire)
     if request.method == 'GET':
-        if g.user.admire == None:
-            passages = db.session.query(Resource.pid).all()
-            print(passages)
-            for pid in passages:
+        passages = db.session.query(Resource.pid).all()
+        for pid in passages:
+            if str(pid[0]) in admire:
+                continue
+            else:
                 admire[pid[0]] = False
-            user = Users.query.filter_by(username = g.user.username).first()
-            user.admire = json.dumps(admire)
-            db.session.commit()
-            db.session.close()
-            return jsonify({"admire": admire,"tips": "Successed!", "code": 520})
+        user = Users.query.filter_by(username = g.user.username).first()
         try:
-            data = json.loads(g.user.admire)
-            print(data)
-            return jsonify({"admire": data,"tips": "Successed!", "code": 520})
+            user.admire = json.dumps(admire)
         except TypeError:
-            return  jsonify({"tips": "Like nothing!", "code": 419})
+            user.admire = admire
+        db.session.commit()
+        db.session.close()
+        return jsonify({"admire": admire,"tips": "Successed!", "code": 520})
     if request.method == 'POST':
-        print(request)
         user = Users.query.filter_by(username = g.user.username).first()
         data = request.json
         user.admire = json.dumps(data)
         db.session.commit()
         db.session.close()
         return jsonify({"Tips": "Successed!", "code": 520})
+
+@app.route('/api/v1/comments',methods=['GET','POST'])
+def comments():
+    if request.method == 'GET':
+        pid = request.args.get('pid')
+        comments = Comments.query.filter_by(pid=pid).all()
+        rt_comments = {}
+        for n in range(len(comments)):
+            try:
+                avatarPath = config.AVATARDIR + comments[n].username +'.jpg'
+                avatar = sendImage(avatarPath)
+            except FileNotFoundError:
+                avatarPath = config.AVATARDIR + comments[n].username +'.png'
+                avatar = sendImage(avatarPath)
+            comments[n] = comments[n].to_json()
+            comments[n]['avatar'] = avatar
+            rt_comments = comments
+            print(comments)
+        return jsonify(rt_comments)
+    if request.method == 'POST':
+        pid = request.json.get('pid')
+        uid = request.json.get('uid')
+        content = request.json.get('commit')
+        username = request.json.get('username')
+        timestamp = datetime.utcnow()
+        comment = Comments(pid,uid,content,username,timestamp)
+        db.session.add(comment)
+        db.session.commit()
+        return jsonify({'tips':'Successed!'})
+
+
 @app.route('/api/v1/admin',methods=['GET','POST'])
 @auth.login_required
 def contentManager():
@@ -204,5 +231,11 @@ def logout():
     username = request.args.get('username')
     print(username)
     return jsonify({'data':username+' log out'})
+
+def sendImage(path):
+    with open(path, 'rb') as f:
+        image = f.read()
+        image = str(base64.b64encode(image))
+    return image[2:-1]
 if __name__ == '__main__':
     app.run()

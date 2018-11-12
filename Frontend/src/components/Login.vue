@@ -109,9 +109,8 @@
                 }
               }
               this.$axios.get(logurl, data).then(function (response) {
-                console.log(response)
+                this.GLOBAL.USER = response.data.user
                 var token = response.data.token
-                console.log(token)
                 store.commit('ADD_TOKEN', token)
                 this.$router.push('/home')
                 this.$notify({
