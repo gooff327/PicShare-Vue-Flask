@@ -27,9 +27,18 @@
       :visible.sync="commentPanel"
       :fullscreen="true"
       :show-close="false">
-      <div slot="title">
+      <div slot="title" class="commentTitle">
         <i @click="commentPanel=false" class="el-icon-back"></i>
         <span>&nbsp;&nbsp;评论</span>
+      </div>
+      <div v-if="this.comments.length === undefined || this.comments.length === 0" class="commentInfo">
+        <h1 class="emptyContent">当前还没有评论哦！</h1>
+      </div>
+      <div v-else v-for="comment in this.comments" class="commentInfo" :key="comment.cid">
+        <img class="commentAvatars" :src="['data:Image/png;base64,'+comment.avatar]" alt="">
+        <span class="commentUsername">{{comment.username}}: <span class="commentContent">{{comment.comments}}</span></span>
+        <span class="commentDate">{{comment.datetime}}</span>
+
       </div>
       <div slot="footer" class="dialog-footer">
           <img class="commentAvatar" :src="['data:Image/png;base64,'+this.GLOBAL.USER.avatar]" alt="">
@@ -37,11 +46,12 @@
           <el-button class="submitBtn"  size="mini" type="primary"   @click="submit">发布</el-button>
   </div>
     </el-dialog>
-   <el-footer  class="footerbar"><h1>what!</h1></el-footer>
+    <v-bottomBar></v-bottomBar>
   </div>
 </template>
 
 <script>
+  import bottomBar from '../bottom/bottom'
     export default {
       data () {
         return {
@@ -51,12 +61,16 @@
           activeName: '',
           passage: {},
           admire: {},
+          comments: [],
           moreInfoText: {
             1: '更多动态加载中...',
             2: '没有更多动态啦！',
             3: '你的网络好像出问题了...'
           }
         }
+      },
+      components: {
+        'v-bottomBar': bottomBar
       },
       created: function () {
         var url = this.GLOBAL.BASE_URL + '/api/v1/admire'
@@ -86,7 +100,8 @@
             }
           }).then(function (response) {
             console.log(response)
-          })
+            this.comments = response.data.reverse()
+          }.bind(this))
         },
         submit: function () {
           if (this.inputContent === '' || this.inputContent === undefined) {
@@ -99,8 +114,21 @@
               username: `${this.GLOBAL.USER.username}`,
               commit: `${this.inputContent}`
             }).then(function (response) {
-              console.log(response)
-            })
+              if (response.data.tips === 'Successed!') {
+                this.inputContent = ''
+                let url = this.GLOBAL.BASE_URL + '/api/v1/comments'
+                this.$axios.get(url, {
+                  params: {
+                    pid: `${this.passage.pid}`
+                  }
+                }).then(function (response) {
+                  console.log(response)
+                  this.comments = response.data.reverse()
+                }.bind(this))
+              }
+              document.body.scrollTo(0, 0)
+             this.$message.success('评论成功！')
+            }.bind(this))
           }
         }
       },
@@ -169,6 +197,11 @@
     max-height: 50%;
     padding-bottom: 0.2rem;
   }
+  .emptyContent{
+    display: block;
+    text-align: center;
+    width: 100;
+  }
   .innerPic{
     width: auto;
     height: auto;
@@ -183,9 +216,12 @@
   }
   .dialog-footer{
     position: fixed;
-    bottom: 10px;
+    bottom: 0px;
     width: 100%;
+    padding-top: 6px;
     text-align: left;
+    height: 46px;
+    background-color: rgba(255,255,255,0.8)
   }
   .commentAvatar{
     margin: 0;
@@ -194,6 +230,43 @@
     height: 33px;
     border-radius: 50%;
     float: left;
+  }
+  .commentInfo{
+    display: block;
+    margin-bottom: 0.6rem;
+  }
+  .commentUsername{
+    line-height: 40px;
+    width: 80%;
+    font-size: 1rem;
+    font-weight: bold;
+    position: relative;
+    top: -10px;
+    margin: 0;
+    margin-left: 0.8rem;
+  }
+  .commentContent{
+    font-size: 1rem;
+    font-weight: normal;
+  }
+  .commentDate{
+    display: inline-block;
+    text-align: left;
+    font-size: 0.4rem;
+    font-weight: lighter;
+    color: gray;
+    width: 80%;
+    position: relative;
+    top: -20px;
+    right: -52px;
+  }
+  .commentAvatars{
+    margin: 0;
+    padding: 0;
+    border-radius: 50%;
+    float: left;
+    width: 40px;
+    height: 40px;
   }
   .submitBtn{
     display: inline-block;
