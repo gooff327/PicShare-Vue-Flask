@@ -192,15 +192,15 @@ def comments():
                 avatar = sendImage(avatarPath)
             comments[n] = comments[n].to_json()
             comments[n]['avatar'] = avatar
-            rt_comments = comments
-            print(comments)
+            comments[n]['datetime'] = str(comments[n]['datetime'])[2:10]
+        rt_comments = comments
         return jsonify(rt_comments)
     if request.method == 'POST':
         pid = request.json.get('pid')
         uid = request.json.get('uid')
         content = request.json.get('commit')
         username = request.json.get('username')
-        timestamp = datetime.utcnow()
+        timestamp = datetime.now()
         comment = Comments(pid,uid,content,username,timestamp)
         db.session.add(comment)
         db.session.commit()
