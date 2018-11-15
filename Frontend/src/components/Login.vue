@@ -5,7 +5,7 @@
      <el-form-item label="头像" v-if="regVisible" prop="Avatar">
        <el-upload
          class="avatar-uploader"
-         action="http://127.0.0.1:5000/api/v1/getImage"
+         action="http://127.0.0.1:5000/api/v1/getAvatar"
          :auto-upload="false"
          :on-change="setPreview"
          ref="uploadAvatar"

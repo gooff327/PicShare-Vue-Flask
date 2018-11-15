@@ -32,7 +32,7 @@
         <span>&nbsp;&nbsp;评论</span>
       </div>
       <div v-if="this.comments.length === undefined || this.comments.length === 0" class="commentInfo">
-        <h1 class="emptyContent">当前还没有评论哦！</h1>
+        <h1 class="emptyContent" v-text="tips"></h1>
       </div>
       <div v-else v-for="comment in this.comments" class="commentInfo" :key="comment.cid">
         <img class="commentAvatars" :src="['data:Image/png;base64,'+comment.avatar]" alt="">
@@ -46,15 +46,46 @@
           <el-button class="submitBtn"  size="mini" type="primary"   @click="submit">发布</el-button>
   </div>
     </el-dialog>
-    <v-bottomBar></v-bottomBar>
+
+    <el-dialog
+      :visible.sync="updatePanel"
+      :fullscreen="true"
+      :show-close="false"
+      width="100%">
+      <div slot="title" class="updateTitle">
+        <i @click="updatePanel=false" class="el-icon-back"></i>
+        <span>&nbsp;&nbsp;新帖子</span>
+      </div>
+      <div class="image-uploader-box">
+        <img v-if="imageUrl" :src="imageUrl" class="image">
+        <i  v-else class="el-icon-plus image-uploader-icon"></i>
+        <input style="opacity: 0" type="file" class="image-uploader">
+      </div>
+      <span slot="footer" class="dialog-footer">
+    <el-button @click="updatePanel = false">取 消</el-button>
+    <el-button type="primary" @click="updatePanel = false">确 定</el-button>
+  </span>
+    </el-dialog>
+
+    <div class="footerbar">
+      <el-button-group>
+        <el-button size="small" class="function" :autofocus=true type="default" ><i class="fa fa-home"></i><p>主页</p></el-button>
+        <el-button size="small" type="default" class="function"><i class="fa fa-handshake-o"></i><p>关注</p></el-button>
+        <el-button size="small" class="plus" @click="updateEvent" type="default" ><i class="fa fa-plus-circle"></i></el-button>
+        <el-button size="small" type="default" class="function" ><i class="fa fa-envelope"></i><p>消息</p> </el-button>
+        <el-button size="small" type="default" class="function"><i class="fa fa-user-o"></i><p>我的</p> </el-button>
+      </el-button-group>
+    </div>
   </div>
 </template>
 
 <script>
-  import bottomBar from '../bottom/bottom'
     export default {
       data () {
         return {
+          imageUrl: '',
+          tips: '',
+          updatePanel: false,
           emptyContent: true,
           inputContent: this.inputContent,
           commentPanel: false,
@@ -68,9 +99,6 @@
             3: '你的网络好像出问题了...'
           }
         }
-      },
-      components: {
-        'v-bottomBar': bottomBar
       },
       created: function () {
         var url = this.GLOBAL.BASE_URL + '/api/v1/admire'
@@ -91,6 +119,8 @@
           })
         },
         commentEvent: function (passage) {
+          this.comments = []
+          this.tips = '加载中...'
           this.commentPanel = true
           this.passage = passage
           let url = this.GLOBAL.BASE_URL + '/api/v1/comments'
@@ -101,6 +131,9 @@
           }).then(function (response) {
             console.log(response)
             this.comments = response.data.reverse()
+            if (this.comments.length === undefined || this.comments.length === 0) {
+              this.tips = '当前还没有评论哦！'
+            }
           }.bind(this))
         },
         submit: function () {
@@ -130,6 +163,9 @@
              this.$message.success('评论成功！')
             }.bind(this))
           }
+        },
+        updateEvent: function () {
+          this.updatePanel = true
         }
       },
       props: {
@@ -281,13 +317,71 @@
     padding-left: 0.6rem;
   }
   .footerbar{
-    height: 20%;
-    display: block;
     position: fixed;
-    bottom: 0px;
-    color: black;
-    background: rgba(255,250,250);
     width: 100%;
+    bottom: 0;
+    background-color: rgba(255,255,255,0.1);
+  }
+  .el-button-group{
+    width: 100%;
+
+  }
+  .el-button{
+    width: 20%;
+    float: left;
+    padding-left: 0;
+    padding-right: 0;
+    border: 0px;
+    height: 46px;
+  }
+  .function .fa,.function.fa::before{
+    font-size: 26px;
+    padding: 0;
+    margin: 0;
+    position: relative;
+    top: -6px;
+    width: 100%;
+  }
+  .footerbar p {
+    position: relative;
+    font-size: smaller;
+    top: -18px;
+  }
+  .plus .fa {
+    padding: 0;
+    font-size: 36px;
+    position: relative;
+    top: -4px;
+    color: #34BE5B;
+  }
+  .image-uploader-box{
+    width: 200px;
+    height: 200px;
+    border: 1px dashed  #d9d9d9;
+  }
+  .image-uploader{
+    height: 100%;
+    width: 100%;
+    opacity: 0;
+  }
+  .image-uploader .el-upload:hover {
+    border-color: #409EFF;
+  }
+  .image-uploader-box i {
+    font-size: 100px;
+    color: #8c939d;
+    width: 200px;
+    height: 200px;
+    line-height: 200px;
+    text-align: center;
+  }
+  .image {
+    width: 200px;
+    height: 200px;
+    display: block;
+  }
+  .image-uploader-icon{
+
   }
   .moreInfo{
     margin-bottom: 60px;

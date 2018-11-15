@@ -47,8 +47,8 @@
   /*width: 48px;*/
   margin: 0;
   padding: 0;
-  height: 30px;
-  width: 30px;
+  height: 36px;
+  width: 36px;
   align-items: center;
   display: inline-block;
 }
