@@ -5,7 +5,7 @@
      <el-form-item label="头像" v-if="regVisible" prop="Avatar">
        <el-upload
          class="avatar-uploader"
-         action="http://127.0.0.1:5000/api/v1/getAvatar"
+         action="http://127.0.0.1:5000/api/v1/post/avatar"
          :auto-upload="false"
          :on-change="setPreview"
          ref="uploadAvatar"
@@ -40,10 +40,10 @@
      </el-form-item>
      <br>
       <div class="btnGroup">
-        <el-button type="info" plain v-if="logBtn" @click="regVisible=!regVisible,btnSwitch = !btnSwitch" class="logbtn">{{btnSwitch ? '取消' : '注册'}}</el-button>
+        <el-button type="info" plain v-if="logBtn" @click="regVisible=!regVisible,btnSwitch = !btnSwitch" class="logbtn">{{btnSwitch ? '取 消' : '注 册'}}</el-button>
         <br>
         <br>
-        <el-button type="primary" @click="submitUser('loginForm')" v-if="logBtn"  class="logbtn">{{btnSwitch ? '提交' :  '登录'}}</el-button>
+        <el-button type="primary" @click="submitUser('loginForm')" v-if="logBtn"  class="logbtn">{{btnSwitch ? '提 交' :  '登 录'}}</el-button>
       </div>
     </el-form>
 </template>
@@ -179,10 +179,10 @@
       },
       setPreview (file) {
         console.log(file)
-        const isJPG = file.type === 'image/jpeg' || 'image/png'
+        const isJPG = file.type === 'image/jpeg'
         const isLt2M = file.size / 1024 / 1024 < 2
         if (!isJPG) {
-          this.$message.error('只能上传 JPG/PNG 格式!')
+          this.$message.error('只能上传 JPG 格式!')
         }
         if (!isLt2M) {
           this.$message.error('大小不能超过 2MB!')

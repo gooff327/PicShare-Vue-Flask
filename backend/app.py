@@ -29,8 +29,8 @@ output:{
     'tips':'status in string'
 }
 """
-@app.route('/api/v1/getImage',methods=['GET','POST'])
-def getImage():
+@app.route('/api/v1/post/avatar',methods=['GET','POST'])
+def get_avatar():
     username= ((request.form).to_dict()).get('username')
     img = request.files.get('file')
     imageName = username+img.filename[-4:]
@@ -123,6 +123,7 @@ input:
 @app.route('/api/v1/resources',methods=['GET','POST'])
 @auth.login_required
 def resource():
+    db.create_all()
     datas = {}
     passages = Resource.query.all()
     for passage in passages:
@@ -153,7 +154,6 @@ def admire():
         admire = {}
     else:
         admire = json.loads(g.user.admire)
-    print(admire)
     if request.method == 'GET':
         passages = db.session.query(Resource.pid).all()
         for pid in passages:
@@ -166,6 +166,7 @@ def admire():
             user.admire = json.dumps(admire)
         except TypeError:
             user.admire = admire
+        admire = json.loads(user.admire)
         db.session.commit()
         db.session.close()
         return jsonify({"admire": admire,"tips": "Successed!", "code": 520})
@@ -206,11 +207,30 @@ def comments():
         db.session.commit()
         return jsonify({'tips':'Successed!'})
 
+@app.route('/api/v1/post/newpassage',methods=['POST'])
+@auth.login_required
+def new_passage():
+    username = ((request.form).to_dict()).get('username')
+    uid = ((request.form).to_dict()).get('uid')
+    desc = ((request.form).to_dict()).get('imageDescription')
+    pv = 0
+    date = datetime.utcnow()
+    img = request.files.get('imageFile')
+    print(img.filename)
+    imgName = username + '#' + img.filename
+    path = basedir + "/static/img/"
+    imagePath = './static/img/'+imgName
+    filepath = path + imgName
+    img.save(filepath)
+    passage = Resource(uid,imagePath,desc,pv,username,date)
+    print(imagePath)
+    db.session.add(passage)
+    db.session.commit()
+    return jsonify({'tips':'Successed!'})
 
 @app.route('/api/v1/admin',methods=['GET','POST'])
 @auth.login_required
-def contentManager():
-    print(request.json)
+def content_manager():
     db.create_all()
     img = request.json.get('img')
     content = request.json.get('content')

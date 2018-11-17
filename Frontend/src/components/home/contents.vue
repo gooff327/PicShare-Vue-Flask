@@ -29,7 +29,7 @@
       :show-close="false">
       <div slot="title" class="commentTitle">
         <i @click="commentPanel=false" class="el-icon-back"></i>
-        <span>&nbsp;&nbsp;评论</span>
+        <span class="dialogTitle">评 论</span>
       </div>
       <div v-if="this.comments.length === undefined || this.comments.length === 0" class="commentInfo">
         <h1 class="emptyContent" v-text="tips"></h1>
@@ -42,8 +42,8 @@
       </div>
       <div slot="footer" class="dialog-footer">
           <img class="commentAvatar" :src="['data:Image/png;base64,'+this.GLOBAL.USER.avatar]" alt="">
-          <el-input class="inputComment" type="textarea" :autosize="{ minRows: 1, maxRows: 6 }" v-model="inputContent" placeholder="添加评论..."></el-input>
-          <el-button class="submitBtn"  size="mini" type="primary"   @click="submit">发布</el-button>
+          <el-input class="inputComment" type="textarea" :autosize="{ minRows: 1, maxRows: 6 }" v-model="inputContent" placeholder="添 加 评 论 ..."></el-input>
+          <el-button class="submitBtn" v-if="this.inputContent"  size="mini" type="primary"   @click="submit">评 论</el-button>
   </div>
     </el-dialog>
 
@@ -54,26 +54,21 @@
       width="100%">
       <div slot="title" class="updateTitle">
         <i @click="updatePanel=false" class="el-icon-back"></i>
-        <span>&nbsp;&nbsp;新帖子</span>
+        <span class="dialogTitle">新 帖 子</span>
       </div>
-      <div class="image-uploader-box">
         <img v-if="imageUrl" :src="imageUrl" class="image">
-        <i  v-else class="el-icon-plus image-uploader-icon"></i>
-        <input style="opacity: 0" type="file" class="image-uploader">
-      </div>
-      <span slot="footer" class="dialog-footer">
-    <el-button @click="updatePanel = false">取 消</el-button>
-    <el-button type="primary" @click="updatePanel = false">确 定</el-button>
-  </span>
+        <el-input type="text" placeholder="添加照片说明..." v-model="imageDescription"></el-input>
+        <el-button class="uploadeBtn" icon="el-icon-upload2" size="mini" type="primary" @click="updateNewPassage">发 布</el-button>
     </el-dialog>
 
     <div class="footerbar">
       <el-button-group>
-        <el-button size="small" class="function" :autofocus=true type="default" ><i class="fa fa-home"></i><p>主页</p></el-button>
-        <el-button size="small" type="default" class="function"><i class="fa fa-handshake-o"></i><p>关注</p></el-button>
-        <el-button size="small" class="plus" @click="updateEvent" type="default" ><i class="fa fa-plus-circle"></i></el-button>
-        <el-button size="small" type="default" class="function" ><i class="fa fa-envelope"></i><p>消息</p> </el-button>
-        <el-button size="small" type="default" class="function"><i class="fa fa-user-o"></i><p>我的</p> </el-button>
+        <el-button size="small" class="function" :autofocus=true type="default" ><i class="fa fa-home"></i><p>主 页</p></el-button>
+        <el-button size="small" type="default" class="function"><i class="fa fa-handshake-o"></i><p>关 注</p></el-button>
+        <el-button size="small" class="plus"  onclick="document.getElementById('image-uploader').click();" type="default" ><i class="fa fa-plus-circle"></i></el-button>
+        <el-button size="small" type="default" class="function" ><i class="fa fa-envelope"></i><p>消 息</p> </el-button>
+        <el-button size="small" type="default" class="function"><i class="fa fa-user-o"></i><p>我 的</p> </el-button>
+        <input id="image-uploader" class="image-uploader" type="file" @change="updateEvent($event)">
       </el-button-group>
     </div>
   </div>
@@ -83,7 +78,9 @@
     export default {
       data () {
         return {
+          imageDescription: '',
           imageUrl: '',
+          imageFile: '',
           tips: '',
           updatePanel: false,
           emptyContent: true,
@@ -103,6 +100,7 @@
       created: function () {
         var url = this.GLOBAL.BASE_URL + '/api/v1/admire'
         this.$axios.get(url).then(function (res) {
+          console.log(res)
           if (res.data.code === 520) {
             this.admire = res.data.admire
           }
@@ -164,8 +162,35 @@
             }.bind(this))
           }
         },
-        updateEvent: function () {
-          this.updatePanel = true
+        updateEvent: function (event) {
+          var file = event.target.files[0]
+          this.imageFile = file
+          if (file) {
+            this.updatePanel = true
+            const isJPG = file.type === 'image/jpeg'
+            const isLt2M = file.size / 1024 / 1024 < 4
+            if (!isJPG) {
+              this.$message.error('只能上传 JPG 格式!')
+            }
+            if (!isLt2M) {
+              this.$message.error('大小不能超过 4MB!')
+            }
+            this.imageUrl = (window.URL || window.webkitURL).createObjectURL(file)
+          }
+        },
+        updateNewPassage: function () {
+          var data = new FormData()
+          data.append('imageFile', this.imageFile)
+          console.log('filename', this.imageFile.filename)
+          data.append('uid',this.GLOBAL.USER.uid)
+          data.append('username', this.GLOBAL.USER.username)
+          data.append('imageDescription', this.imageDescription)
+          let config = {headers: {'Content-Type': 'mutipart/form-data'}}
+          let url = this.GLOBAL.BASE_URL + '/api/v1/post/newpassage'
+          this.$axios.post(url, data, config).then(function (response) {
+            console.log(response)
+          })
+          console.log(data)
         }
       },
       props: {
@@ -326,7 +351,9 @@
     width: 100%;
 
   }
-  .el-button{
+  .function{
+    position: relative;
+    bottom: 0px;
     width: 20%;
     float: left;
     padding-left: 0;
@@ -342,10 +369,20 @@
     top: -6px;
     width: 100%;
   }
+  .dialogTitle{
+    display: inline-block;
+    position: relative;
+    left: 36%;
+  }
   .footerbar p {
     position: relative;
     font-size: smaller;
     top: -18px;
+    margin-bottom: 0px;
+  }
+  .plus{
+    height: 46px;
+    border: 0px;
   }
   .plus .fa {
     padding: 0;
@@ -354,35 +391,19 @@
     top: -4px;
     color: #34BE5B;
   }
-  .image-uploader-box{
-    width: 200px;
-    height: 200px;
-    border: 1px dashed  #d9d9d9;
-  }
   .image-uploader{
     height: 100%;
     width: 100%;
-    opacity: 0;
+    display: none;
   }
-  .image-uploader .el-upload:hover {
-    border-color: #409EFF;
-  }
-  .image-uploader-box i {
-    font-size: 100px;
-    color: #8c939d;
-    width: 200px;
-    height: 200px;
-    line-height: 200px;
-    text-align: center;
-  }
-  .image {
-    width: 200px;
-    height: 200px;
-    display: block;
-  }
-  .image-uploader-icon{
-
-  }
+.image{
+  max-width: 100%;
+  border-radius: 6px;
+}
+.uploadeBtn{
+  margin-top: 0.6rem;
+  float: right;
+}
   .moreInfo{
     margin-bottom: 60px;
   }

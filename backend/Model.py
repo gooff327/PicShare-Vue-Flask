@@ -49,19 +49,21 @@ class Resource(db.Model):
     __tablename__ =  'timeline'
     pid = db.Column(db.Integer,primary_key=True,autoincrement=True)
     uid = db.Column(db.Integer,nullable=False)
-    img = db.Column(db.String(50))
+    img = db.Column(db.String(100))
+    desc = db.Column(db.String(100))
     pv = db.Column(db.Integer)
     author = db.Column(db.String(30))
     date = db.Column(db.DateTime)
     uavatar = db.Column(db.String(50))
 
-    def __init__(self,uid,img,pv,author,date):
+    def __init__(self,uid,img,desc,pv,author,date):
         self.uid = uid
         self.img = img
+        self.desc = desc
         self.pv = pv
         self.author = author
         self.date = date
-        self.uavatar = config.AVATARDIR+author+'.jpg'
+        self.uavatar = author+'.jpg'
 
     def to_json(self):
         dict = self.__dict__
