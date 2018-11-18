@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import login from '../components/Login'
 import home from '../components/home/home'
 import admin from '../components/admin/admin'
+import personal from '../components/home/personal'
 Vue.use(Router)
 
 export default new Router({
@@ -22,6 +23,12 @@ export default new Router({
       path: '/admin',
       name: 'admin',
       component: admin,
+      meta: { requireAuth: true }
+    },
+    {
+      path: '/home/user/:username',
+      name: 'user',
+      component: personal,
       meta: { requireAuth: true }
     }
   ]

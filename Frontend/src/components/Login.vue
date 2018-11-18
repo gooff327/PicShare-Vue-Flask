@@ -113,10 +113,11 @@
                 var token = response.data.token
                 store.commit('ADD_TOKEN', token)
                 this.$router.push('/home')
-                this.$notify({
-                  title: 'Messages:',
-                  message: 'Welcome !' + `  ${this.loginForm.username}`,
-                  position: 'bottom',
+                this.$message({
+                  dangerouslyUseHTMLString: true,
+                  center: true,
+                  duration: 1500,
+                  message: 'Welcome !' + '<b>' + `${this.loginForm.username}` + '</b>',
                   type: 'success'
                 })
               }.bind(this))
@@ -179,7 +180,7 @@
       },
       setPreview (file) {
         console.log(file)
-        const isJPG = file.type === 'image/jpeg'
+        const isJPG = file.raw.type === 'image/jpeg'
         const isLt2M = file.size / 1024 / 1024 < 2
         if (!isJPG) {
           this.$message.error('只能上传 JPG 格式!')

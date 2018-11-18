@@ -11,6 +11,7 @@ import store from './vuex/user.js'
 import global_ from '../config/global.js'
 import preview from 'vue-photo-preview'
 import 'vue-photo-preview/dist/skin.css'
+import 'font-awesome/css/font-awesome.css'
 
 Vue.use(preview)
 Vue.prototype.GLOBAL = global_

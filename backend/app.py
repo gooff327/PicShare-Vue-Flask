@@ -57,10 +57,7 @@ def register():
         return jsonify({'username':username,'password':password,'tips':'Reppeat of username!','err_code': 402})
     elif Users.query.filter_by(email=email).first():
         return jsonify({'username': username, 'password': password,'tips':"This email has signed!",'err_code': 403})
-    if(os.path.exists(basedir+"/static/img/avatar/"+username+".jpg")):
-        avatar = username+'.jpg'
-    else:
-        avatar = username + '.png'
+    avatar = username+'.jpg'
     user = Users(username,email,avatar)
     user.hash_password(password)
     db.session.add(user)
@@ -125,13 +122,13 @@ input:
 def resource():
     db.create_all()
     datas = {}
-    passages = Resource.query.all()
+    passages = Resource.query.order_by(Resource.date.desc()).all()
+    print(passages)
     for passage in passages:
         avatarPath = config.AVATARDIR+passage.uavatar
         passage.uavatar = sendImage(avatarPath)
         imgPath = passage.img
         passage.img = sendImage(imgPath)
-
     for n in range(len(passages)):
         datas[n] = passages[n].to_json()
     return jsonify(datas)

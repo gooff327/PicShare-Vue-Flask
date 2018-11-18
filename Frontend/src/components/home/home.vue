@@ -1,7 +1,7 @@
 <template>
   <div>
     <brand-header></brand-header>
-    <home-contents :contents = 'contents'></home-contents>
+    <home-contents @setContents="contentsUpdate" :contents = 'contents'></home-contents>
   </div>
 </template>
 <script>
@@ -24,6 +24,11 @@
           this.contents = response.data
           console.log(this.contents)
         }.bind(this))
+      },
+      methods: {
+          contentsUpdate: function (newData) {
+            this.contents = newData
+          }
       }
     }
 </script>

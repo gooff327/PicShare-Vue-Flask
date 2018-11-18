@@ -10,6 +10,7 @@
           </div>
           <div class="contentImage">
             <img  class="innerPic" :src="['data:Image/png;base64,'+key.img]" :preview="key.pid" alt="">
+            <div class="imageDesc">{{key.desc}}</div>
           </div>
     <div class="bottom">
       <span class="bottomText">{{key.pv}} 次浏览</span>
@@ -55,19 +56,20 @@
       <div slot="title" class="updateTitle">
         <i @click="updatePanel=false" class="el-icon-back"></i>
         <span class="dialogTitle">新 帖 子</span>
+        <a class="uploadeBtn" icon="el-icon-upload2" size="mini" type="primary" @click="updateNewPassage">发 布</a>
       </div>
         <img v-if="imageUrl" :src="imageUrl" class="image">
-        <el-input type="text" placeholder="添加照片说明..." v-model="imageDescription"></el-input>
-        <el-button class="uploadeBtn" icon="el-icon-upload2" size="mini" type="primary" @click="updateNewPassage">发 布</el-button>
+        <el-input class="inputDesc" :autosize="{ minRows: 1, maxRows: 6 }" type="textarea" placeholder="添加照片说明..." v-model="imageDescription"></el-input>
+
     </el-dialog>
 
     <div class="footerbar">
       <el-button-group>
-        <el-button size="small" class="function" :autofocus=true type="default" ><i class="fa fa-home"></i><p>主 页</p></el-button>
+        <el-button size="small" class="function"  :autofocus=true type="default" ><i class="fa fa-home"></i><p>主 页</p></el-button>
         <el-button size="small" type="default" class="function"><i class="fa fa-handshake-o"></i><p>关 注</p></el-button>
         <el-button size="small" class="plus"  onclick="document.getElementById('image-uploader').click();" type="default" ><i class="fa fa-plus-circle"></i></el-button>
         <el-button size="small" type="default" class="function" ><i class="fa fa-envelope"></i><p>消 息</p> </el-button>
-        <el-button size="small" type="default" class="function"><i class="fa fa-user-o"></i><p>我 的</p> </el-button>
+        <el-button size="small" type="default" @click="showPersonalData" class="function"><i class="fa fa-user-o"></i><p>我 的</p> </el-button>
         <input id="image-uploader" class="image-uploader" type="file" @change="updateEvent($event)">
       </el-button-group>
     </div>
@@ -87,6 +89,7 @@
           inputContent: this.inputContent,
           commentPanel: false,
           activeName: '',
+          refreshData: {},
           passage: {},
           admire: {},
           comments: [],
@@ -98,15 +101,18 @@
         }
       },
       created: function () {
-        var url = this.GLOBAL.BASE_URL + '/api/v1/admire'
-        this.$axios.get(url).then(function (res) {
-          console.log(res)
-          if (res.data.code === 520) {
-            this.admire = res.data.admire
-          }
-        }.bind(this))
+        this.getAdmireList()
       },
       methods: {
+        getAdmireList: function () {
+          var url = this.GLOBAL.BASE_URL + '/api/v1/admire'
+          this.$axios.get(url).then(function (res) {
+            console.log(res)
+            if (res.data.code === 520) {
+              this.admire = res.data.admire
+            }
+          }.bind(this))
+        },
         likeEvent: function (pid) {
           this.admire[pid] === true ? this.admire[pid] = false : this.admire[pid] = true
           console.log(this.admire)
@@ -128,7 +134,7 @@
             }
           }).then(function (response) {
             console.log(response)
-            this.comments = response.data.reverse()
+            this.comments = response.data
             if (this.comments.length === undefined || this.comments.length === 0) {
               this.tips = '当前还没有评论哦！'
             }
@@ -157,40 +163,64 @@
                   this.comments = response.data.reverse()
                 }.bind(this))
               }
-              document.body.scrollTo(0, 0)
-             this.$message.success('评论成功！')
+              this.$message({
+                type: 'success',
+                message: '评 论 成 功 ！',
+                center: true,
+                duration: 1000})
             }.bind(this))
           }
         },
         updateEvent: function (event) {
           var file = event.target.files[0]
-          this.imageFile = file
+          console.log(file)
           if (file) {
-            this.updatePanel = true
             const isJPG = file.type === 'image/jpeg'
-            const isLt2M = file.size / 1024 / 1024 < 4
+            const isLt4M = file.size / 1024 / 1024 < 4
             if (!isJPG) {
               this.$message.error('只能上传 JPG 格式!')
             }
-            if (!isLt2M) {
+            if (!isLt4M) {
               this.$message.error('大小不能超过 4MB!')
             }
-            this.imageUrl = (window.URL || window.webkitURL).createObjectURL(file)
+            console.log(isJPG, isLt4M)
+            if (isJPG && isLt4M) {
+              this.updatePanel = true
+              this.imageFile = file
+              this.imageUrl = (window.URL || window.webkitURL).createObjectURL(file)
+            }
           }
         },
         updateNewPassage: function () {
           var data = new FormData()
           data.append('imageFile', this.imageFile)
-          console.log('filename', this.imageFile.filename)
-          data.append('uid',this.GLOBAL.USER.uid)
+          data.append('uid', this.GLOBAL.USER.uid)
           data.append('username', this.GLOBAL.USER.username)
           data.append('imageDescription', this.imageDescription)
           let config = {headers: {'Content-Type': 'mutipart/form-data'}}
           let url = this.GLOBAL.BASE_URL + '/api/v1/post/newpassage'
           this.$axios.post(url, data, config).then(function (response) {
-            console.log(response)
-          })
-          console.log(data)
+            if (response.data.tips === 'Successed!') {
+              this.$message({
+                type: 'success',
+                message: '发 布 成 功 ！',
+                center: true,
+                duration: 1000})
+              this.refreshContent()
+              this.updatePanel = false
+            }
+          }.bind(this))
+        },
+        refreshContent: function () {
+          var url = this.GLOBAL.BASE_URL + '/api/v1/resources'
+          this.$axios.get(url).then(function (response) {
+            this.refreshData = response.data
+            this.$emit('setContents', this.refreshData)
+            this.getAdmireList()
+          }.bind(this))
+        },
+        showPersonalData: function () {
+          this.$router.push(`/home/user/${this.GLOBAL.USER.username}`)
         }
       },
       props: {
@@ -210,6 +240,20 @@
     padding-bottom: 0.2rem;
     width: 100%;
     float: left;
+  }
+  .imageDesc{
+    position: absolute;
+    bottom: 0.5rem;
+    color: white;
+    background-color: rgba(0,0,0,0.4);
+    width: 95%;
+    text-align: center;
+    max-height: 40%;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    font-size: 16px;
+    font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+    border-radius: 4px;
   }
   .username{
     display: inline-block;
@@ -257,6 +301,7 @@
     max-width: 100%;
     max-height: 50%;
     padding-bottom: 0.2rem;
+    position: relative;
   }
   .emptyContent{
     display: block;
@@ -269,6 +314,17 @@
     max-width: 100%;
     max-height: 100%;
     border-radius: 4px;
+  }
+  .fa-heart:hover{
+    animation: admire 0.6s normal;
+  }
+  @keyframes admire {
+    0% { transform: scale(1,1)}
+    20% { transform: scale(2.4,2.4)}
+    100% { transform: scale(1,1)}
+  }
+  .fa-heart-o:hover{
+    transition: color 1.5s;
   }
   .item{
     border-radius: 10px;
@@ -401,8 +457,12 @@
   border-radius: 6px;
 }
 .uploadeBtn{
-  margin-top: 0.6rem;
+  color: #409EFF;
+  display: inline-block;
   float: right;
+}
+.inputDesc{
+  padding-top: 0.5rem;
 }
   .moreInfo{
     margin-bottom: 60px;
