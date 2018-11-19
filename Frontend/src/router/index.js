@@ -3,7 +3,9 @@ import Router from 'vue-router'
 import login from '../components/Login'
 import home from '../components/home/home'
 import admin from '../components/admin/admin'
-import personal from '../components/home/personal'
+import personal from '../components/User/personal'
+import upload from '../components/Upload/editor'
+import comment from '../components/Common/comment'
 Vue.use(Router)
 
 export default new Router({
@@ -26,9 +28,21 @@ export default new Router({
       meta: { requireAuth: true }
     },
     {
-      path: '/home/user/:username',
+      path: '/user/:username',
       name: 'user',
       component: personal,
+      meta: { requireAuth: true }
+    },
+    {
+      path: '/create/details',
+      name: 'upload',
+      component: upload,
+      meta: { requireAuth: true }
+    },
+    {
+      path: '/comment/:id',
+      name: 'comment',
+      component: comment,
       meta: { requireAuth: true }
     }
   ]

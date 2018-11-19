@@ -1,20 +1,24 @@
 <template>
   <div>
     <brand-header></brand-header>
-    <home-contents @setContents="contentsUpdate" :contents = 'contents'></home-contents>
+    <home-contents :contents = 'contents'></home-contents>
+    <nav-bottom :selected=style_active></nav-bottom>
   </div>
 </template>
 <script>
   import homeHeader from '../header/homeHeader'
   import contentsPanel from './contents'
+  import navBottom from '../bottom/bottom'
     export default {
         name: 'home',
       components: {
           'brandHeader': homeHeader,
-          'HomeContents': contentsPanel
+          'homeContents': contentsPanel,
+          'navBottom': navBottom
       },
       data () {
         return {
+          style_active: 'color = #409EFF;',
           contents: {}
         }
       },
@@ -26,13 +30,12 @@
         }.bind(this))
       },
       methods: {
-          contentsUpdate: function (newData) {
-            this.contents = newData
-          }
       }
     }
 </script>
 
 <style scoped>
-
+  .homeBtn{
+    background-color: black;
+  }
 </style>
