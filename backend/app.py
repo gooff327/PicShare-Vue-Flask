@@ -33,10 +33,7 @@ output:{
 def get_avatar():
     username= ((request.form).to_dict()).get('username')
     img = request.files.get('file')
-    imageName = username+img.filename[-4:]
-    path = basedir +"/static/img/avatar/"
-    filepath = path +imageName
-    img.save(filepath)
+    save_avatar(img,username)
     # img_name = '1.jpg'
     # if not img and img_name:
     #     return make_response('上传失败！')
@@ -100,12 +97,15 @@ def verify_password(username_or_token,password):
 def get_token():
     user = {}
     token = g.user.generate_auth_token()
-    print(g.user.username)
     avatarPath = config.AVATARDIR + g.user.avatar
     user['username'] = g.user.username
     user['uid'] = g.user.uid
-    user['avatar'] = sendImage(avatarPath)
-    return jsonify({'token': token.decode('ascii'),'user': user})
+    user['brief'] = g.user.brief
+    user['email'] = g.user.email
+    user['avatar'] = send_image(avatarPath)
+    user['phone'] = g.user.phone
+    user['sex'] = g.user.sex
+    return jsonify({'token': token.decode('ascii'), 'user': user})
 '''
 Api to get resource
 Content-Type:application/json
@@ -126,9 +126,9 @@ def resource():
     print(passages)
     for passage in passages:
         avatarPath = config.AVATARDIR+passage.uavatar
-        passage.uavatar = sendImage(avatarPath)
+        passage.uavatar = send_image(avatarPath)
         imgPath = passage.img
-        passage.img = sendImage(imgPath)
+        passage.img = send_image(imgPath)
     for n in range(len(passages)):
         datas[n] = passages[n].to_json()
     return jsonify(datas)
@@ -168,7 +168,7 @@ def admire():
         db.session.close()
         return jsonify({"admire": admire,"tips": "Successed!", "code": 520})
     if request.method == 'POST':
-        user = Users.query.filter_by(username = g.user.username).first()
+        user = Users.query.filter_by(username=g.user.username).first()
         data = request.json
         user.admire = json.dumps(data)
         db.session.commit()
@@ -183,11 +183,11 @@ def comments():
         rt_comments = {}
         for n in range(len(comments)):
             try:
-                avatarPath = config.AVATARDIR + comments[n].username +'.jpg'
-                avatar = sendImage(avatarPath)
+                avatarPath = config.AVATARDIR + comments[n].username + '.jpg'
+                avatar = send_image(avatarPath)
             except FileNotFoundError:
-                avatarPath = config.AVATARDIR + comments[n].username +'.png'
-                avatar = sendImage(avatarPath)
+                avatarPath = config.AVATARDIR + comments[n].username + '.png'
+                avatar = send_image(avatarPath)
             comments[n] = comments[n].to_json()
             comments[n]['avatar'] = avatar
             comments[n]['datetime'] = str(comments[n]['datetime'])[2:10]
@@ -207,13 +207,12 @@ def comments():
 @app.route('/api/v1/post/newpassage',methods=['POST'])
 @auth.login_required
 def new_passage():
-    username = ((request.form).to_dict()).get('username')
-    uid = ((request.form).to_dict()).get('uid')
+    username = g.user.username
+    uid = g.user.uid
     desc = ((request.form).to_dict()).get('imageDescription')
     pv = 0
     date = datetime.utcnow()
     img = request.files.get('imageFile')
-    print(img.filename)
     imgName = username + '#' + img.filename
     path = basedir + "/static/img/"
     imagePath = './static/img/'+imgName
@@ -225,21 +224,32 @@ def new_passage():
     db.session.commit()
     return jsonify({'tips':'Successed!'})
 
-@app.route('/api/v1/admin',methods=['GET','POST'])
+@app.route('/api/v1/edit/profile',methods=['POST'])
 @auth.login_required
-def content_manager():
-    db.create_all()
-    img = request.json.get('img')
-    content = request.json.get('content')
-    author = g.user.username
-    date = datetime.now().isoformat()
-    pv = 0
-    passage = Resource(img,content,pv,author,date)
-    db.session.add(passage)
+def edit_profile():
+    rt_user = {}
+    avatar = request.files.get('avatar')
+    brief = ((request.form).to_dict()).get('brief')
+    sex = ((request.form).to_dict()).get('sex')
+    phone = ((request.form).to_dict()).get('phone')
+    user = Users.query.filter_by(uid=g.user.uid).first()
+    if avatar!= None:
+        save_avatar(avatar, g.user.username)
+    else:
+        pass
+    user.brief = brief
+    user.sex = sex
+    user.phone = phone
     db.session.commit()
-    return jsonify({'tips': 'Admin will check the content you submit!'})
-
-
+    avatarPath = config.AVATARDIR + g.user.avatar
+    rt_user['username'] = g.user.username
+    rt_user['uid'] = g.user.uid
+    rt_user['brief'] = g.user.brief
+    rt_user['email'] = g.user.email
+    rt_user['avatar'] = send_image(avatarPath)
+    rt_user['phone'] = g.user.phone
+    rt_user['sex'] = g.user.sex
+    return jsonify({'tips': 'Successed!', 'user': rt_user})
 
 
 @app.route('/api/v1/logout')
@@ -249,7 +259,15 @@ def logout():
     print(username)
     return jsonify({'data':username+' log out'})
 
-def sendImage(path):
+
+def save_avatar(img,username):
+    imageName = username + '.jpg'
+    path = basedir + "/static/img/avatar/"
+    filepath = path + imageName
+    img.save(filepath)
+
+
+def send_image(path):
     with open(path, 'rb') as f:
         image = f.read()
         image = str(base64.b64encode(image))

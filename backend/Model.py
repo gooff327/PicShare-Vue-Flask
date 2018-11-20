@@ -11,18 +11,23 @@ class Users(db.Model):
     email = db.Column(db.String(120), unique=True)
     avatar = db.Column(db.String(50))
     admire = db.Column(db.String(4096), default=None)
+    brief = db.Column(db.String(200))
+    phone = db.Column(db.String(20))
+    sex = db.Column(db.String(4))
 
     def __init__(self,username,email,avatar):
         self.username = username
         self.email = email
         self.avatar = avatar
+        self.brief = None
+        self.phone = None
+        self.sex = '未设置'
+
     def hash_password(self,password):
         self.password = custom_app_context.encrypt(password)
 
-
     def verify_password(self,password):
         return custom_app_context.verify(password,self.password)
-
 
     def generate_auth_token(self,expiration = 6000):
         s = Serializer(config.SECRET_KEY,expires_in=expiration)

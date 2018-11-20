@@ -103,7 +103,10 @@
     padding-right: 0.5rem;
     font-size: 16px;
     font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
-    border-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    padding-top: 0.1rem;
+    padding-bottom: 0.1rem;
   }
   .username{
     display: inline-block;
@@ -114,8 +117,8 @@
     padding-left: 0.4rem;
   }
   .avatar{
-    width: 10%;
-    height: 10%;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     float: left;
   }
