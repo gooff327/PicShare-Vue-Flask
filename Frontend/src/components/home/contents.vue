@@ -4,7 +4,7 @@
   <div class="contentWrapper">
   <el-card shadow="hover" :body-style="{padding: '6px' }" class="item" v-for="(key,item) in contents" :key="item" :title="key.title" :name="key.id">
           <div class="headbar">
-            <img class="avatar" :src="['data:Image/png;base64,'+key.uavatar]" alt="">
+            <img  @click="showUserDetails(key.author)" class="avatar" :src="['data:Image/png;base64,'+key.uavatar]" alt="">
             <span class="username">{{key.author}}</span>
             <i class="el-icon-more-outline"></i>
           </div>
@@ -60,6 +60,9 @@
             }
           }.bind(this))
         },
+        showUserDetails: function (username) {
+           this.$router.push(`/user/${username}`)
+        },
         likeEvent: function (pid) {
           this.admire[pid] === true ? this.admire[pid] = false : this.admire[pid] = true
           console.log(this.admire)
@@ -89,7 +92,7 @@
     font-size: 20%;
     padding-bottom: 0.2rem;
     width: 100%;
-    float: left;
+    position: relative;
   }
   .imageDesc{
     position: absolute;
@@ -117,6 +120,7 @@
     padding-left: 0.4rem;
   }
   .avatar{
+    display: inline-block;
     width: 36px;
     height: 36px;
     border-radius: 50%;

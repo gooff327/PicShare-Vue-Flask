@@ -224,6 +224,22 @@ def new_passage():
     db.session.commit()
     return jsonify({'tips':'Successed!'})
 
+
+@app.route('/api/v1/query/user/', methods=['GET'])
+@auth.login_required
+def query_user():
+    rt_user = {}
+    key = request.args.get('username')
+    result = Users.query.filter_by(username=key).first()
+    avatarPath = config.AVATARDIR +result.avatar
+    rt_user['username'] = result.username
+    rt_user['uid'] = result.uid
+    rt_user['brief'] = result.brief
+    rt_user['avatar'] = send_image(avatarPath)
+    rt_user['sex'] = result.sex
+    return jsonify({'tips': 'Successed!', 'user': rt_user})
+
+
 @app.route('/api/v1/edit/profile',methods=['POST'])
 @auth.login_required
 def edit_profile():

@@ -25,7 +25,6 @@
           }
       },
       created: function () {
-          console.log('1')
         this.imageURL = (window.URL || window.webkitURL).createObjectURL(this.GLOBAL.UPLOAD_FILE)
       },
       methods: {
@@ -36,8 +35,6 @@
           readyToUpload: function () {
           var data = new FormData()
           data.append('imageFile', this.GLOBAL.UPLOAD_FILE)
-          data.append('uid', this.GLOBAL.USER.uid)
-          data.append('username', this.GLOBAL.USER.username)
           data.append('imageDescription', this.imageDescription)
           let config = {headers: {'Content-Type': 'mutipart/form-data'}}
           let url = this.GLOBAL.BASE_URL + '/api/v1/post/newpassage'
@@ -61,6 +58,11 @@
 </script>
 
 <style scoped>
+  .el-icon-back{
+    position: relative;
+    font-size: larger;
+    font-weight: bolder;
+  }
   .dialogTitle{
     display: inline-block;
     position: relative;

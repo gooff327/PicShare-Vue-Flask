@@ -97,12 +97,11 @@
   }
   .commentTitle i{
     position: relative;
-    left: 20px;
     font-size: larger;
     font-weight: bolder;
   }
   .dialogTitle{
-    width: 88%;
+    width: 78%;
     display: inline-block;
     font-weight: normal;
     text-align: center;

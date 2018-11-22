@@ -10,13 +10,14 @@
     <el-row :gutter="20">
       <el-col :span="6">
         <div class="content-left">
-          <img class="user-avatar" :src="['data:Image/png;base64,'+this.GLOBAL.USER.avatar]" alt="">
+          <img class="user-avatar" :src="['data:Image/jpg;base64,'+this.currentUser.avatar]" alt="">
         </div>
       </el-col>
       <el-col :span="18">
         <div class="content-right">
-          <span class="user-username" v-text="this.GLOBAL.USER.username"></span>
-          <el-button class="edit-btn" @click="editorVisible" size="mini">编辑主页</el-button>
+          <span class="user-username" v-text="this.currentUser.username"></span>
+          <el-button v-show="isSelf" class="edit-btn" @click="editorVisible" size="mini">编辑主页</el-button>
+          <el-button v-show="!isSelf" class="concern-btn" size="mini" @click="btnSwitch = !btnSwitch,concernAction(this.routeParams)">{{btnSwitch ? '关  注': '取消关注' }}</el-button>
           <el-dialog
             :visible.sync="editSelfPanel"
             :show-close="false"
@@ -58,27 +59,8 @@
           </el-dialog>
         </div>
       </el-col>
-      <el-col :span="24" class="middle-tab-a">
-        <div class="posts">
-          <span class="quantity">1</span>
-          <br>
-          <span class="label">帖子</span>
-        </div>
-        <div class="followers">
-          <span class="quantity">9</span>
-          <br>
-          <span class="followers">粉丝</span>
-        </div>
-        <div class="following">
-          <span class="quantity">10</span>
-          <br>
-          <span class="following">关注</span>
-        </div>
-      </el-col>
-      <el-col :span="24" class="middle-tab-b">
-        <span class="fa fa-th"></span><span class="fa fa-navicon"></span>
-      </el-col>
     </el-row>
+    <middle-content></middle-content>
   </el-main>
   <nav-bottom></nav-bottom>
 </el-container>
@@ -86,13 +68,17 @@
 
 <script>
   import navBottom from '../bottom/bottom'
+  import middle from '../User/middle'
   export default {
       name: 'personal',
       components: {
-          'navBottom': navBottom
+          'navBottom': navBottom,
+          'middleContent': middle
       },
       data () {
           return {
+            isSelf: false,
+            btnSwitch: false,
             options: [{
               value: '未设置',
               label: '未设置'
@@ -103,6 +89,8 @@
               value: '女',
               label: '女'
             }],
+            currentUser: '',
+            avatar: '',
             value: this.GLOBAL.USER.sex,
             noChange: true,
             username: this.GLOBAL.USER.username,
@@ -115,10 +103,26 @@
             avatarFile: ''
           }
       },
+    created: function () {
+        if (this.$route.params.username === this.GLOBAL.USER.username) {
+          this.isSelf = true
+          this.currentUser = this.GLOBAL.USER
+        } else {
+          let username = this.$route.params.username
+          let url = this.GLOBAL.BASE_URL + '/api/v1/query/user/?username=' + username
+          this.$axios.get(url).then(function (response) {
+            console.log('user', response)
+            this.currentUser = response.data.user
+          }.bind(this))
+        }
+    },
     methods: {
         editorVisible: function () {
           this.editSelfPanel = true
         },
+      concernAction: function (username) {
+          console.log(username)
+      },
       avatarChoosed: function (event) {
         var file = event.target.files[0]
         if (file) {
@@ -213,7 +217,8 @@
   .content-left{
     padding-bottom: 1rem;
   }
-  .content-right .edit-btn{
+  .content-right .el-button{
+    margin: 0;
     width: 100%;
   }
   .dialogTitle{
@@ -250,31 +255,5 @@
     position: relative;
     font-size: larger;
     font-weight: bolder;
-  }
-  .middle-tab-a{
-    border-top: 1px solid gainsboro;
-    padding: 0 !important;
-  }
-  .middle-tab-b{
-    border-top: 1px solid gainsboro;
-    border-bottom: 1px solid gainsboro;
-    padding: 0 !important;
-  }
-  .middle-tab-a div{
-    display: block;
-    padding: 0;
-    margin: 0;
-    width: 33%;
-    text-align: center;
-    line-height: 2rem;
-    float: left;
-  }
-  .middle-tab-b span{
-    display: inline-block;
-    padding: 0;
-    margin: 0;
-    width: 50%;
-    text-align: center;
-    line-height: 2rem;
   }
 </style>
