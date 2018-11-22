@@ -301,4 +301,4 @@ def send_image(path):
 if __name__ == '__main__':
     # from werkzeug.contrib.fixers import ProxyFix
     # app.wsgi_app = ProxyFix(app.wsgi_app)
-    app.run(port=6000)
+    app.run(port=5000)
