@@ -1,4 +1,4 @@
-const BASE_URL = 'http://127.0.0.1:5000';
+const BASE_URL = 'http://95.179.176.41:5000';
 var USER = {};
 var UPDATE = false;
 var UPLOAD_FILE = ''
