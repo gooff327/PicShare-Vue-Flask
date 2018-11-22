@@ -2,7 +2,6 @@
 <template>
 <el-container>
   <el-header>
-    <span class="fa fa-cog"></span>
     <span class="headTitle">个 人 主 页</span>
     <span class="fa fa-user-plus"></span>
   </el-header>

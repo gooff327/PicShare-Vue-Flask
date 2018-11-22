@@ -1,4 +1,4 @@
-from flask import Flask,request,jsonify,g,json,make_response
+from flask import Flask,request,jsonify,g,json,make_response,render_template
 from flask_cors import CORS
 from ext import db
 from config import config
@@ -8,7 +8,7 @@ import os
 from flask_httpauth import HTTPBasicAuth
 from datetime import datetime
 from urllib.request import urlopen
-app = Flask(__name__)
+app = Flask(__name__,static_folder="../dist/static", template_folder="../dist")
 app.config.from_object(config)
 CORS(app)
 db.init_app(app)
@@ -29,6 +29,11 @@ output:{
     'tips':'status in string'
 }
 """
+
+@app.route('/',methods=['GET','POST'])
+def index():
+    return render_template('index.html')
+
 @app.route('/api/v1/post/avatar',methods=['GET','POST'])
 def get_avatar():
     username= ((request.form).to_dict()).get('username')
