@@ -12,3 +12,4 @@ class config:
     SQLALCHEMY_DATABASE_URI = DIALECT+'+pymysql://'+USERNAME+':'+PASSWORD+'@'+HOST+':'+PORT+'/'+DATABASE
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     AVATARDIR = './static/img/avatar/'
+    IMAGEDIR = './static/img/'

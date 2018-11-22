@@ -32,7 +32,9 @@ output:{
 
 @app.route('/',methods=['GET','POST'])
 def index():
+    print(basedir)
     return render_template('index.html')
+
 
 @app.route('/api/v1/post/avatar',methods=['GET','POST'])
 def get_avatar():
@@ -100,6 +102,7 @@ def verify_password(username_or_token,password):
 @app.route('/api/v1/login',methods=['GET','POST'])
 @auth.login_required
 def get_token():
+    print(os.getcwd())
     user = {}
     token = g.user.generate_auth_token()
     avatarPath = config.AVATARDIR + g.user.avatar
@@ -126,6 +129,7 @@ input:
 @auth.login_required
 def resource():
     db.create_all()
+    print(os.getcwd())
     datas = {}
     passages = Resource.query.order_by(Resource.date.desc()).all()
     print(passages)
@@ -220,7 +224,7 @@ def new_passage():
     img = request.files.get('imageFile')
     imgName = username + '#' + img.filename
     path = basedir + "/static/img/"
-    imagePath = './static/img/'+imgName
+    imagePath = config.IMAGEDIR+imgName
     filepath = path + imgName
     img.save(filepath)
     passage = Resource(uid,imagePath,desc,pv,username,date)
@@ -289,9 +293,12 @@ def save_avatar(img,username):
 
 
 def send_image(path):
+    print(path)
     with open(path, 'rb') as f:
         image = f.read()
         image = str(base64.b64encode(image))
     return image[2:-1]
 if __name__ == '__main__':
-    app.run()
+    # from werkzeug.contrib.fixers import ProxyFix
+    # app.wsgi_app = ProxyFix(app.wsgi_app)
+    app.run(port=6000)
