@@ -5,7 +5,7 @@
      <el-form-item label="头像" v-if="regVisible" prop="Avatar">
        <el-upload
          class="avatar-uploader"
-         action="http://127.0.0.1:5000/api/v1/post/avatar"
+         :action=avatarPath
          :auto-upload="false"
          :on-change="setPreview"
          ref="uploadAvatar"
@@ -77,6 +77,7 @@
       }
     return {
       imageUrl: '',
+      avatarPath: this.GLOBAL.BASE_URL + '/api/v1/post/avatar',
       loginForm: {
         avatar: '',
         pass: '',
@@ -101,7 +102,7 @@
       submitUser (Form) {
         this.$refs[Form].validate((valid) => {
             if (this.btnSwitch === false) {
-              var logurl = 'http://127.0.0.1:5000/api/v1/login'
+              var logurl = this.GLOBAL.BASE_URL + '/api/v1/login'
               var data = {
                 'auth': {
                   username: this.loginForm.username,
@@ -132,7 +133,7 @@
                   })
                 }.bind(this))
             } else {
-              var regurl = 'http://127.0.0.1:5000/api/v1/register'
+              var regurl = this.GLOBAL.BASE_URL + '/api/v1/register'
               var regdata = {
                 username: this.loginForm.username,
                 password: this.loginForm.pass,
