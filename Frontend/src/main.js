@@ -12,7 +12,9 @@ import global_ from '../config/global.js'
 import preview from 'vue-photo-preview'
 import 'vue-photo-preview/dist/skin.css'
 import 'font-awesome/css/font-awesome.css'
+import VueScroller from 'vue-scroller'
 
+Vue.user(VueScroller)
 Vue.use(preview)
 Vue.prototype.GLOBAL = global_
 Vue.prototype.$axios = axios

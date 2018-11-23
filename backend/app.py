@@ -293,6 +293,7 @@ def save_avatar(img,username):
 
 
 def send_image(path):
+    print(os.getcwd())
     print(path)
     with open(path, 'rb') as f:
         image = f.read()

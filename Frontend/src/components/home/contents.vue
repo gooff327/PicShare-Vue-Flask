@@ -1,8 +1,10 @@
 <!--suppress ALL -->
 <template>
   <div class="container">
-  <div class="contentWrapper">
-  <el-card shadow="hover" :body-style="{padding: '6px' }" class="item" v-for="(key,item) in contents" :key="item" :title="key.title" :name="key.id">
+    <!--<scroller  :on-refresh="refresh"-->
+               <!--:on-infinite="infinite">-->
+      <div class="contentWrapper">
+        <el-card shadow="hover" :body-style="{padding: '6px' }" class="item" v-for="(key,item) in contents" :key="item" :title="key.title" :name="key.id">
           <div class="headbar">
             <img  @click="showUserDetails(key.author)" class="avatar" :src="['data:Image/png;base64,'+key.uavatar]" alt="">
             <span class="username">{{key.author}}</span>
@@ -12,18 +14,19 @@
             <img  class="innerPic" :src="['data:Image/png;base64,'+key.img]" :preview="key.pid" alt="">
             <div class="imageDesc">{{key.desc}}</div>
           </div>
-    <div class="bottom">
-      <span class="bottomText">{{key.pv}} 次浏览</span>
-      <span class="botttomIcon">
-        <i style="color: #EE4957" @click="likeEvent(key.pid)" v-if="admire[key.pid] ===true" class="fa fa-heart"  aria-hidden="true"></i>
-        <i @click="likeEvent(key.pid)" v-else class="fa fa-heart-o"  aria-hidden="true"></i>
-        <i @click="commentEvent(key)" class="fa fa-comment-o" aria-hidden="true"></i>
-        <i @click="shareEvent(key.pid)" class="fa fa-paper-plane-o" aria-hidden="true"></i>
-      </span>
-    </div>
-  </el-card>
-    <i class="el-icon-loading moreInfo"></i><span>{{moreInfoText["1"]}}</span>
-  </div>
+          <div class="bottom">
+            <span class="bottomText">{{key.pv}} 次浏览</span>
+            <span class="botttomIcon">
+              <i style="color: #EE4957" @click="likeEvent(key.pid)" v-if="admire[key.pid] ===true" class="fa fa-heart"  aria-hidden="true"></i>
+              <i @click="likeEvent(key.pid)" v-else class="fa fa-heart-o"  aria-hidden="true"></i>
+              <i @click="commentEvent(key)" class="fa fa-comment-o" aria-hidden="true"></i>
+              <i @click="shareEvent(key.pid)" class="fa fa-paper-plane-o" aria-hidden="true"></i>
+           </span>
+          </div>
+        </el-card>
+        <i class="el-icon-loading moreInfo"></i><span>{{moreInfoText["1"]}}</span>
+      </div>
+    <!--</scroller>-->
     <comment ref="comment"></comment>
   </div>
 </template>

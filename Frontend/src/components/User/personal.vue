@@ -2,6 +2,8 @@
 <template>
 <el-container>
   <el-header>
+    <span v-if="isSelf" class="fa fa-cog"></span>
+    <span v-else class="el-icon-back" @click="back"></span>
     <span class="headTitle">个 人 主 页</span>
     <span class="fa fa-user-plus"></span>
   </el-header>
@@ -88,7 +90,9 @@
               value: '女',
               label: '女'
             }],
-            currentUser: '',
+            currentUser: {
+              avatar: ''
+            },
             avatar: '',
             value: this.GLOBAL.USER.sex,
             noChange: true,
@@ -102,7 +106,9 @@
             avatarFile: ''
           }
       },
-    created: function () {
+    watch: {
+      '$route' (to, from) {
+        console.log(this.$route.params)
         if (this.$route.params.username === this.GLOBAL.USER.username) {
           this.isSelf = true
           this.currentUser = this.GLOBAL.USER
@@ -114,51 +120,68 @@
             this.currentUser = response.data.user
           }.bind(this))
         }
-    },
-    methods: {
+      }},
+      created: function () {
+        if (this.$route.params.username === this.GLOBAL.USER.username) {
+          this.isSelf = true
+          this.currentUser = this.GLOBAL.USER
+        } else {
+          let username = this.$route.params.username
+          let url = this.GLOBAL.BASE_URL + '/api/v1/query/user/?username=' + username
+          this.$axios.get(url).then(function (response) {
+            console.log('user', response)
+            this.currentUser = response.data.user
+          }.bind(this))
+        }
+      },
+      methods: {
+        back: function () {
+          this.$router.go(-1)
+        },
         editorVisible: function () {
           this.editSelfPanel = true
         },
-      concernAction: function (username) {
+        concernAction: function (username) {
           console.log(username)
-      },
-      avatarChoosed: function (event) {
-        var file = event.target.files[0]
-        if (file) {
-          const isJPG = file.type === 'image/jpeg'
-          const isLt2M = file.size / 1024 / 1024 < 2
-          if (!isJPG) {
-            this.$message.error('只能上传 JPG 格式!')
+        },
+        avatarChoosed: function (event) {
+          var file = event.target.files[0]
+          if (file) {
+            const isJPG = file.type === 'image/jpeg'
+            const isLt2M = file.size / 1024 / 1024 < 2
+            if (!isJPG) {
+              this.$message.error('只能上传 JPG 格式!')
+            }
+            if (!isLt2M) {
+              this.$message.error('大小不能超过 2MB!')
+            }
+            if (isJPG && isLt2M) {
+              this.imageURL = (window.URL || window.webkitURL).createObjectURL(file)
+              this.avatarFile = file
+            }
           }
-          if (!isLt2M) {
-            this.$message.error('大小不能超过 2MB!')
-          }
-          if (isJPG && isLt2M) {
-            this.imageURL = (window.URL || window.webkitURL).createObjectURL(file)
-            this.avatarFile = file
-          }
+        },
+        submitChange: function () {
+          let data = new FormData()
+          data.append('avatar', this.avatarFile)
+          data.append('brief', this.brief)
+          data.append('phone', this.phone)
+          data.append('sex', this.value)
+          let url = this.GLOBAL.BASE_URL + '/api/v1/edit/profile'
+          this.$axios.post(url, data).then(function (response) {
+            if (response.data.tips === 'Successed!') {
+              this.$message({
+                type: 'success',
+                message: '修 改 成 功 ！',
+                center: true,
+                duration: 1000
+              })
+              this.GLOBAL.USER = response.data.user
+              this.editSelfPanel = false
+            }
+          }.bind(this))
         }
-      },
-      submitChange: function () {
-        let data = new FormData()
-        data.append('avatar', this.avatarFile)
-        data.append('brief', this.brief)
-        data.append('phone', this.phone)
-        data.append('sex', this.value)
-        let url = this.GLOBAL.BASE_URL + '/api/v1/edit/profile'
-        this.$axios.post(url, data).then(function (response) {
-          if (response.data.tips === 'Successed!') {
-            this.$message({
-              type: 'success',
-              message: '修 改 成 功 ！',
-              center: true,
-              duration: 1000})
-            this.GLOBAL.USER = response.data.user
-            this.editSelfPanel = false
-          }
-        }.bind(this))
       }
-    }
     }
 </script>
 
@@ -184,7 +207,8 @@
   .el-main{
     padding: 0;
   }
-  .fa-cog{
+  .fa-cog,.el-icon-back{
+    position: relative;
     width: 6%;
     line-height: 100%;
     padding-left: 1%;

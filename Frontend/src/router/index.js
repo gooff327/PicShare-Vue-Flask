@@ -9,6 +9,7 @@ import comment from '../components/Common/comment'
 Vue.use(Router)
 
 export default new Router({
+  mode: 'history',
   routes: [
     {
       path: '/',
@@ -19,7 +20,10 @@ export default new Router({
       path: '/home',
       name: 'home',
       component: home,
-      meta: { requireAuth: true }
+      meta: {
+        requireAuth: true,
+        keepAlive: true
+      }
     },
     {
       path: '/admin',

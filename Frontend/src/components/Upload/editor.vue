@@ -48,7 +48,7 @@
                 message: '发 布 成 功 ！',
                 center: true,
                 duration: 1000})
-              this.refreshContent()
+              this.$router.push('/home')
               this.updatePanel = false
             }
           }.bind(this))
