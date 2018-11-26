@@ -89,7 +89,7 @@
   .footerbar p {
     position: relative;
     font-size: smaller;
-    top: -18px;
+    top: -14px;
     margin-bottom: 0px;
   }
   .plus{

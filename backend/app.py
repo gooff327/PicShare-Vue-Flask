@@ -129,17 +129,22 @@ input:
 @auth.login_required
 def resource():
     db.create_all()
-    print(os.getcwd())
     datas = {}
+    startIndex = int(request.args.get('startIndex'))
+    lastIndex = int(request.args.get('lastIndex'))
     passages = Resource.query.order_by(Resource.date.desc()).all()
-    print(passages)
+    if lastIndex > len(passages):
+        passages = passages[startIndex:]
+    else:
+        passages = passages[startIndex:lastIndex]
     for passage in passages:
         avatarPath = config.AVATARDIR+passage.uavatar
         passage.uavatar = send_image(avatarPath)
         imgPath = passage.img
         passage.img = send_image(imgPath)
+    print(passages)
     for n in range(len(passages)):
-        datas[n] = passages[n].to_json()
+       datas[startIndex+n] = passages[n].to_json()
     return jsonify(datas)
 '''
 Api to logout
@@ -293,8 +298,6 @@ def save_avatar(img,username):
 
 
 def send_image(path):
-    print(os.getcwd())
-    print(path)
     with open(path, 'rb') as f:
         image = f.read()
         image = str(base64.b64encode(image))
@@ -302,4 +305,4 @@ def send_image(path):
 if __name__ == '__main__':
     # from werkzeug.contrib.fixers import ProxyFix
     # app.wsgi_app = ProxyFix(app.wsgi_app)
-    app.run(port=5000)
+    app.run(host='192.168.12.1',port=5000)

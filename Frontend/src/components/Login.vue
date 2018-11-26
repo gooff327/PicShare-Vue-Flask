@@ -1,63 +1,67 @@
 <!--suppress ALL -->
 <template>
-   <el-form :model="loginForm" hide-required-asterisk status-icon :rules="rules" ref="loginForm" class="demo-loginForm">
-     <v-header></v-header>
-     <el-form-item label="头像" v-if="regVisible" prop="Avatar">
-       <el-upload
-         class="avatar-uploader"
-         :action="this.avatarPath"
-         :auto-upload="false"
-         :on-change="setPreview"
-         ref="uploadAvatar"
-         :data="this.loginForm"
-         :show-file-list="false">
-         <img v-if="imageUrl" :src=imageUrl class="avatar">
-         <i v-else class="el-icon-plus avatar-uploader-icon"></i>
-       </el-upload>
-     </el-form-item>
-     <el-form-item label="用户名"  prop="username" :rules="[
+  <el-form :model="loginForm" hide-required-asterisk status-icon :rules="rules" ref="loginForm" class="demo-loginForm">
+    <v-header></v-header>
+    <el-form-item label="头像" v-if="regVisible" prop="Avatar">
+      <el-upload
+        class="avatar-uploader"
+        action="http://127.0.0.1:5000/api/v1/post/avatar"
+        :auto-upload="false"
+        :on-change="setPreview"
+        ref="uploadAvatar"
+        :data="this.loginForm"
+        :show-file-list="false">
+        <img v-if="imageUrl" :src=imageUrl class="avatar">
+        <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+      </el-upload>
+    </el-form-item>
+    <el-form-item label="用户名" prop="username" :rules="[
      {required:true,message:'Username can not be empty!',trigger:'blur'},
      {min:5,max:18,message:'Username\'s length is between 5 and 18!',trigger:'blur'}
      ]">
       <el-input v-model="loginForm.username" placeholder="用户名至少6位"></el-input>
-     </el-form-item>
+    </el-form-item>
 
-     <el-form-item label="密码" prop="pass" :rules="[
+    <el-form-item label="密码" prop="pass" :rules="[
       {required:true,message:'Password can not be empty!',trigger:'blur'},
       {min: 5,max: 18,message:'Password is between 5 to 18',trigger:'blur'}
      ]">
-       <el-input type="password" v-model="loginForm.pass" placeholder="请输入密码"></el-input>
-     </el-form-item>
+      <el-input type="password" v-model="loginForm.pass" placeholder="请输入密码"></el-input>
+    </el-form-item>
 
-     <el-form-item v-if='regVisible' label="确认密码" prop="checkPass">
-       <el-input class="reg" type="password" v-model="loginForm.checkPass" placeholder="请重复输入密码"></el-input>
-     </el-form-item>
+    <el-form-item v-if='regVisible' label="确认密码" prop="checkPass">
+      <el-input class="reg" type="password" v-model="loginForm.checkPass" placeholder="请重复输入密码"></el-input>
+    </el-form-item>
 
-     <el-form-item v-if="regVisible" label="电子邮箱" prop="email" :rules="[
+    <el-form-item v-if="regVisible" label="电子邮箱" prop="email" :rules="[
      {required: true,message:'Email地址不能为空',trigger:'blur'}
      ]">
-       <el-input class="reg" type="email" v-model="loginForm.email" placeholder="example@gamil.com"></el-input>
-     </el-form-item>
-     <br>
-      <div class="btnGroup">
-        <el-button type="info" plain v-if="logBtn" @click="regVisible=!regVisible,btnSwitch = !btnSwitch" class="logbtn">{{btnSwitch ? '取 消' : '注 册'}}</el-button>
-        <br>
-        <br>
-        <el-button type="primary" @click="submitUser('loginForm')" v-if="logBtn"  class="logbtn">{{btnSwitch ? '提 交' :  '登 录'}}</el-button>
-      </div>
-    </el-form>
+      <el-input class="reg" type="email" v-model="loginForm.email" placeholder="example@gamil.com"></el-input>
+    </el-form-item>
+    <br>
+    <div class="btnGroup">
+      <el-button type="info" plain v-if="logBtn" @click="regVisible=!regVisible,btnSwitch = !btnSwitch" class="logbtn">
+        {{btnSwitch ? '取 消' : '注 册'}}
+      </el-button>
+      <br>
+      <br>
+      <el-button type="primary" @click="submitUser('loginForm')" v-if="logBtn" class="logbtn">{{btnSwitch ? '提 交' :
+        '登录'}}
+      </el-button>
+    </div>
+  </el-form>
 </template>
 
 <script>
   import headers from './header/header'
   import store from '../vuex/user'
+
   export default {
-  name: 'Login',
+    name: 'Login',
     components: {
-    'v-header': headers
+      'v-header': headers
     },
-    data (
-    ) {
+    data () {
       var validatePass = (rule, value, callback) => {
         if (value === '') {
           callback(new Error('Please inssert password'))
@@ -68,35 +72,38 @@
           callback()
         }
       }
-    var validatePass2 = (rule, value, callbacks) => {
-      if (value === '') {
-        callbacks(new Error('Please insert password!'))
-      } else if (value !== this.loginForm.pass) {
+      var validatePass2 = (rule, value, callbacks) => {
+        if (value === '') {
+          callbacks(new Error('Please insert password!'))
+        } else if (value !== this.loginForm.pass) {
           callbacks(new Error('Password do not match!'))
-      } else { callbacks() }
+        } else {
+          callbacks()
+        }
       }
-    return {
-      imageUrl: '',
-      loginForm: {
-        avatar: '',
-        avatarPath: this.GLOBAL.BASE_URL + '/api/v1/post/avatar',
+      return {
+        imageUrl: '',
+        loginForm: {
+          avatar: '',
+          avatarPath: this.GLOBAL.BASE_URL + '/api/v1/post/avatar',
           pass: '',
-        username: '',
-        email: '',
-        checkPass: '',
-        openfullscreen: false
-      },
-      datas: '',
-      btnSwitch: false,
-      regVisible: false,
-      logBtn: true,
-      rules: {
-        pass: [
-          { validator: validatePass, trigger: 'blur' }
-        ],
-        checkPass: [
-      {validator: validatePass2, trigger: 'blur'}]
-    }}
+          username: '',
+          email: '',
+          checkPass: '',
+          openfullscreen: false
+        },
+        datas: '',
+        btnSwitch: false,
+        regVisible: false,
+        logBtn: true,
+        rules: {
+          pass: [
+            {validator: validatePass, trigger: 'blur'}
+          ],
+          checkPass: [
+            {validator: validatePass2, trigger: 'blur'}]
+        }
+      }
     },
     methods: {
       submitUser (Form) {
@@ -192,32 +199,38 @@
         this.imageUrl = (window.URL || window.webkitURL).createObjectURL(file.raw)
         return isJPG && isLt2M
       }
-  }
     }
+  }
 </script>
 
 <style scoped>
-  .demo-loginForm{
-    font-family: "Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;
+  .demo-loginForm {
+    font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
   }
-  .demo-loginForm{
+
+  .demo-loginForm {
     align-items: center;
   }
-  .btnGroup{
+
+  .btnGroup {
     align-items: center;
   }
-  .logbtn{
+
+  .logbtn {
     width: 100%;
   }
+
   .avatar-uploader .el-upload {
     border: 1px dot-dot-dash #d9d9d9;
     border-radius: 6px;
     cursor: pointer;
     overflow: hidden;
   }
+
   .avatar-uploader .el-upload:hover {
     border-color: #409EFF;
   }
+
   .avatar-uploader-icon {
     font-size: 28px;
     color: #8c939d;
@@ -226,6 +239,7 @@
     line-height: 140px;
     text-align: center;
   }
+
   .avatar {
     width: 20%;
     height: 20%;

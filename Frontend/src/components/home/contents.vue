@@ -1,94 +1,179 @@
 <!--suppress ALL -->
 <template>
-  <div class="container">
-    <!--<scroller  :on-refresh="refresh"-->
-               <!--:on-infinite="infinite">-->
+  <div>
+    <transition name="fadein">
+      <span class="drop-down" v-cloak v-if="dropDown">松手刷新</span>
+    </transition>
+    <div ref="wrapper" class="wrapper">
       <div class="contentWrapper">
-        <el-card shadow="hover" :body-style="{padding: '6px' }" class="item" v-for="(key,item) in contents" :key="item" :title="key.title" :name="key.id">
+        <el-card shadow="hover" :body-style="{padding: '6px' }" class="item" v-for="(key,item) in contents" :key="item">
           <div class="headbar">
-            <img  @click="showUserDetails(key.author)" class="avatar" :src="['data:Image/png;base64,'+key.uavatar]" alt="">
+            <img @click="showUserDetails(key.author)" class="avatar" :src="['data:Image/png;base64,'+key.uavatar]"
+                 alt="">
             <span class="username">{{key.author}}</span>
             <i class="el-icon-more-outline"></i>
           </div>
           <div class="contentImage">
-            <img  class="innerPic" :src="['data:Image/png;base64,'+key.img]" :preview="key.pid" alt="">
+            <img onmouseover="displayDesc" class="innerPic" :src="['data:Image/png;base64,'+key.img]" :preview="key.pid"
+                 alt="">
             <div class="imageDesc">{{key.desc}}</div>
           </div>
           <div class="bottom">
             <span class="bottomText">{{key.pv}} 次浏览</span>
             <span class="botttomIcon">
-              <i style="color: #EE4957" @click="likeEvent(key.pid)" v-if="admire[key.pid] ===true" class="fa fa-heart"  aria-hidden="true"></i>
-              <i @click="likeEvent(key.pid)" v-else class="fa fa-heart-o"  aria-hidden="true"></i>
+              <i style="color: #EE4957" @click="likeEvent(key.pid)" v-if="admire[key.pid] ===true" class="fa fa-heart"
+                 aria-hidden="true"></i>
+              <i @click="likeEvent(key.pid)" v-else class="fa fa-heart-o" aria-hidden="true"></i>
               <i @click="commentEvent(key)" class="fa fa-comment-o" aria-hidden="true"></i>
               <i @click="shareEvent(key.pid)" class="fa fa-paper-plane-o" aria-hidden="true"></i>
            </span>
           </div>
         </el-card>
-        <i class="el-icon-loading moreInfo"></i><span>{{moreInfoText["1"]}}</span>
+        <i class="el-icon-loading moreInfo"></i><span>{{moreInfoText['1']}}</span>
       </div>
-    <!--</scroller>-->
+    </div>
     <comment ref="comment"></comment>
   </div>
 </template>
 
 <script>
   import comment from '../../components/Common/comment'
-    export default {
-      data () {
-        return {
-          updatePanel: false,
-          emptyContent: true,
-          refreshData: {},
-          admire: {},
-          moreInfoText: {
-            1: '更多动态加载中...',
-            2: '没有更多动态啦！',
-            3: '你的网络好像出问题了...'
-          }
+  import BScroll from 'better-scroll'
+
+  export default {
+    data () {
+      return {
+        dropDown: false,
+        updatePanel: false,
+        emptyContent: true,
+        refreshData: {},
+        scrollpos: 0,
+        admire: {},
+        moreInfoText: {
+          1: '更多动态加载中...',
+          2: '没有更多动态啦！',
+          3: '你的网络好像出问题了...'
         }
-      },
-      components: {
-        'comment': comment
-      },
-      created: function () {
-        this.getAdmireList()
-      },
-      methods: {
-        getAdmireList: function () {
-          var url = this.GLOBAL.BASE_URL + '/api/v1/admire'
-          this.$axios.get(url).then(function (res) {
-            console.log(res)
-            if (res.data.code === 520) {
-              this.admire = res.data.admire
+      }
+    },
+    components: {
+      'comment': comment
+    },
+    created: function () {
+      this.getAdmireList()
+    },
+    watch: {
+      $route (to, from) {
+        if (from.path === '/home' && to.path !== '/create/details') {
+          let position = this.scroll.y
+          this.$store.commit('changeY', position)
+        }
+        if (to.path === '/home') {
+          this.scroll.refresh()
+          this.scroll.scrollTo(0, this.$store.state.saveY)
+        }
+      }
+    },
+    mounted () {
+      // setTimeout(() => {
+      //   this.scroll = new BScroll(this.$refs.wrapper)
+      // }, 20)
+      this.$nextTick(() => {
+        if (!this.scroll) {
+          this.scroll = new BScroll(this.$refs.wrapper, {
+            click: true,
+            bounce: true,
+            scrollY: true,
+            probeType: 3,
+            pullUpLoad: {
+              threshold: 0
+            },
+            pullDownRefresh: {
+              threshold: 20
             }
-          }.bind(this))
-        },
-        showUserDetails: function (username) {
-           this.$router.push(`/user/${username}`)
-        },
-        likeEvent: function (pid) {
-          this.admire[pid] === true ? this.admire[pid] = false : this.admire[pid] = true
-          console.log(this.admire)
-          let url = this.GLOBAL.BASE_URL + '/api/v1/admire'
-          let data = JSON.stringify(this.admire)
-          this.$axios.post(url, data, {headers: {'Content-Type': 'Application/json'}}).then(function (response) {
-            console.log(response)
           })
-        },
-        commentEvent: function (object) {
-          this.$refs.comment.commentEvent(object)
+          this.scroll.on('scroll', (position) => {
+            if (position.y > 20) {
+              this.dropDown = true
+            } else {
+              this.dropDown = false
+            }
+          })
+          this.scroll.on('pullingDown', () => {
+            this.$emit('refresh')
+            console.log('刷新数据')
+            setTimeout(() => {
+              this.scroll.finishPullDown()
+              this.scroll.refresh()
+            }, 200)
+          })
+          this.scroll.on('pullingUp', () => {
+            this.$emit('loadMore')
+            console.log('获取更多数据')
+            setTimeout(() => {
+              this.scroll.finishPullUp()
+              this.scroll.refresh()
+            }, 200)
+          })
+        } else {
+          this.scroll.refresh()
         }
+      })
+    },
+    methods: {
+      getAdmireList: function () {
+        var url = this.GLOBAL.BASE_URL + '/api/v1/admire'
+        this.$axios.get(url).then(function (res) {
+          console.log(res)
+          if (res.data.code === 520) {
+            this.admire = res.data.admire
+          }
+        }.bind(this))
       },
-      props: {
-        contents: {
-          type: Object
-        }
+      showUserDetails: function (username) {
+        this.$router.push(`/user/${username}`)
       },
-        name: 'contents'
-    }
+      likeEvent: function (pid) {
+        this.admire[pid] === true ? this.admire[pid] = false : this.admire[pid] = true
+        console.log(this.admire)
+        let url = this.GLOBAL.BASE_URL + '/api/v1/admire'
+        let data = JSON.stringify(this.admire)
+        this.$axios.post(url, data, {headers: {'Content-Type': 'Application/json'}}).then(function (response) {
+          console.log(response)
+        })
+      },
+      commentEvent: function (object) {
+        this.$refs.comment.commentEvent(object)
+      }
+    },
+    props: {
+      contents: {
+        type: Object
+      }
+    },
+    name: 'contents'
+  }
 </script>
 <style scoped>
-  .headbar{
+  .drop-down {
+    color: #34BE5B;
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+    position: fixed;
+    top: 46px;
+    left: 0;
+  }
+
+  .fadein-enter-active, .fadein-leave-active {
+    transition: opacity .5s
+  }
+
+  .fadein-enter, .fadein-leave-active {
+    opacity: 0
+  }
+
+  .headbar {
     display: inline-block;
     vertical-align: top;
     height: 20%;
@@ -97,11 +182,25 @@
     width: 100%;
     position: relative;
   }
-  .imageDesc{
+
+  [v-cloak] {
+    display: none;
+  }
+
+  .wrapper {
+    position: absolute;
+    z-index: 100;
+    left: 0;
+    top: 40;
+    overflow: hidden;
+    height: 85vh;
+  }
+
+  .imageDesc {
     position: absolute;
     bottom: 0.5rem;
     color: white;
-    background-color: rgba(0,0,0,0.4);
+    background-color: rgba(0, 0, 0, 0.4);
     width: 95%;
     text-align: center;
     max-height: 40%;
@@ -114,7 +213,8 @@
     padding-top: 0.1rem;
     padding-bottom: 0.1rem;
   }
-  .username{
+
+  .username {
     display: inline-block;
     max-width: 70%;
     font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
@@ -122,76 +222,96 @@
     padding-top: 0.8rem;
     padding-left: 0.4rem;
   }
-  .avatar{
+
+  .avatar {
     display: inline-block;
     width: 36px;
     height: 36px;
     border-radius: 50%;
     float: left;
   }
-  .el-icon-more-outline{
+
+  .el-icon-more-outline {
     display: inline-block;
     height: 20%;
     float: right;
     padding-top: 4%;
     padding-right: 6%;
   }
-  .bottomText{
+
+  .bottomText {
     font-size: 0.8rem;
     color: gray;
     margin: 0;
     padding: 0;
   }
-  .botttom{
+
+  .botttom {
     vertical-align: top;
   }
-  .botttomIcon{
+
+  .botttomIcon {
     display: inline-block;
     float: right;
     padding-right: 0.4rem;
     margin-bottom: 0.4rem;
   }
-  .fa{
+
+  .fa {
     padding-right: 0.4rem;
     padding-left: 0.4rem;
     padding-bottom: 0.4rem;
   }
-  .contentImage{
+
+  .contentImage {
     margin-top: 0.2rem;
     max-width: 100%;
     max-height: 50%;
     padding-bottom: 0.2rem;
     position: relative;
   }
-  .emptyContent{
+
+  .emptyContent {
     display: block;
     text-align: center;
     width: 100;
   }
-  .innerPic{
+
+  .innerPic {
     width: auto;
     height: auto;
     max-width: 100%;
     max-height: 100%;
     border-radius: 4px;
   }
-  .fa-heart:hover{
+
+  .fa-heart:hover {
     animation: admire 0.6s normal;
   }
+
   @keyframes admire {
-    0% { transform: scale(1,1)}
-    20% { transform: scale(2.4,2.4)}
-    100% { transform: scale(1,1)}
+    0% {
+      transform: scale(1, 1)
+    }
+    20% {
+      transform: scale(2.4, 2.4)
+    }
+    100% {
+      transform: scale(1, 1)
+    }
   }
-  .fa-heart-o:hover{
+
+  .fa-heart-o:hover {
     transition: color 1.5s;
   }
-  .item{
+
+  .item {
     border-radius: 10px;
     margin-top: 2px;
     margin-bottom: 2px;
   }
-  .moreInfo{
+
+  .moreInfo {
     margin-bottom: 60px;
   }
 </style>

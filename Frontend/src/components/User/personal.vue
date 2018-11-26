@@ -108,7 +108,6 @@
       },
     watch: {
       '$route' (to, from) {
-        console.log(this.$route.params)
         if (this.$route.params.username === this.GLOBAL.USER.username) {
           this.isSelf = true
           this.currentUser = this.GLOBAL.USER
@@ -116,7 +115,6 @@
           let username = this.$route.params.username
           let url = this.GLOBAL.BASE_URL + '/api/v1/query/user/?username=' + username
           this.$axios.get(url).then(function (response) {
-            console.log('user', response)
             this.currentUser = response.data.user
           }.bind(this))
         }
