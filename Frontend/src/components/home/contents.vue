@@ -29,7 +29,6 @@
            </span>
           </div>
         </el-card>
-        <i class="el-icon-loading moreInfo"></i><span>{{moreInfoText['1']}}</span>
       </div>
     </div>
     <comment ref="comment"></comment>
@@ -48,12 +47,7 @@
         emptyContent: true,
         refreshData: {},
         scrollpos: 0,
-        admire: {},
-        moreInfoText: {
-          1: '更多动态加载中...',
-          2: '没有更多动态啦！',
-          3: '你的网络好像出问题了...'
-        }
+        admire: {}
       }
     },
     components: {
@@ -93,12 +87,13 @@
             }
           })
           this.scroll.on('scroll', (position) => {
-            if (position.y > 20) {
+            if (!this.scroll.isInTransition && !this.scroll.isAnimating && position.y > 20) {
               this.dropDown = true
             } else {
               this.dropDown = false
             }
           })
+
           this.scroll.on('pullingDown', () => {
             this.$emit('refresh')
             console.log('刷新数据')
@@ -109,7 +104,6 @@
           })
           this.scroll.on('pullingUp', () => {
             this.$emit('loadMore')
-            console.log('获取更多数据')
             setTimeout(() => {
               this.scroll.finishPullUp()
               this.scroll.refresh()
@@ -169,7 +163,7 @@
     transition: opacity .5s
   }
 
-  .fadein-enter, .fadein-leave-active {
+  .fadein-enter, .fadein-leave-to {
     opacity: 0
   }
 
@@ -191,9 +185,9 @@
     position: absolute;
     z-index: 100;
     left: 0;
-    top: 40;
+    top: 40px;
     overflow: hidden;
-    height: 85vh;
+    height: 86vh;
   }
 
   .imageDesc {
@@ -312,6 +306,9 @@
   }
 
   .moreInfo {
-    margin-bottom: 60px;
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+    color: #34BE5B;
   }
 </style>

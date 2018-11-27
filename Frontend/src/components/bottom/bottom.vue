@@ -70,7 +70,7 @@
   }
   .function{
     position: relative;
-    bottom: 0px;
+    bottom: 2px;
     width: 20%;
     float: left;
     padding-left: 0;
@@ -89,7 +89,7 @@
   .footerbar p {
     position: relative;
     font-size: smaller;
-    top: -14px;
+    top: -16px;
     margin-bottom: 0px;
   }
   .plus{

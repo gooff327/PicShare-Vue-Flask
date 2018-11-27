@@ -24,8 +24,7 @@
         lastIndex: 5,
         style_active: 'color = #409EFF;',
         contents: {},
-        tempContents: {},
-        preContents: {}
+        tempContents: {}
       }
     },
     watch: {
@@ -48,14 +47,10 @@
             lastIndex: this.lastIndex
           }
         }).then(function (response) {
-          console.log('res', response.data)
           this.tempContents = this.contents
           this.contents = response.data
-          console.log('get', this.contents)
-          this.preContents = $.extend(this.contents, this.tempContents)
-          console.log('pre', this.preContents)
-          this.contents = this.preContents
-          console.log(this.contents)
+          this.tempContents = $.extend(this.contents, this.tempContents)
+          this.contents = this.tempContents
         }.bind(this))
       },
       getMore: function () {
