@@ -1,5 +1,8 @@
+from filecmp import cmp
+
 from flask import Flask, request, jsonify, g, json, make_response, render_template
 from flask_cors import CORS
+from sqlalchemy import func
 from ext import db
 from config import config
 import base64
@@ -106,10 +109,11 @@ def verify_password(username_or_token, password):
 @app.route('/api/v1/login', methods=['GET', 'POST'])
 @auth.login_required
 def get_token():
-    print(os.getcwd())
+    db.create_all()
     user = {}
     token = g.user.generate_auth_token()
     avatarPath = config.AVATARDIR + g.user.avatar
+    user['following'] = resolve_relation_list(g.user.relation)
     user['username'] = g.user.username
     user['uid'] = g.user.uid
     user['brief'] = g.user.brief
@@ -136,9 +140,14 @@ input:
 def resource():
     db.create_all()
     datas = {}
+    current_path = request.args.get('currentPath')
+    print(current_path)
     start_index = int(request.args.get('startIndex'))
     last_index = int(request.args.get('lastIndex'))
-    datas = query_passages(start_index, last_index, type=1, keyword=None)
+    if current_path == 'home':
+        datas = query_passages(start_index, last_index, types=1, keyword=None)
+    elif current_path == 'following':
+        datas = query_passages(start_index, last_index, types=2, keyword=g.user.uid)
     return jsonify(datas[0])
 
 
@@ -239,26 +248,86 @@ def new_passage():
     return jsonify({'tips': 'Successed!'})
 
 
+@app.route('/api/v1/get/users', methods=['GET'])
+@auth.login_required
+def get_users():
+    type = request.args.get('type')
+    uid = int(request.args.get('uid'))
+    if type == 'following':
+        vid_stub = Relation.query.filter_by(uid=uid).with_entities(Relation.vid.label('vid')).subquery()
+        # passages = db.session.query(Resource, vid_stub.c.vid).join(vid_stub,
+        #                                                           Resource.uid == vid_stub.c.vid).with_entities(
+        #   Resource).order_by(Resource.date.desc()).all()
+        users = db.session.query(Users, vid_stub.c.vid).join(vid_stub,
+                                                             Users.uid == vid_stub.c.vid).with_entities(
+            Users).all()
+        users = resolve_users(users)
+        following = users
+        return jsonify({'tips': 'Successed!', 'userList': users})
+    elif type == 'followers':
+        user = Users.query.filter_by(username=key).first()
+        followers = Relation.query.filter_by(vid=user.uid).all()
+        followers = resolve_relation_list(followers)
+        return jsonify({'tips': 'Successed!', 'followers': followers})
+
+def resolve_users(users):
+    rt_users = []
+    for user in users:
+        lite_user = {}
+        lite_user['uid'] = user.uid
+        lite_user['username'] = user.username
+        lite_user['brief'] = user.brief
+        avatar_path = config.AVATARDIR + user.avatar
+        print(type(user))
+        lite_user['avatar'] = send_image(avatar_path)
+        rt_users.append(lite_user)
+    return rt_users
+
 @app.route('/api/v1/query/user', methods=['GET'])
 @auth.login_required
 def query_user():
-    rt_user = {}
-    amounts = {}
-    start_index = int(request.args.get('startIndex'))
-    last_index = int(request.args.get('lastIndex'))
-    key = request.args.get('username')
-    user = Users.query.filter_by(username=key).first()
-    res = query_passages(start_index, last_index, type=2, keyword=key)
-    avatar_path = config.AVATARDIR + user.avatar
-    rt_user['username'] = user.username
-    rt_user['uid'] = user.uid
-    rt_user['brief'] = user.brief
-    rt_user['avatar'] = send_image(avatar_path)
-    rt_user['sex'] = user.sex
-    amounts['produces'] = res[1]
-    if res[0] == {}:
-        return jsonify({'tips': 'All loaded!', 'user': rt_user, 'amounts': amounts, 'contents': res[0]})
+    with db.session.no_autoflush:
+        db.create_all()
+        rt_user = {}
+        start_index = int(request.args.get('startIndex'))
+        last_index = int(request.args.get('lastIndex'))
+        key = request.args.get('username')
+        user = Users.query.filter_by(username=key).first()
+        print('length', len(user.resource))
+        followers = Relation.query.filter_by(vid=user.uid).all()
+        res = query_passages(start_index, last_index, types=3, keyword=key)
+        avatar_path = config.AVATARDIR + user.avatar
+
+        rt_user['produces'] = len(user.resource)
+        rt_user['followers'] = resolve_relation_list(followers)
+        rt_user['following'] = resolve_relation_list(user.relation)
+        rt_user['username'] = user.username
+        rt_user['uid'] = user.uid
+        rt_user['brief'] = user.brief
+        rt_user['avatar'] = send_image(avatar_path)
+        rt_user['sex'] = user.sex
+        amounts = len(user.resource)
+        if res[0] == {}:
+            return jsonify({'tips': 'All loaded!', 'user': rt_user, 'amounts': amounts, 'contents': res[0]})
     return jsonify({'tips': 'Successed!', 'user': rt_user, 'amounts': amounts, 'contents': res[0]})
+
+
+@app.route('/api/v1/concern/action', methods=['POST'])
+@auth.login_required
+def concern_action():
+    vid = ((request.form).to_dict()).get('vid')
+    status = get_bool_status((request.form).to_dict().get('status'))
+    print(status)
+    uid = g.user.uid
+    relation = Relation.query.filter_by(uid=uid, vid=vid).first()
+    if (status == True):
+        relation = Relation(uid=uid, vid=vid, status=status)
+        db.session.add(relation)
+        db.session.commit()
+    elif (status == False):
+        db.session.delete(relation)
+        db.session.commit()
+    return jsonify({'tips': 'Successed!'})
 
 
 @app.route('/api/v1/edit/profile', methods=['POST'])
@@ -297,12 +366,33 @@ def logout():
     return jsonify({'data': username + ' log out'})
 
 
-def query_passages(start_index, last_index, type, keyword):
+def get_bool_status(str):
+    return True if str.lower() == 'true' else False
+
+
+def resolve_relation_list(relations):
+    rt_relations = {}
+    for relation in relations:
+        relation = relation.to_json()
+        rt_relations[relation['vid']] = relation['status']
+    print(rt_relations)
+    return rt_relations
+
+
+def query_passages(start_index, last_index, types, keyword):
     datas = {}
     res = []
-    if type == 1:
+    if types == 1:
         passages = Resource.query.order_by(Resource.date.desc()).all()
-    elif type == 2:
+        # 好友动态
+    elif types == 2:
+        # 保存获取好友id的sql语句
+        vid_stub = Relation.query.filter_by(uid=keyword).with_entities(Relation.vid.label('vid')).subquery()
+        # 通过uid进行join查询好友动态
+        passages = db.session.query(Resource, vid_stub.c.vid).join(vid_stub,
+                                                                   Resource.uid == vid_stub.c.vid).with_entities(
+            Resource).order_by(Resource.date.desc()).all()
+    elif types == 3:
         passages = Resource.query.filter_by(author=keyword).order_by(Resource.date.desc()).all()
     else:
         return None
@@ -320,7 +410,6 @@ def query_passages(start_index, last_index, type, keyword):
         passage.uavatar = send_image(avatar_path)
         imgPath = passage.img
         passage.img = send_image(imgPath)
-    print(passages)
     for n in range(len(passages)):
         datas[start_index + n] = passages[n].to_json()
     res.append(datas)

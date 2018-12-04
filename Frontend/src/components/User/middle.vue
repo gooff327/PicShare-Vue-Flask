@@ -1,20 +1,20 @@
 <template>
   <div>
     <transition name="fadein">
-      <el-row>
+      <el-row v-show="topBody">
         <el-col :span="24" class="middle-tab-a">
           <div class="posts">
             <span class="quantity" v-text="amounts['produces']"></span>
             <br>
             <span class="label">帖子</span>
           </div>
-          <div class="followers">
-            <span class="quantity">9</span>
+          <div @click="showFollowers" class="followers">
+            <span class="quantity" v-text="amounts['followers']"></span>
             <br>
             <span class="followers">粉丝</span>
           </div>
-          <div class="following">
-            <span class="quantity">10</span>
+          <div @click="showFollowing" class="following">
+            <span class="quantity" v-text="amounts['following']"></span>
             <br>
             <span class="following">关注</span>
           </div>
@@ -29,20 +29,24 @@
         </transition>
       </el-row>
     </transition>
-    <div v-cloak v-show="moreView" ref="wrapper" :class="wrapperStyle">
-      <el-row class="moreRow">
-        <el-col v-for="(key,item) in contents" :key="item" :span="8" class="contents">
-          <img class="smallPic" :src="['data:Image/png;base64,'+key.img]">
-        </el-col>
-      </el-row>
-    </div>
-    <div v-cloak v-show="!moreView" ref="wrappers" :class="wrapperStyle">
-      <el-row>
-        <el-col v-for="(key,item) in contents" :key="item" :span="24" class="contents">
-          <img class="bigPic" :src="['data:Image/png;base64,'+key.img]">
-        </el-col>
-      </el-row>
-    </div>
+    <transition name="fadein">
+      <div v-cloak v-show="moreView" ref="moreWrapper" class="wrapper">
+        <el-row class="moreRow">
+          <el-col v-for="(key,item) in contents" :key="item" :span="8" class="contents">
+            <img class="smallPic" :src="['data:Image/png;base64,'+key.img]">
+          </el-col>
+        </el-row>
+      </div>
+    </transition>
+    <transition name="fadein">
+      <div v-cloak v-show="!moreView" ref="lessWrapper" :class="wrapperStyle">
+        <el-row>
+          <el-col v-for="(key,item) in contents" :key="item" :span="24" class="contents">
+            <img class="bigPic" :src="['data:Image/png;base64,'+key.img]">
+          </el-col>
+        </el-row>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -52,6 +56,9 @@
   export default {
     name: 'Middle',
     props: {
+      uid: {
+        type: Number
+      },
       amounts: {
         type: Object
       },
@@ -65,15 +72,17 @@
         activeSelect: 'active-icon',
         activeMore: 'active-icon',
         activeLess: '',
-        wrapperStyle: 'wrapper',
         dropDown: false,
-        topBody: true
+        topBody: true,
+        wrapper1: 'wrapper',
+        wrapper2: '',
+        wrapperStyle: 'wrapper'
       }
     },
     mounted () {
       this.$nextTick(() => {
         if (!this.scroll) {
-          this.scroll = new BScroll(this.$refs.wrapper, {
+          this.scroll = new BScroll(this.$refs.moreWrapper, {
             click: true,
             bounce: true,
             scrollY: true,
@@ -89,20 +98,12 @@
           this.scroll.on('scroll', (position) => {
             if (!this.scroll.isInTransition && !this.scroll.isAnimating && position.y > 20) {
               this.dropDown = true
-            } else if (position.y < 0) {
-              this.$emit('closeTop', false)
-              this.wrapperStyle = 'fullWrapper'
-            } else if (position.y > 0) {
-              this.wrapperStyle = 'wrapper'
-              this.$emit('closeTop', true)
             } else {
               this.dropDown = false
             }
           })
           this.scroll.on('pullingDown', () => {
-            this.topBody = true
             this.$emit('refresh')
-            this.$emit('closeTop', true)
             setTimeout(() => {
               this.scroll.finishPullDown()
               this.scroll.refresh()
@@ -119,6 +120,54 @@
         } else {
           this.scroll.refresh()
         }
+        if (!this.scrollex) {
+          this.scrollex = new BScroll(this.$refs.lessWrapper, {
+            click: true,
+            bounce: true,
+            scrollY: true,
+            topBody: true,
+            probeType: 3,
+            pullUpLoad: {
+              threshold: 0
+            },
+            pullDownRefresh: {
+              threshold: 20
+            }
+          })
+          this.scrollex.on('scroll', (position) => {
+            if (!this.scrollex.isInTransition && !this.scrollex.isAnimating && position.y > 20) {
+              this.dropDown = true
+            } else if (position.y < 0) {
+              this.topBody = false
+              this.$emit('closeTop', false)
+              this.wrapperStyle = 'fullWrapper'
+            } else if (position.y > 0) {
+              this.$emit('closeTop', true)
+              this.topBody = true
+            } else {
+              this.dropDown = false
+            }
+          })
+          this.scrollex.on('pullingDown', () => {
+            this.topBody = true
+            this.$emit('closeTop', true)
+            this.$emit('refresh')
+            setTimeout(() => {
+              this.scrollex.finishPullDown()
+              this.scrollex.refresh()
+            }, 200)
+          })
+          this.scrollex.on('pullingUp', () => {
+            console.log('加载数据！')
+            this.$emit('loadData')
+            setTimeout(() => {
+              this.scrollex.finishPullUp()
+              this.scrollex.refresh()
+            }, 200)
+          })
+        } else {
+          this.scrollex.refresh()
+        }
       })
     },
     methods: {
@@ -127,11 +176,21 @@
         this.activeLess = ''
         this.activeMore = this.activeSelect
         this.moreView = true
+        this.wrapper1 = 'wrapper'
+        this.wrapper2 = ''
       },
       showLess: function () {
         this.activeMore = ''
         this.activeLess = this.activeSelect
         this.moreView = false
+        this.wrapper1 = ''
+        this.wrapper2 = 'wrapper'
+      },
+      showFollowing: function () {
+        this.$router.push({path: this.$route.path + '/following', query: {uid: this.uid}})
+      },
+      showFollowers: function () {
+        this.$router.push({path: this.$route.path + '/followers', query: {uid: this.uid}})
       }
     }
   }
@@ -155,15 +214,26 @@
   }
 
   .wrapper {
-    position: fixed;
+    position: relative;
     top: 0;
     left: 0;
-    height: 53vh;
+    height: 51vh;
+    z-index: 10;
     overflow: hidden;
   }
+
+  .fullWrapper {
+    position: relative;
+    top: 0;
+    left: 0;
+    height: 90vh;
+    z-index: 10;
+  }
+
   .moreRow {
     background: white;
   }
+
   .dropDown {
     color: #34BE5B;
     display: inline-block;
@@ -172,12 +242,7 @@
     position: relative;
     top: 10px;
     padding-bottom: 20px;
-  }
-
-  .fullWrapper {
-    position: relative;
-    top: 0;
-    height: 60vh;
+    padding-top: 10px;
   }
 
   .middle-tab-a {

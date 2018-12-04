@@ -21,47 +21,49 @@
     data () {
       return {
         startIndex: 0,
-        lastIndex: 5,
+        lastIndex: 10,
         style_active: 'color = #409EFF;',
         contents: {},
         tempContents: {}
       }
     },
+    created: function () {
+      this.getUpdate(this.$route.name)
+    },
     watch: {
       '$route' (to, from) {
-        console.log(to.path, from.path)
-        if (from.path === '/create/details') {
-          this.getUpdate()
+        if (to.path === '/following') {
+          this.getUpdate(this.$route.name)
+        } else if (to.path === 'home') {
+          this.getUpdate(this.$route.name)
         }
       }
     },
-    created: function () {
-      this.getUpdate()
-    },
     methods: {
-      getUpdate: function () {
+      getUpdate: function (path) {
+        let currentPath = path
         let url = this.GLOBAL.BASE_URL + '/api/v1/resources'
         this.$axios.get(url, {
           params: {
+            currentPath: currentPath,
             startIndex: this.startIndex,
             lastIndex: this.lastIndex
           }
         }).then(function (response) {
-          this.tempContents = this.contents
-          this.contents = response.data
-          this.tempContents = $.extend(this.contents, this.tempContents)
-          this.contents = this.tempContents
+            this.tempContents = this.contents
+            this.contents = response.data
+            this.contents = $.extend(this.contents, this.tempContents)
         }.bind(this))
       },
       getMore: function () {
         this.startIndex += 5
         this.lastIndex += 5
-        this.getUpdate()
+        this.getUpdate(this.$route.name)
       },
       refresh: function () {
         this.startIndex = 0
         this.lastIndex = 5
-        this.getUpdate()
+        this.getUpdate(this.$route.name)
       }
     }
   }

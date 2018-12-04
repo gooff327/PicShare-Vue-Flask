@@ -6,7 +6,8 @@
     </transition>
     <div ref="wrapper" class="wrapper">
       <div class="contentWrapper">
-        <el-card shadow="hover" :body-style="{padding: '6px' }" class="item" v-for="(key,item) in contents" :key="item">
+        <el-card shadow="hover" :body-style="{padding: '6px' }" class="item" v-for="(key,item) in contents"
+                 :key="item">
           <div class="headbar">
             <img @click="showUserDetails(key.author)" class="avatar" :src="['data:Image/png;base64,'+key.uavatar]"
                  alt="">
@@ -38,10 +39,12 @@
 <script>
   import comment from '../../components/Common/comment'
   import BScroll from 'better-scroll'
+  import store from '../../vuex/user'
 
   export default {
     data () {
       return {
+        showContents: true,
         dropDown: false,
         updatePanel: false,
         emptyContent: true,
@@ -58,21 +61,23 @@
     },
     watch: {
       $route (to, from) {
-        if (from.path === '/home' && to.path !== '/create/details') {
+        if (from.path === '/following') {
           let position = this.scroll.y
-          this.$store.commit('changeY', position)
+          store.commit('changefPosition', position)
         }
-        if (to.path === '/home') {
+        if (to.path === '/following') {
           this.scroll.refresh()
-          this.scroll.scrollTo(0, this.$store.state.saveY)
+          this.scroll.scrollTo(0, store.state.positions.fPosition)
         }
       }
     },
     mounted () {
-      // setTimeout(() => {
-      //   this.scroll = new BScroll(this.$refs.wrapper)
-      // }, 20)
       this.$nextTick(() => {
+        this.initHomeScroll()
+      })
+    },
+    methods: {
+      initHomeScroll: function () {
         if (!this.scroll) {
           this.scroll = new BScroll(this.$refs.wrapper, {
             click: true,
@@ -112,9 +117,7 @@
         } else {
           this.scroll.refresh()
         }
-      })
-    },
-    methods: {
+      },
       getAdmireList: function () {
         var url = this.GLOBAL.BASE_URL + '/api/v1/admire'
         this.$axios.get(url).then(function (res) {

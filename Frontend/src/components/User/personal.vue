@@ -1,6 +1,5 @@
 <!--suppress ALL -->
 <template>
-  <transition name="fadein">
   <el-container>
     <el-header>
       <span v-if="isSelf" class="fa fa-cog"></span>
@@ -9,69 +8,74 @@
       <span class="fa fa-user-plus"></span>
     </el-header>
     <el-main>
-      <el-row v-cloak :gutter="20">
-        <el-col :span="6">
-          <div class="content-left">
-            <img class="user-avatar" :src="['data:Image/jpg;base64,'+this.currentUser.avatar]" alt="">
-          </div>
-        </el-col>
-        <el-col :span="18">
-          <div class="content-right">
-            <span class="user-username" v-text="this.currentUser.username"></span>
-            <el-button v-show="isSelf" class="edit-btn" @click="editorVisible" size="mini">编辑主页</el-button>
-            <el-button v-show="!isSelf" class="concern-btn" size="mini"
-                       @click="btnSwitch = !btnSwitch,concernAction(this.routeParams)">{{btnSwitch ? '关 注': '取消关注' }}
-            </el-button>
-            <el-dialog
-              :visible.sync="editSelfPanel"
-              :show-close="false"
-              :fullscreen="true"
-              width="100%">
-              <div slot="title" class="commentTitle">
-                <i @click="editSelfPanel=false" class="el-icon-back"></i>
-                <span class="dialogTitle">编 辑 主 页</span>
-              </div>
-              <div class="edit-avatar">
+      <transition name="fadein">
+        <el-row v-show="topBody" v-cloak :gutter="20">
+          <el-col :span="6">
+            <div class="content-left">
+              <img class="user-avatar" :src="['data:Image/jpg;base64,'+this.currentUser.avatar]" alt="">
+            </div>
+          </el-col>
+          <el-col :span="18">
+            <div class="content-right">
+              <span class="user-username" v-text="this.currentUser.username"></span>
+              <el-button v-show="isSelf" class="edit-btn" @click="editorVisible" size="mini">编辑主页</el-button>
+              <el-button v-show="!isSelf" v-if="this.btnConcern" class="concern-btn" size="mini" @click="concernAction">
+                取消关注
+              </el-button>
+              <el-button v-show="!isSelf" v-else class="concern-btn" size="mini" @click="concernAction">关 注</el-button>
+              <el-dialog
+                :visible.sync="editSelfPanel"
+                :show-close="false"
+                :fullscreen="true"
+                width="100%">
+                <div slot="title" class="commentTitle">
+                  <i @click="editSelfPanel=false" class="el-icon-back"></i>
+                  <span class="dialogTitle">编 辑 主 页</span>
+                </div>
+                <div class="edit-avatar">
               <span><img v-if="imageURL === ''||imageURL === undefined" class="avatar-preview"
                          :src="['data:Image/png;base64,'+this.GLOBAL.USER.avatar]" alt="">
               <img v-else class="avatar-preview" :src=imageURL alt=""></span>
-                <p onclick="document.getElementById('avatar-choose').click();">更换头像</p>
-                <input id="avatar-choose" class="avatar-choose" type="file" @change="avatarChoosed($event)">
-              </div>
-              <div class="informations">
-                <span>ID</span>
-                <el-input :disabled="true" v-model="this.GLOBAL.USER.uid"></el-input>
-                <span>用户名</span>
-                <el-input :disabled="true" v-model="username"></el-input>
-                <span>个人简介</span>
-                <el-input v-model="brief"></el-input>
-                <span>手机</span>
-                <el-input v-model="phone"></el-input>
-                <span>邮箱</span>
-                <el-input :disabled="true" v-model="email"></el-input>
-                <span>性别</span>
-                <el-select v-model="value" :placeholder="sex">
-                  <el-option v-for="item in options"
-                             :key="item.value"
-                             :label="item.label"
-                             :value="item.value"></el-option>
-                </el-select>
-                <br><br>
-                <el-button type="primary" class="submitChange" @click="submitChange"
-                           :disabled="this.imageURL === '' &&this.imageURL !== undefined&& this.username === this.GLOBAL.USER.username && this.email === this.GLOBAL.USER.email && this.brief === this.GLOBAL.USER.brief && this.phone === this.GLOBAL.USER.phone && this.value === this.GLOBAL.USER.sex">
-                  提 交
-                </el-button>
-              </div>
-            </el-dialog>
-          </div>
-        </el-col>
-      </el-row>
-      <middle-content @refresh="refresh" @loadData="loadData" @closeTop="closeTop" :amounts="amounts"
+                  <p onclick="document.getElementById('avatar-choose').click();">更换头像</p>
+                  <input id="avatar-choose" class="avatar-choose" type="file" @change="avatarChoosed($event)">
+                </div>
+                <div class="informations">
+                  <span>ID</span>
+                  <el-input :disabled="true" v-model="this.GLOBAL.USER.uid"></el-input>
+                  <span>用户名</span>
+                  <el-input :disabled="true" v-model="username"></el-input>
+                  <span>个人简介</span>
+                  <el-input v-model="brief"></el-input>
+                  <span>手机</span>
+                  <el-input v-model="phone"></el-input>
+                  <span>邮箱</span>
+                  <el-input :disabled="true" v-model="email"></el-input>
+                  <span>性别</span>
+                  <el-select v-model="value" :placeholder="sex">
+                    <el-option v-for="item in options"
+                               :key="item.value"
+                               :label="item.label"
+                               :value="item.value"></el-option>
+                  </el-select>
+                  <br><br>
+                  <el-button type="primary" class="submitChange" @click="submitChange"
+                             :disabled="this.imageURL === '' &&this.imageURL !== undefined&& this.username === this.GLOBAL.USER.username && this.email === this.GLOBAL.USER.email && this.brief === this.GLOBAL.USER.brief && this.phone === this.GLOBAL.USER.phone && this.value === this.GLOBAL.USER.sex">
+                    提 交
+                  </el-button>
+                </div>
+              </el-dialog>
+            </div>
+          </el-col>
+        </el-row>
+      </transition>
+      <middle-content @refresh="refresh" @loadData="loadData" @closeTop="closeTop" :uid="this.currentUser.uid"
+                      :amounts="amounts"
                       :contents="contents"></middle-content>
     </el-main>
-    <nav-bottom v-show="topBody"></nav-bottom>
+    <transition name="fadein">
+      <nav-bottom v-show="topBody"></nav-bottom>
+    </transition>
   </el-container>
-  </transition>
 </template>
 <script>
   import navBottom from '../bottom/bottom'
@@ -87,7 +91,7 @@
     data () {
       return {
         isSelf: false,
-        btnSwitch: false,
+        btnConcern: false,
         topBody: true,
         options: [{
           value: '未设置',
@@ -110,7 +114,7 @@
         email: this.GLOBAL.USER.email,
         phone: this.GLOBAL.USER.phone,
         startIndex: 0,
-        lastIndex: 9,
+        lastIndex: 12,
         sex: '',
         imageURL: '',
         editSelfPanel: false,
@@ -119,7 +123,8 @@
         contents: {},
         tempContents: {},
         dropDown: false,
-        staus: ''
+        staus: '',
+        followAmount: 0
       }
     },
     watch: {
@@ -127,7 +132,7 @@
         if (this.$route.params.username === this.GLOBAL.USER.username) {
           console.log(1)
           this.isSelf = true
-          this.currentUser = this.GLOBAL.USER
+          this.getData(this.GLOBAL.USER.username)
         }
         let username = this.$route.params.username
         this.contents = {}
@@ -160,7 +165,10 @@
           this.tempContents = $.extend(this.contents, this.tempContents)
           this.contents = this.tempContents
           this.currentUser = response.data.user
-          this.amounts = response.data.amounts
+          this.amounts['produces'] = this.currentUser.produces
+          this.amounts['following'] = Object.keys(this.currentUser.following).length
+          this.amounts['followers'] = Object.keys(this.currentUser.followers).length
+          this.isConcerned(this.currentUser.uid)
         }.bind(this))
       },
       closeTop: function (boolean) {
@@ -168,17 +176,19 @@
       },
       refresh: function () {
         this.startIndex = 0
-        this.lastIndex = 9
+        this.lastIndex = 12
         let username = this.$route.params.username
         this.getData(username)
       },
       loadData: function () {
-        this.startIndex += 9
-        this.lastIndex += 9
+        this.startIndex += 12
+        this.lastIndex += 12
         if (this.status !== 'All loaded!') {
           let username = this.$route.params.username
           this.getData(username)
-        } else this.$message.error('没有更多数据啦！')
+        } else {
+          this.$message.error('没有更多数据啦！')
+        }
       },
       back: function () {
         this.$router.push('/home')
@@ -186,8 +196,27 @@
       editorVisible: function () {
         this.editSelfPanel = true
       },
-      concernAction: function (username) {
-        console.log(username)
+      // 关联btn的显示
+      isConcerned: function (vid) {
+        console.log('GLOBAL', this.GLOBAL.USER)
+        this.btnConcern = this.GLOBAL.USER.following[vid]
+      },
+      concernAction: function () {
+        this.btnConcern = !this.btnConcern
+        let url = this.GLOBAL.BASE_URL + '/api/v1/concern/action'
+        let data = new FormData()
+        data.append('vid', this.currentUser.uid)
+        data.append('status', this.btnConcern)
+        console.log('user', this.GLOBAL.USER)
+        console.log('concern-data', data)
+        this.$axios.post(url, data).then(function (response) {
+          if (response.data.tips !== 'Successed!') {
+            this.$message.error('操作不成功！')
+          } else {
+            this.getData(this.currentUser.username)
+            this.GLOBAL.USER.following[this.currentUser.uid] = this.btnConcern
+          }
+        }.bind(this))
       },
       avatarChoosed: function (event) {
         var file = event.target.files[0]
@@ -249,12 +278,6 @@
     display: none;
   }
 
-  .wrapper {
-    position: fixed;
-    height: 80vh;
-    z-index: 2;
-  }
-
   .el-header {
     padding: 0;
     margin-top: 10px;
@@ -279,7 +302,7 @@
     width: 6%;
     line-height: 100%;
     padding-left: 1%;
-    font-size: 1.4rem;
+    font-size: 1rem;
   }
 
   .headTitle {
@@ -292,7 +315,7 @@
     width: 6%;
     float: right;
     padding-right: 10px;
-    font-size: 1.4rem;
+    font-size: 1rem;
   }
 
   .user-avatar {

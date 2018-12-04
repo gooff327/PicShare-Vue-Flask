@@ -1,12 +1,17 @@
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer,SignatureExpired,BadSignature
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, SignatureExpired, BadSignature
+from pip._vendor.colorama import Fore
+from sqlalchemy import ForeignKey
+
 from ext import db
 from config import config
 from passlib.apps import custom_app_context
 import json
+
+
 class Users(db.Model):
     __tablename__ = 'user'
-    uid = db.Column(db.Integer,primary_key=True,autoincrement=True)
-    username = db.Column(db.String(80),unique=True)
+    uid = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    username = db.Column(db.String(80), unique=True)
     password = db.Column(db.String(120))
     email = db.Column(db.String(120), unique=True)
     avatar = db.Column(db.String(50))
@@ -14,8 +19,10 @@ class Users(db.Model):
     brief = db.Column(db.String(200))
     phone = db.Column(db.String(20))
     sex = db.Column(db.String(4))
+    relation = db.relationship('Relation', order_by='Relation.id', backref='user')
+    resource = db.relationship('Resource', backref='user')
 
-    def __init__(self,username,email,avatar):
+    def __init__(self, username, email, avatar):
         self.username = username
         self.email = email
         self.avatar = avatar
@@ -23,14 +30,14 @@ class Users(db.Model):
         self.phone = None
         self.sex = '未设置'
 
-    def hash_password(self,password):
+    def hash_password(self, password):
         self.password = custom_app_context.encrypt(password)
 
-    def verify_password(self,password):
-        return custom_app_context.verify(password,self.password)
+    def verify_password(self, password):
+        return custom_app_context.verify(password, self.password)
 
-    def generate_auth_token(self,expiration = 6000):
-        s = Serializer(config.SECRET_KEY,expires_in=expiration)
+    def generate_auth_token(self, expiration=6000):
+        s = Serializer(config.SECRET_KEY, expires_in=expiration)
         return s.dumps({'uid': self.uid})
 
     def verify_token(token):
@@ -50,10 +57,11 @@ class Users(db.Model):
             del dict["_sa_instance_state"]
         return dict
 
+
 class Resource(db.Model):
-    __tablename__ =  'timeline'
-    pid = db.Column(db.Integer,primary_key=True,autoincrement=True)
-    uid = db.Column(db.Integer,nullable=False)
+    __tablename__ = 'timeline'
+    pid = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    uid = db.Column(db.Integer, ForeignKey('user.uid'), ForeignKey('relation.vid'))
     img = db.Column(db.String(100))
     desc = db.Column(db.String(100))
     pv = db.Column(db.Integer)
@@ -61,14 +69,14 @@ class Resource(db.Model):
     date = db.Column(db.DateTime)
     uavatar = db.Column(db.String(50))
 
-    def __init__(self,uid,img,desc,pv,author,date):
+    def __init__(self, uid, img, desc, pv, author, date):
         self.uid = uid
         self.img = img
         self.desc = desc
         self.pv = pv
         self.author = author
         self.date = date
-        self.uavatar = author+'.jpg'
+        self.uavatar = author + '.jpg'
 
     def to_json(self):
         dict = self.__dict__
@@ -76,21 +84,42 @@ class Resource(db.Model):
             del dict["_sa_instance_state"]
         return dict
 
+
 class Comments(db.Model):
     __tablename__ = 'comments'
-    cid = db.Column(db.Integer,primary_key=True,autoincrement=True)
-    pid = db.Column(db.Integer,nullable=False)
-    uid = db.Column(db.Integer,nullable=False)
+    cid = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    pid = db.Column(db.Integer, nullable=False)
+    uid = db.Column(db.Integer, nullable=False)
     comments = db.Column(db.String(1024))
     username = db.Column(db.String(80))
     datetime = db.Column(db.DateTime)
 
-    def __init__(self,pid,uid,comments,username,datetime):
+    def __init__(self, pid, uid, comments, username, datetime):
         self.pid = pid
         self.uid = uid
         self.comments = comments
         self.username = username
         self.datetime = datetime
+
+    def to_json(self):
+        dict = self.__dict__
+        if "_sa_instance_state" in dict:
+            del dict["_sa_instance_state"]
+        return dict
+
+
+class Relation(db.Model):
+    __tablename__ = 'relation'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    uid = db.Column(db.Integer, ForeignKey('user.uid'))
+    vid = db.Column(db.Integer)
+    status = db.Column(db.Boolean)
+    resource = db.relationship('Resource', backref='relation')
+
+    def __init__(self, uid, vid, status):
+        self.uid = uid
+        self.vid = vid
+        self.status = status
 
     def to_json(self):
         dict = self.__dict__
