@@ -1,5 +1,8 @@
-from flask import Flask,request,jsonify,g,json,make_response,render_template
+from filecmp import cmp
+
+from flask import Flask, request, jsonify, g, json, make_response, render_template
 from flask_cors import CORS
+from sqlalchemy import func
 from ext import db
 from config import config
 import base64
@@ -8,7 +11,8 @@ import os
 from flask_httpauth import HTTPBasicAuth
 from datetime import datetime
 from urllib.request import urlopen
-app = Flask(__name__,static_folder="../dist/static", template_folder="../dist")
+
+app = Flask(__name__, static_folder="../dist/static", template_folder="../dist")
 app.config.from_object(config)
 CORS(app)
 db.init_app(app)
@@ -30,27 +34,28 @@ output:{
 }
 """
 
-@app.route('/',methods=['GET','POST'])
+
+@app.route('/', methods=['GET', 'POST'])
 def index():
     print(basedir)
     return render_template('index.html')
 
 
-@app.route('/api/v1/post/avatar',methods=['GET','POST'])
+@app.route('/api/v1/post/avatar', methods=['GET', 'POST'])
 def get_avatar():
-    username= ((request.form).to_dict()).get('username')
+    username = ((request.form).to_dict()).get('username')
     img = request.files.get('file')
-    save_avatar(img,username)
+    save_avatar(img, username)
     # img_name = '1.jpg'
     # if not img and img_name:
     #     return make_response('上传失败！')
     # with open(img_name, 'wb')as f:
     #     f.write(img)
     #     f.close()
-    return jsonify({'id':'1'})
+    return jsonify({'id': '1'})
 
 
-@app.route('/api/v1/register',methods=['GET','POST'])
+@app.route('/api/v1/register', methods=['GET', 'POST'])
 def register():
     '''can remove the '#' to create the user table ! '''
     db.create_all()
@@ -58,15 +63,16 @@ def register():
     password = request.json.get("password")
     email = request.json.get("email")
     if Users.query.filter_by(username=username).first():
-        return jsonify({'username':username,'password':password,'tips':'Reppeat of username!','err_code': 402})
+        return jsonify({'username': username, 'password': password, 'tips': 'Reppeat of username!', 'err_code': 402})
     elif Users.query.filter_by(email=email).first():
-        return jsonify({'username': username, 'password': password,'tips':"This email has signed!",'err_code': 403})
-    avatar = username+'.jpg'
-    user = Users(username,email,avatar)
+        return jsonify({'username': username, 'password': password, 'tips': "This email has signed!", 'err_code': 403})
+    avatar = username + '.jpg'
+    user = Users(username, email, avatar)
     user.hash_password(password)
     db.session.add(user)
     db.session.commit()
-    return jsonify({'username': username,'password':password,'tips':'Okay,you can sign in now!','err_code': 200})
+    return jsonify({'username': username, 'password': password, 'tips': 'Okay,you can sign in now!', 'err_code': 200})
+
 
 """
 Api to login
@@ -84,11 +90,12 @@ output:
 }
 """
 
+
 @auth.verify_password
-def verify_password(username_or_token,password):
-    print(username_or_token,password)
+def verify_password(username_or_token, password):
+    print(username_or_token, password)
     if request.path == '/api/v1/login':
-        user = Users.query.filter_by(username = username_or_token).first()
+        user = Users.query.filter_by(username=username_or_token).first()
         if not user or not user.verify_password(password):
             return False
     else:
@@ -99,13 +106,14 @@ def verify_password(username_or_token,password):
     return True
 
 
-@app.route('/api/v1/login',methods=['GET','POST'])
+@app.route('/api/v1/login', methods=['GET', 'POST'])
 @auth.login_required
 def get_token():
-    print(os.getcwd())
+    db.create_all()
     user = {}
     token = g.user.generate_auth_token()
     avatarPath = config.AVATARDIR + g.user.avatar
+    user['following'] = resolve_relation_list(g.user.relation)
     user['username'] = g.user.username
     user['uid'] = g.user.uid
     user['brief'] = g.user.brief
@@ -114,6 +122,8 @@ def get_token():
     user['phone'] = g.user.phone
     user['sex'] = g.user.sex
     return jsonify({'token': token.decode('ascii'), 'user': user})
+
+
 '''
 Api to get resource
 Content-Type:application/json
@@ -125,22 +135,22 @@ input:
 '''
 
 
-@app.route('/api/v1/resources',methods=['GET','POST'])
+@app.route('/api/v1/resources', methods=['GET', 'POST'])
 @auth.login_required
 def resource():
     db.create_all()
-    print(os.getcwd())
     datas = {}
-    passages = Resource.query.order_by(Resource.date.desc()).all()
-    print(passages)
-    for passage in passages:
-        avatarPath = config.AVATARDIR+passage.uavatar
-        passage.uavatar = send_image(avatarPath)
-        imgPath = passage.img
-        passage.img = send_image(imgPath)
-    for n in range(len(passages)):
-        datas[n] = passages[n].to_json()
-    return jsonify(datas)
+    current_path = request.args.get('currentPath')
+    print(current_path)
+    start_index = int(request.args.get('startIndex'))
+    last_index = int(request.args.get('lastIndex'))
+    if current_path == 'home':
+        datas = query_passages(start_index, last_index, types=1, keyword=None)
+    elif current_path == 'following':
+        datas = query_passages(start_index, last_index, types=2, keyword=g.user.uid)
+    return jsonify(datas[0])
+
+
 '''
 Api to logout
 input:
@@ -152,7 +162,9 @@ output:
     'data': xxx log out
 }
 '''
-@app.route('/api/v1/admire',methods=['GET','POST'])
+
+
+@app.route('/api/v1/admire', methods=['GET', 'POST'])
 @auth.login_required
 def admire():
     print(g.user.admire)
@@ -167,7 +179,7 @@ def admire():
                 continue
             else:
                 admire[pid[0]] = False
-        user = Users.query.filter_by(username = g.user.username).first()
+        user = Users.query.filter_by(username=g.user.username).first()
         try:
             user.admire = json.dumps(admire)
         except TypeError:
@@ -175,7 +187,7 @@ def admire():
         admire = json.loads(user.admire)
         db.session.commit()
         db.session.close()
-        return jsonify({"admire": admire,"tips": "Successed!", "code": 520})
+        return jsonify({"admire": admire, "tips": "Successed!", "code": 520})
     if request.method == 'POST':
         user = Users.query.filter_by(username=g.user.username).first()
         data = request.json
@@ -184,7 +196,8 @@ def admire():
         db.session.close()
         return jsonify({"Tips": "Successed!", "code": 520})
 
-@app.route('/api/v1/comments',methods=['GET','POST'])
+
+@app.route('/api/v1/comments', methods=['GET', 'POST'])
 def comments():
     if request.method == 'GET':
         pid = request.args.get('pid')
@@ -208,12 +221,13 @@ def comments():
         content = request.json.get('commit')
         username = request.json.get('username')
         timestamp = datetime.now()
-        comment = Comments(pid,uid,content,username,timestamp)
+        comment = Comments(pid, uid, content, username, timestamp)
         db.session.add(comment)
         db.session.commit()
-        return jsonify({'tips':'Successed!'})
+        return jsonify({'tips': 'Successed!'})
 
-@app.route('/api/v1/post/newpassage',methods=['POST'])
+
+@app.route('/api/v1/post/newpassage', methods=['POST'])
 @auth.login_required
 def new_passage():
     username = g.user.username
@@ -224,32 +238,99 @@ def new_passage():
     img = request.files.get('imageFile')
     imgName = username + '#' + img.filename
     path = basedir + "/static/img/"
-    imagePath = config.IMAGEDIR+imgName
+    imagePath = config.IMAGEDIR + imgName
     filepath = path + imgName
     img.save(filepath)
-    passage = Resource(uid,imagePath,desc,pv,username,date)
+    passage = Resource(uid, imagePath, desc, pv, username, date)
     print(imagePath)
     db.session.add(passage)
     db.session.commit()
-    return jsonify({'tips':'Successed!'})
+    return jsonify({'tips': 'Successed!'})
 
 
-@app.route('/api/v1/query/user/', methods=['GET'])
+@app.route('/api/v1/get/users', methods=['GET'])
+@auth.login_required
+def get_users():
+    type = request.args.get('type')
+    uid = int(request.args.get('uid'))
+    if type == 'following':
+        vid_stub = Relation.query.filter_by(uid=uid).with_entities(Relation.vid.label('vid')).subquery()
+        # passages = db.session.query(Resource, vid_stub.c.vid).join(vid_stub,
+        #                                                           Resource.uid == vid_stub.c.vid).with_entities(
+        #   Resource).order_by(Resource.date.desc()).all()
+        users = db.session.query(Users, vid_stub.c.vid).join(vid_stub,
+                                                             Users.uid == vid_stub.c.vid).with_entities(
+            Users).all()
+        users = resolve_users(users)
+        following = users
+        return jsonify({'tips': 'Successed!', 'userList': users})
+    elif type == 'followers':
+        user = Users.query.filter_by(username=key).first()
+        followers = Relation.query.filter_by(vid=user.uid).all()
+        followers = resolve_relation_list(followers)
+        return jsonify({'tips': 'Successed!', 'followers': followers})
+
+def resolve_users(users):
+    rt_users = []
+    for user in users:
+        lite_user = {}
+        lite_user['uid'] = user.uid
+        lite_user['username'] = user.username
+        lite_user['brief'] = user.brief
+        avatar_path = config.AVATARDIR + user.avatar
+        print(type(user))
+        lite_user['avatar'] = send_image(avatar_path)
+        rt_users.append(lite_user)
+    return rt_users
+
+@app.route('/api/v1/query/user', methods=['GET'])
 @auth.login_required
 def query_user():
-    rt_user = {}
-    key = request.args.get('username')
-    result = Users.query.filter_by(username=key).first()
-    avatarPath = config.AVATARDIR +result.avatar
-    rt_user['username'] = result.username
-    rt_user['uid'] = result.uid
-    rt_user['brief'] = result.brief
-    rt_user['avatar'] = send_image(avatarPath)
-    rt_user['sex'] = result.sex
-    return jsonify({'tips': 'Successed!', 'user': rt_user})
+    with db.session.no_autoflush:
+        db.create_all()
+        rt_user = {}
+        start_index = int(request.args.get('startIndex'))
+        last_index = int(request.args.get('lastIndex'))
+        key = request.args.get('username')
+        user = Users.query.filter_by(username=key).first()
+        print('length', len(user.resource))
+        followers = Relation.query.filter_by(vid=user.uid).all()
+        res = query_passages(start_index, last_index, types=3, keyword=key)
+        avatar_path = config.AVATARDIR + user.avatar
+
+        rt_user['produces'] = len(user.resource)
+        rt_user['followers'] = resolve_relation_list(followers)
+        rt_user['following'] = resolve_relation_list(user.relation)
+        rt_user['username'] = user.username
+        rt_user['uid'] = user.uid
+        rt_user['brief'] = user.brief
+        rt_user['avatar'] = send_image(avatar_path)
+        rt_user['sex'] = user.sex
+        amounts = len(user.resource)
+        if res[0] == {}:
+            return jsonify({'tips': 'All loaded!', 'user': rt_user, 'amounts': amounts, 'contents': res[0]})
+    return jsonify({'tips': 'Successed!', 'user': rt_user, 'amounts': amounts, 'contents': res[0]})
 
 
-@app.route('/api/v1/edit/profile',methods=['POST'])
+@app.route('/api/v1/concern/action', methods=['POST'])
+@auth.login_required
+def concern_action():
+    vid = ((request.form).to_dict()).get('vid')
+    status = get_bool_status((request.form).to_dict().get('status'))
+    print(status)
+    uid = g.user.uid
+    relation = Relation.query.filter_by(uid=uid, vid=vid).first()
+    if (status == True):
+        relation = Relation(uid=uid, vid=vid, status=status)
+        db.session.add(relation)
+        db.session.commit()
+    elif (status == False):
+        db.session.delete(relation)
+        db.session.commit()
+    return jsonify({'tips': 'Successed!'})
+
+
+@app.route('/api/v1/edit/profile', methods=['POST'])
 @auth.login_required
 def edit_profile():
     rt_user = {}
@@ -258,7 +339,7 @@ def edit_profile():
     sex = ((request.form).to_dict()).get('sex')
     phone = ((request.form).to_dict()).get('phone')
     user = Users.query.filter_by(uid=g.user.uid).first()
-    if avatar!= None:
+    if avatar != None:
         save_avatar(avatar, g.user.username)
     else:
         pass
@@ -282,10 +363,61 @@ def edit_profile():
 def logout():
     username = request.args.get('username')
     print(username)
-    return jsonify({'data':username+' log out'})
+    return jsonify({'data': username + ' log out'})
 
 
-def save_avatar(img,username):
+def get_bool_status(str):
+    return True if str.lower() == 'true' else False
+
+
+def resolve_relation_list(relations):
+    rt_relations = {}
+    for relation in relations:
+        relation = relation.to_json()
+        rt_relations[relation['vid']] = relation['status']
+    print(rt_relations)
+    return rt_relations
+
+
+def query_passages(start_index, last_index, types, keyword):
+    datas = {}
+    res = []
+    if types == 1:
+        passages = Resource.query.order_by(Resource.date.desc()).all()
+        # 好友动态
+    elif types == 2:
+        # 保存获取好友id的sql语句
+        vid_stub = Relation.query.filter_by(uid=keyword).with_entities(Relation.vid.label('vid')).subquery()
+        # 通过uid进行join查询好友动态
+        passages = db.session.query(Resource, vid_stub.c.vid).join(vid_stub,
+                                                                   Resource.uid == vid_stub.c.vid).with_entities(
+            Resource).order_by(Resource.date.desc()).all()
+    elif types == 3:
+        passages = Resource.query.filter_by(author=keyword).order_by(Resource.date.desc()).all()
+    else:
+        return None
+    amount = len(passages)
+    if last_index > amount:
+        passages = passages[start_index:]
+    elif start_index > amount:
+        res.append(datas)
+        res.append(amount)
+        return res
+    else:
+        passages = passages[start_index:last_index]
+    for passage in passages:
+        avatar_path = config.AVATARDIR + passage.uavatar
+        passage.uavatar = send_image(avatar_path)
+        imgPath = passage.img
+        passage.img = send_image(imgPath)
+    for n in range(len(passages)):
+        datas[start_index + n] = passages[n].to_json()
+    res.append(datas)
+    res.append(amount)
+    return res
+
+
+def save_avatar(img, username):
     imageName = username + '.jpg'
     path = basedir + "/static/img/avatar/"
     filepath = path + imageName
@@ -293,13 +425,13 @@ def save_avatar(img,username):
 
 
 def send_image(path):
-    print(os.getcwd())
-    print(path)
     with open(path, 'rb') as f:
         image = f.read()
         image = str(base64.b64encode(image))
     return image[2:-1]
+
+
 if __name__ == '__main__':
     # from werkzeug.contrib.fixers import ProxyFix
     # app.wsgi_app = ProxyFix(app.wsgi_app)
-    app.run(port=5000)
+    app.run(host='192.168.12.1', port=5000)

@@ -45,7 +45,7 @@
               this.$router.back()
               this.$message({
                 type: 'success',
-                message: '发 布 成 功 ！',
+                message: '发布成功！下拉刷新查看哦',
                 center: true,
                 duration: 1000})
               this.$router.push('/home')

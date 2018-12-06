@@ -1,7 +1,7 @@
 <template>
   <div>
     <brand-header></brand-header>
-    <home-contents :contents = 'contents'></home-contents>
+    <home-contents @loadMore="getMore" @refresh="refresh" :contents='contents'></home-contents>
     <nav-bottom :selected=style_active></nav-bottom>
   </div>
 </template>
@@ -9,33 +9,68 @@
   import homeHeader from '../header/homeHeader'
   import contentsPanel from './contents'
   import navBottom from '../bottom/bottom'
-    export default {
-        name: 'home',
-      components: {
-          'brandHeader': homeHeader,
-          'homeContents': contentsPanel,
-          'navBottom': navBottom
-      },
-      data () {
-        return {
-          style_active: 'color = #409EFF;',
-          contents: {}
+  import $ from 'jquery'
+
+  export default {
+    name: 'home',
+    components: {
+      'brandHeader': homeHeader,
+      'homeContents': contentsPanel,
+      'navBottom': navBottom
+    },
+    data () {
+      return {
+        startIndex: 0,
+        lastIndex: 10,
+        style_active: 'color = #409EFF;',
+        contents: {},
+        tempContents: {}
+      }
+    },
+    created: function () {
+      this.getUpdate(this.$route.name)
+    },
+    watch: {
+      '$route' (to, from) {
+        if (to.path === '/following') {
+          this.getUpdate(this.$route.name)
+        } else if (to.path === 'home') {
+          this.getUpdate(this.$route.name)
         }
-      },
-      created: function () {
-        var url = this.GLOBAL.BASE_URL + '/api/v1/resources'
-        this.$axios.get(url).then(function (response) {
-          this.contents = response.data
-          console.log(this.contents)
+      }
+    },
+    methods: {
+      getUpdate: function (path) {
+        let currentPath = path
+        let url = this.GLOBAL.BASE_URL + '/api/v1/resources'
+        this.$axios.get(url, {
+          params: {
+            currentPath: currentPath,
+            startIndex: this.startIndex,
+            lastIndex: this.lastIndex
+          }
+        }).then(function (response) {
+            this.tempContents = this.contents
+            this.contents = response.data
+            this.contents = $.extend(this.contents, this.tempContents)
         }.bind(this))
       },
-      methods: {
+      getMore: function () {
+        this.startIndex += 5
+        this.lastIndex += 5
+        this.getUpdate(this.$route.name)
+      },
+      refresh: function () {
+        this.startIndex = 0
+        this.lastIndex = 5
+        this.getUpdate(this.$route.name)
       }
     }
+  }
 </script>
 
 <style scoped>
-  .homeBtn{
+  .homeBtn {
     background-color: black;
   }
 </style>

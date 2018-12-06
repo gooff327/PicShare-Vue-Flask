@@ -1,11 +1,14 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import login from '../components/Login'
-import home from '../components/home/home'
+import index from '../components/home/index'
 import admin from '../components/admin/admin'
 import personal from '../components/User/personal'
 import upload from '../components/Upload/editor'
 import comment from '../components/Common/comment'
+import following from '../components/home/following'
+import followlist from '../components/User/followlist'
+
 Vue.use(Router)
 
 export default new Router({
@@ -19,7 +22,16 @@ export default new Router({
     {
       path: '/home',
       name: 'home',
-      component: home,
+      component: index,
+      meta: {
+        requireAuth: true,
+        keepAlive: false
+      }
+    },
+    {
+      path: '/following',
+      name: 'following',
+      component: following,
       meta: {
         requireAuth: true,
         keepAlive: true
@@ -29,25 +41,37 @@ export default new Router({
       path: '/admin',
       name: 'admin',
       component: admin,
-      meta: { requireAuth: true }
+      meta: {requireAuth: true}
     },
     {
       path: '/user/:username',
       name: 'user',
       component: personal,
-      meta: { requireAuth: true }
+      meta: {requireAuth: true}
+    },
+    {
+      path: '/user/:username/followers',
+      name: 'followers',
+      component: followlist,
+      meta: {requireAuth: true}
+    },
+    {
+      path: '/user/:username/following',
+      name: 'following',
+      component: followlist,
+      meta: {requireAuth: true}
     },
     {
       path: '/create/details',
       name: 'upload',
       component: upload,
-      meta: { requireAuth: true }
+      meta: {requireAuth: true}
     },
     {
       path: '/comment/:id',
       name: 'comment',
       component: comment,
-      meta: { requireAuth: true }
+      meta: {requireAuth: true}
     }
   ]
 })
