@@ -109,11 +109,10 @@ def verify_password(username_or_token, password):
 @app.route('/api/v1/login', methods=['GET', 'POST'])
 @auth.login_required
 def get_token():
-    db.create_all()
     user = {}
     token = g.user.generate_auth_token()
     avatarPath = config.AVATARDIR + g.user.avatar
-    user['following'] = resolve_relation_list(g.user.relation)
+    user['following'] = resolve_following_relation(g.user.relation)
     user['username'] = g.user.username
     user['uid'] = g.user.uid
     user['brief'] = g.user.brief
@@ -252,23 +251,21 @@ def new_passage():
 @auth.login_required
 def get_users():
     type = request.args.get('type')
-    uid = int(request.args.get('uid'))
+    keyword = int(request.args.get('uid'))
     if type == 'following':
-        vid_stub = Relation.query.filter_by(uid=uid).with_entities(Relation.vid.label('vid')).subquery()
-        # passages = db.session.query(Resource, vid_stub.c.vid).join(vid_stub,
-        #                                                           Resource.uid == vid_stub.c.vid).with_entities(
-        #   Resource).order_by(Resource.date.desc()).all()
-        users = db.session.query(Users, vid_stub.c.vid).join(vid_stub,
-                                                             Users.uid == vid_stub.c.vid).with_entities(
+        vid_sub = Relation.query.filter_by(uid=keyword).with_entities(Relation.vid.label('vid')).subquery()
+        users = db.session.query(Users, vid_sub.c.vid).join(vid_sub, Users.uid == vid_sub.c.vid).with_entities(
             Users).all()
         users = resolve_users(users)
-        following = users
         return jsonify({'tips': 'Successed!', 'userList': users})
+
     elif type == 'followers':
-        user = Users.query.filter_by(username=key).first()
-        followers = Relation.query.filter_by(vid=user.uid).all()
-        followers = resolve_relation_list(followers)
-        return jsonify({'tips': 'Successed!', 'followers': followers})
+        uid_sub = Relation.query.filter_by(vid=keyword).with_entities(Relation.uid.label('uid')).subquery()
+        users = db.session.query(Users, uid_sub.c.uid).join(uid_sub, Users.uid == uid_sub.c.uid).with_entities(
+            Users).all()
+        users = resolve_users(users)
+    return jsonify({'tips': 'Successed!', 'userList': users})
+
 
 def resolve_users(users):
     rt_users = []
@@ -283,6 +280,7 @@ def resolve_users(users):
         rt_users.append(lite_user)
     return rt_users
 
+
 @app.route('/api/v1/query/user', methods=['GET'])
 @auth.login_required
 def query_user():
@@ -293,23 +291,22 @@ def query_user():
         last_index = int(request.args.get('lastIndex'))
         key = request.args.get('username')
         user = Users.query.filter_by(username=key).first()
-        print('length', len(user.resource))
+        produces = Resource.query.filter_by(author=key).all()
         followers = Relation.query.filter_by(vid=user.uid).all()
         res = query_passages(start_index, last_index, types=3, keyword=key)
         avatar_path = config.AVATARDIR + user.avatar
 
-        rt_user['produces'] = len(user.resource)
-        rt_user['followers'] = resolve_relation_list(followers)
-        rt_user['following'] = resolve_relation_list(user.relation)
+        rt_user['produces'] = len(produces)
+        rt_user['followers'] = len(followers)
+        rt_user['following'] = len(user.relation)
         rt_user['username'] = user.username
         rt_user['uid'] = user.uid
         rt_user['brief'] = user.brief
         rt_user['avatar'] = send_image(avatar_path)
         rt_user['sex'] = user.sex
-        amounts = len(user.resource)
         if res[0] == {}:
-            return jsonify({'tips': 'All loaded!', 'user': rt_user, 'amounts': amounts, 'contents': res[0]})
-    return jsonify({'tips': 'Successed!', 'user': rt_user, 'amounts': amounts, 'contents': res[0]})
+            return jsonify({'tips': 'All loaded!', 'user': rt_user, 'contents': res[0]})
+    return jsonify({'tips': 'Successed!', 'user': rt_user, 'contents': res[0]})
 
 
 @app.route('/api/v1/concern/action', methods=['POST'])
@@ -370,11 +367,20 @@ def get_bool_status(str):
     return True if str.lower() == 'true' else False
 
 
-def resolve_relation_list(relations):
+def resolve_following_relation(relations):
     rt_relations = {}
     for relation in relations:
         relation = relation.to_json()
         rt_relations[relation['vid']] = relation['status']
+    print(rt_relations)
+    return rt_relations
+
+
+def resolve_followers_relation(relations):
+    rt_relations = {}
+    for relation in relations:
+        relation = relation.to_json()
+        rt_relations[relation['uid']] = relation['status']
     print(rt_relations)
     return rt_relations
 
