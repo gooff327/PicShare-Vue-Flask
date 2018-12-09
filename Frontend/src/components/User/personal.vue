@@ -158,16 +158,16 @@
             lastIndex: this.lastIndex
           }
         }).then(function (response) {
-          console.log('user-info', response.data)
           this.status = response.data.tips
           this.tempContents = this.contents
           this.contents = response.data.contents
           this.tempContents = $.extend(this.contents, this.tempContents)
           this.contents = this.tempContents
           this.currentUser = response.data.user
+          console.log('currentUser', this.currentUser)
           this.amounts['produces'] = this.currentUser.produces
-          this.amounts['following'] = Object.keys(this.currentUser.following).length
-          this.amounts['followers'] = Object.keys(this.currentUser.followers).length
+          this.amounts['following'] = this.currentUser.following
+          this.amounts['followers'] = this.currentUser.followers
           this.isConcerned(this.currentUser.uid)
         }.bind(this))
       },
@@ -191,7 +191,7 @@
         }
       },
       back: function () {
-        this.$router.push('/home')
+        this.$router.back()
       },
       editorVisible: function () {
         this.editSelfPanel = true

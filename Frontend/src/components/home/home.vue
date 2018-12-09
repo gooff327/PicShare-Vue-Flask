@@ -63,6 +63,7 @@
       refresh: function () {
         this.startIndex = 0
         this.lastIndex = 5
+        this.contents = {}
         this.getUpdate(this.$route.name)
       }
     }

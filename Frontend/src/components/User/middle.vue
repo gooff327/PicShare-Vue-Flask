@@ -172,7 +172,6 @@
     },
     methods: {
       showMore: function () {
-        console.log(1)
         this.activeLess = ''
         this.activeMore = this.activeSelect
         this.moreView = true

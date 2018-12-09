@@ -20,7 +20,6 @@ class Users(db.Model):
     phone = db.Column(db.String(20))
     sex = db.Column(db.String(4))
     relation = db.relationship('Relation', order_by='Relation.id', backref='user')
-    resource = db.relationship('Resource', backref='user')
 
     def __init__(self, username, email, avatar):
         self.username = username
@@ -61,7 +60,7 @@ class Users(db.Model):
 class Resource(db.Model):
     __tablename__ = 'timeline'
     pid = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    uid = db.Column(db.Integer, ForeignKey('user.uid'), ForeignKey('relation.vid'))
+    uid = db.Column(db.Integer, )
     img = db.Column(db.String(100))
     desc = db.Column(db.String(100))
     pv = db.Column(db.Integer)
@@ -114,7 +113,6 @@ class Relation(db.Model):
     uid = db.Column(db.Integer, ForeignKey('user.uid'))
     vid = db.Column(db.Integer)
     status = db.Column(db.Boolean)
-    resource = db.relationship('Resource', backref='relation')
 
     def __init__(self, uid, vid, status):
         self.uid = uid
@@ -123,6 +121,6 @@ class Relation(db.Model):
 
     def to_json(self):
         dict = self.__dict__
-        if "_sa_instance_state" in dict:
-            del dict["_sa_instance_state"]
+        # if "_sa_instance_state" in dict:
+        #     del dict["_sa_instance_state"]
         return dict

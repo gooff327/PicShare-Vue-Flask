@@ -4,18 +4,24 @@
       <i @click="goBack" class="el-icon-back"></i>
       <span v-text="isFollowers?'关注':'粉丝'"></span>
     </el-header>
-    <el-input
-      :placeholder="isFollowers?'搜索你关注的用户...':'搜索粉丝...'"
-      prefix-icon="el-icon-search" v-model="searchContent"></el-input>
     <div userBox>
       <ul v-for="(item,key) in userList" :key="key">
         <li class="userList">
           <el-row>
-            <el-col :offset="1" :span="4"><img class="smallPic" :src="['data:Image/png;base64,'+item.avatar]"></el-col>
-            <el-col :span="14"><span class="usernameWrapper" v-text="item.username"></span><span class="briefWrapper" v-text="item.brief"></span></el-col>
+            <el-col :offset="1" :span="4"><img @click="showUserDetails(item.username)" class="smallPic"
+                                               :src="['data:Image/png;base64,'+item.avatar]">
+            </el-col>
+            <el-col :span="14"><span class="usernameWrapper" v-text="item.username"></span><span class="briefWrapper"
+                                                                                                 v-text="item.brief"></span>
+            </el-col>
             <el-col :span="4">
-              <el-button :round="true" size="mini" v-if="isConcerned(item.uid)" type="default">取关</el-button>
-              <el-button size="mini" :round="true" v-else type="primary">关注</el-button>
+              <el-button :disabled="isSelf(item.uid)" :autofocus="false" :round="true" size="mini"
+                         v-if="isConcerned(item.uid)" type="default"
+                         @click="concernAction(item.uid)">取 关
+              </el-button>
+              <el-button :disabled="isSelf(item.uid)" :autofocus="false" size="mini" :round="true" v-else type="primary"
+                         @click="concernAction(item.uid)">关 注
+              </el-button>
             </el-col>
           </el-row>
         </li>
@@ -31,7 +37,7 @@
       return {
         searchContent: '',
         isFollowers: true,
-        userList: {}
+        userList: []
       }
     },
     created: function () {
@@ -66,8 +72,34 @@
           this.userList = response.data.userList
         }.bind(this))
       },
+      isSelf: function (uid) {
+        if (uid === this.GLOBAL.USER.uid) {
+          return true
+        } else {
+          return false
+        }
+      },
+      showUserDetails: function (username) {
+        console.log(1)
+        this.$router.push(`/user/${username}`)
+      },
       isConcerned: function (vid) {
         return this.GLOBAL.USER.following[vid]
+      },
+      concernAction: function (vid) {
+        this.GLOBAL.USER.following[vid] = !this.GLOBAL.USER.following[vid]
+        let url = this.GLOBAL.BASE_URL + '/api/v1/concern/action'
+        let data = new FormData()
+        console.log(vid)
+        data.append('vid', vid)
+        data.append('status', this.GLOBAL.USER.following[vid])
+        this.$axios.post(url, data).then(function (response) {
+          if (response.data.tips !== 'Successed!') {
+            this.$message.error('操作不成功！')
+          } else {
+            this.getUserlist(this.$route.name)
+          }
+        }.bind(this))
       }
     }
   }
@@ -121,17 +153,20 @@
   .userList div {
     line-height: 40px !important;
   }
-  .usernameWrapper,.briefWrapper{
+
+  .usernameWrapper, .briefWrapper {
     display: block;
     width: 100%;
     line-height: 14px;
     font-size: 0.4rem;
     font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
   }
-  .usernameWrapper{
+
+  .usernameWrapper {
     margin-top: 10px;
   }
-  .briefWrapper{
+
+  .briefWrapper {
     color: #606266;
   }
 </style>
