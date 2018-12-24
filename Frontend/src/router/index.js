@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import login from '../components/Login'
 import index from '../components/home/index'
-import admin from '../components/admin/admin'
+import message from '../components/Message/message'
 import personal from '../components/User/personal'
 import upload from '../components/Upload/editor'
 import comment from '../components/Common/comment'
@@ -38,9 +38,9 @@ export default new Router({
       }
     },
     {
-      path: '/admin',
-      name: 'admin',
-      component: admin,
+      path: '/message',
+      name: 'message',
+      component: message,
       meta: {requireAuth: true}
     },
     {

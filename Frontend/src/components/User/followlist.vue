@@ -2,7 +2,7 @@
   <el-container>
     <el-header>
       <i @click="goBack" class="el-icon-back"></i>
-      <span v-text="isFollowers?'关注':'粉丝'"></span>
+      <span v-text="isFollowers?'关 注':'粉 丝'"></span>
     </el-header>
     <div userBox>
       <ul v-for="(item,key) in userList" :key="key">
@@ -15,11 +15,11 @@
                                                                                                  v-text="item.brief"></span>
             </el-col>
             <el-col :span="4">
-              <el-button :disabled="isSelf(item.uid)" :autofocus="false" :round="true" size="mini"
+              <el-button :disabled="isSelf(item.uid)" :autofocus="false" :round="false" size="mini"
                          v-if="isConcerned(item.uid)" type="default"
                          @click="concernAction(item.uid)">取 关
               </el-button>
-              <el-button :disabled="isSelf(item.uid)" :autofocus="false" size="mini" :round="true" v-else type="primary"
+              <el-button :disabled="isSelf(item.uid)" :autofocus="false" size="mini" :round="false" v-else type="primary"
                          @click="concernAction(item.uid)">关 注
               </el-button>
             </el-col>
@@ -119,7 +119,7 @@
     vertical-align: center;
     display: inline-block;
     color: rgba(43, 43, 43, 0.93);
-    width: 90%;
+    width: 86%;
     text-align: center;
     font-size: 1.0rem;
   }

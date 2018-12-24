@@ -8,8 +8,8 @@
         <p>关 注</p></el-button>
       <el-button size="small" type="default" class="plus" onclick="document.getElementById('image-uploader').click();">
         <i class="fa fa-plus-circle"></i></el-button>
-      <el-button size="small" type="default" class="function"><i class="fa fa-envelope"></i>
-        <p>消 息</p></el-button>
+        <el-button size="small" type="default" @click="showMessage" class="function"><i class="fa fa-envelope"></i>
+          <p>消 息</p></el-button>
       <el-button size="small" type="default" @click="showPersonalData" class="function"><i class="fa fa-user-o"></i>
         <p>我 的</p></el-button>
       <input id="image-uploader" class="image-uploader" type="file" @change="updateEvent($event)">
@@ -45,22 +45,13 @@
         }
       },
       showFollowingProduces: function () {
-        // this.$router.replace({
-        //   path: '/empty'
-        // })
-        // this.$router.replace({
-        //   path: '/following'
-        // })
         this.$router.push('/following')
       },
       showHomePanel: function () {
-        // this.$router.replace({
-        //   path: '/empty'
-        // })
-        // this.$router.replace({
-        //   path: '/home'
-        // })
         this.$router.push('/home')
+      },
+      showMessage: function () {
+        this.$router.push('/message')
       },
       showPersonalData: function () {
         this.$router.push(`/user/${this.GLOBAL.USER.username}`)
@@ -81,7 +72,6 @@
     bottom: 0;
     background-color: rgba(255, 255, 255, 0.1);
   }
-
   .el-button-group {
     width: 100%;
     background-color: rgba(255, 255, 255, 0.1);

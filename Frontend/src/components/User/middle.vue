@@ -145,6 +145,7 @@
               this.$emit('closeTop', true)
               this.topBody = true
             } else {
+              this.wrapperStyle = 'wrapper'
               this.dropDown = false
             }
           })
@@ -216,7 +217,7 @@
     position: relative;
     top: 0;
     left: 0;
-    height: 51vh;
+    height: 50vh;
     z-index: 10;
     overflow: hidden;
   }

@@ -157,9 +157,14 @@
   }
   .submitBtn{
     display: inline-block;
+    position: fixed;
+    bottom: 0.6rem;
+    right: 1rem;
     height: 33px;
   }
   .inputComment{
+    position: fixed;
+    bottom: 0.6rem;
     width: 60%;
     padding: 0 0 0 0;
     margin: 0;

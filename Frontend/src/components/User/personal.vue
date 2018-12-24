@@ -18,7 +18,7 @@
           <el-col :span="18">
             <div class="content-right">
               <span class="user-username" v-text="this.currentUser.username"></span>
-              <el-button v-show="isSelf" class="edit-btn" @click="editorVisible" size="mini">编辑主页</el-button>
+              <el-button v-show="isSelf" type="primary" class="edit-btn" @click="editorVisible" size="mini">编辑主页</el-button>
               <el-button v-show="!isSelf" v-if="this.btnConcern" class="concern-btn" size="mini" @click="concernAction">
                 取消关注
               </el-button>
