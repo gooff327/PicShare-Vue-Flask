@@ -44,7 +44,7 @@
       if (this.$route.name === 'followers') {
         this.isFollowers = false
         this.initFollowers()
-      } else if (this.$route.name === 'following') {
+      } else if (this.$route.name === 'followings') {
         this.isFollowers = true
         this.initFollowing()
       }
@@ -57,7 +57,7 @@
         this.getUserlist('followers')
       },
       initFollowing: function () {
-        this.getUserlist('following')
+        this.getUserlist('followings')
       },
       getUserlist: function (type) {
         let uid = this.$route.query.uid

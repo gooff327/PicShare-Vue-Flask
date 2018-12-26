@@ -56,8 +56,8 @@ export default new Router({
       meta: {requireAuth: true}
     },
     {
-      path: '/user/:username/following',
-      name: 'following',
+      path: '/user/:username/followings',
+      name: 'followings',
       component: followlist,
       meta: {requireAuth: true}
     },

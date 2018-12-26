@@ -187,7 +187,7 @@
         this.wrapper2 = 'wrapper'
       },
       showFollowing: function () {
-        this.$router.push({path: this.$route.path + '/following', query: {uid: this.uid}})
+        this.$router.push({path: this.$route.path + '/followings', query: {uid: this.uid}})
       },
       showFollowers: function () {
         this.$router.push({path: this.$route.path + '/followers', query: {uid: this.uid}})
