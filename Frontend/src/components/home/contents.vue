@@ -20,7 +20,7 @@
             <div class="imageDesc">{{key.desc}}</div>
           </div>
           <div class="bottom">
-            <span class="bottomText">{{key.pv}} 次浏览</span>
+            <span class="bottomText">{{key.pv}} 个人觉得很赞</span>
             <span class="botttomIcon">
               <i style="color: #EE4957" @click="likeEvent(key.pid)" v-if="admire[key.pid] ===true" class="fa fa-heart"
                  aria-hidden="true"></i>

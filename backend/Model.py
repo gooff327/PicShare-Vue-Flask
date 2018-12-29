@@ -127,10 +127,11 @@ class Relation(db.Model):
 
 
 # m_type:
-# 1 like message
-# 2 comment message
-# 3 follow message
-# 4 friend message
+# 1 admire messages
+# 2 comment messages
+# 3 follow messages
+# 4 private messages
+# 5 forward messages
 class Message(db.Model):
     __tablename__ = 'message'
     mid = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -151,6 +152,6 @@ class Message(db.Model):
 
     def to_json(self):
         dict = self.__dict__
-        # if "_sa_instance_state" in dict:
-        #     del dict["_sa_instance_state"]
+        if "_sa_instance_state" in dict:
+            del dict["_sa_instance_state"]
         return dict

@@ -191,9 +191,9 @@ def admire():
         admire_this = json.loads(data['admireThis'])
         print(admire_this)
         if admire_this['result']:
-            add_like_message(admire_this['pid'])
+            add_admire_message(admire_this['pid'])
         else:
-            remove_like_message(admire_this['pid'])
+            remove_admire_message(admire_this['pid'])
         user.admire = json.dumps(admire_list)
         db.session.commit()
         db.session.close()
@@ -256,7 +256,7 @@ def new_passage():
 def get_users():
     type = request.args.get('type')
     keyword = int(request.args.get('uid'))
-    if type == 'following':
+    if type == 'followings':
         vid_sub = Relation.query.filter_by(uid=keyword).with_entities(Relation.vid.label('vid')).subquery()
         users = db.session.query(Users, vid_sub.c.vid).join(vid_sub, Users.uid == vid_sub.c.vid).with_entities(
             Users).all()
@@ -359,6 +359,28 @@ def edit_profile():
     return jsonify({'tips': 'Successed!', 'user': rt_user})
 
 
+@app.route('/api/v1/get/messages')
+@auth.login_required
+def get_messages():
+    rt_messages = {}
+    admire_messages = Message.query.filter_by(vid=g.user.uid, m_type=1).all()
+    admire_messages = resolve_messages(admire_messages)
+    comment_messages = Message.query.filter_by(vid=g.user.uid, m_type=2).all()
+    comment_messages = resolve_messages(comment_messages)
+    follow_messages = Message.query.filter_by(vid=g.user.uid, m_type=3).all()
+    follow_messages = resolve_messages(follow_messages)
+    private_messages = Message.query.filter_by(vid=g.user.uid, m_type=4).all()
+    private_messages = resolve_messages(private_messages)
+    forward_messages = Message.query.filter_by(vid=g.user.uid, m_type=5).all()
+    forward_messages = resolve_messages(forward_messages)
+    rt_messages['admire_messages'] = admire_messages
+    rt_messages['comment_messages'] = comment_messages
+    rt_messages['follow_messages'] = follow_messages
+    rt_messages['private_messages'] = private_messages
+    rt_messages['forward_messages'] = forward_messages
+    return jsonify({'messages': rt_messages})
+
+
 @app.route('/api/v1/logout')
 @auth.login_required
 def logout():
@@ -387,6 +409,16 @@ def resolve_followers_relation(relations):
         rt_relations[relation['uid']] = relation['status']
     print(rt_relations)
     return rt_relations
+
+
+def resolve_messages(messages):
+    rt_messages = {}
+    for i in range(0, len(messages)):
+        # 过滤掉自己给自己的赞
+        if not messages[i].vid == messages[i].uid:
+            messages[i] = messages[i].to_json()
+            rt_messages[i] = messages[i]
+    return rt_messages
 
 
 def query_passages(start_index, last_index, types, keyword):
@@ -442,7 +474,7 @@ def send_image(path):
 
 
 # when user like others passages,make a message into server for sending t authors
-def add_like_message(pid):
+def add_admire_message(pid):
     db.create_all()
     uid = g.user.uid
     vid = Resource.query.filter_by(pid=pid).first().uid  # get author uid
@@ -451,15 +483,15 @@ def add_like_message(pid):
     m_content = None
     m_status = True
     if not (Message.query.filter_by(uid=g.user.uid, pid=pid).first()):
-        like_message = Message(uid=uid, vid=vid, pid=pid, m_type=m_type, m_content=m_content, m_status=m_status)
-    db.session.add(like_message)
+        admire_message = Message(uid=uid, vid=vid, pid=pid, m_type=m_type, m_content=m_content, m_status=m_status)
+    db.session.add(admire_message)
     db.session.commit()
 
 
-def remove_like_message(pid):
-    like_message = Message.query.filter_by(pid=pid, uid=g.user.uid).first()
-    if like_message:
-        db.session.delete(like_message)
+def remove_admire_message(pid):
+    admire_message = Message.query.filter_by(pid=pid, uid=g.user.uid).first()
+    if admire_message:
+        db.session.delete(admire_message)
         db.session.commit()
 
 

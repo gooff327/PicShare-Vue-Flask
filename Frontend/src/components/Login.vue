@@ -121,6 +121,7 @@
                 var token = response.data.token
                 store.commit('ADD_TOKEN', token)
                 this.$router.push('/home')
+                this.getMessage()
                 this.$message({
                   dangerouslyUseHTMLString: true,
                   center: true,
@@ -198,6 +199,13 @@
         }
         this.imageUrl = (window.URL || window.webkitURL).createObjectURL(file.raw)
         return isJPG && isLt2M
+      },
+      getMessage: function () {
+        let url = this.GLOBAL.BASE_URL + '/api/v1/get/messages'
+        this.$axios.get(url).then(function (response) {
+          this.GLOBAL.MESSAGES = response.data['messages']
+          console.log('init_message', this.GLOBAL.MESSAGES)
+        }.bind(this))
       }
     }
   }

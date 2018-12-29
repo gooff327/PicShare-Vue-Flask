@@ -8,8 +8,11 @@
         <p>关 注</p></el-button>
       <el-button size="small" type="default" class="plus" onclick="document.getElementById('image-uploader').click();">
         <i class="fa fa-plus-circle"></i></el-button>
-        <el-button size="small" type="default" @click="showMessage" class="function"><i class="fa fa-envelope"></i>
-          <p>消 息</p></el-button>
+      <el-button size="small" type="default" @click="showMessage" class="function">
+        <el-badge :value="200" :max="99" class="item">
+          <i class="fa fa-envelope"></i>
+        </el-badge>
+        <p>消 息</p></el-button>
       <el-button size="small" type="default" @click="showPersonalData" class="function"><i class="fa fa-user-o"></i>
         <p>我 的</p></el-button>
       <input id="image-uploader" class="image-uploader" type="file" @change="updateEvent($event)">
@@ -72,6 +75,7 @@
     bottom: 0;
     background-color: rgba(255, 255, 255, 0.1);
   }
+
   .el-button-group {
     width: 100%;
     background-color: rgba(255, 255, 255, 0.1);

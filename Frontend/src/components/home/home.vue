@@ -50,9 +50,9 @@
             lastIndex: this.lastIndex
           }
         }).then(function (response) {
-            this.tempContents = this.contents
-            this.contents = response.data
-            this.contents = $.extend(this.contents, this.tempContents)
+          this.tempContents = this.contents
+          this.contents = response.data
+          this.contents = $.extend(this.contents, this.tempContents)
         }.bind(this))
       },
       getMore: function () {
