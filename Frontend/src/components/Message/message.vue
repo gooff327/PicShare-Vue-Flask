@@ -10,7 +10,8 @@
           <span style="background-color: #f17c67" class="icon-wrapper">
             <i class="fa fa-share-alt"></i>
           </span>
-          <span class="icon-desc">@我的动态  <el-badge :value="200" :max="99" class="badge"/></span>
+          <span class="icon-desc">@我的动态  <el-badge :hidden="this.GLOBAL.COUNT.forwardCount === 0" :value="this.GLOBAL.COUNT.forwardCount" :max="99"
+                                                   class="badge"/></span>
         </div>
       </el-col>
       <el-col :span="24" @click="goBack">
@@ -18,7 +19,8 @@
           <span style="background-color: #fa5a5a" class="icon-wrapper">
             <i class="fa fa-thumbs-o-up"></i>
           </span>
-          <span class="icon-desc">我收到的赞  <el-badge :value="200" :max="99" class="badge"/></span>
+          <span class="icon-desc">我收到的赞  <el-badge :hidden="this.GLOBAL.COUNT.admireCount === 0" :value="this.GLOBAL.COUNT.admireCount" :max="99"
+                                                   class="badge"/></span>
         </div>
       </el-col>
       <el-col :span="24" @click="privateDetails">
@@ -26,7 +28,7 @@
           <span style="background-color: #00be70" class="icon-wrapper">
             <i class="fa fa-envelope-open-o"></i>
           </span>
-          <span class="icon-desc">私信  <el-badge :value="200" :max="99" class="badge"/></span>
+          <span class="icon-desc">私信  <el-badge :hidden="this.GLOBAL.COUNT.privateCount === 0" :value="this.GLOBAL.COUNT.privateCount" :max="99" class="badge"/></span>
         </div>
       </el-col>
       <el-col :span="24" @click="followDetails">
@@ -34,17 +36,18 @@
           <span style="background-color: #418DFF" class="icon-wrapper">
             <i class="fa fa-users"></i>
           </span>
-          <span class="icon-desc">好友关注  <el-badge :value="200" :max="99" class="badge"/></span>
+          <span class="icon-desc">好友关注  <el-badge :hidden="this.GLOBAL.COUNT.followCount === 0" :value="this.GLOBAL.COUNT.followCount" :max="99"
+                                                  class="badge"/></span>
         </div>
       </el-col>
-      <el-col :span="24" @click="commentDetails">
-        <div class="row-wrapper" @click="forwardDetails">
-          <span style="background-color: #f17c67" class="icon-wrapper">
-            <i class="fa fa-share-alt"></i>
-          </span>
-          <span class="icon-desc">@我的动态  <el-badge :value="200" :max="99" class="badge"/></span>
-        </div>
-      </el-col>
+      <!--<el-col :span="24" @click="commentDetails">-->
+        <!--<div class="row-wrapper" @click="forwardDetails">-->
+          <!--<span style="background-color: #f17c67" class="icon-wrapper">-->
+            <!--<i class="fa fa-share-alt"></i>-->
+          <!--</span>-->
+          <!--<span class="icon-desc">@我的动态  <el-badge :value="this.GLOBAL.COUNT.sum" :max="99" class="badge"/></span>-->
+        <!--</div>-->
+      <!--</el-col>-->
     </el-row>
   </el-container>
 </template>
@@ -54,26 +57,17 @@
     name: 'message',
     data () {
       return {
-        commentMessage: {}
       }
     },
     created: function () {
-      this.classifyMessage(1)
     },
     methods: {
       goBack: function () {
         this.$router.back()
       },
-      classifyMessage: function (mType) {
-        console.log(mType)
-        let messages = this.GLOBAL.MESSAGES
-        forEach(messages)
-        console.log(messages['admire_messages'])
-      },
       admireDetails: function () {
       },
       followDetails: function () {
-        console.log(1)
       },
       privateDetails: function () {
       },
@@ -89,11 +83,10 @@
 <style scoped>
   .el-header {
     padding: 0;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    padding-bottom: 6px;
+    margin: 0;
+    padding-bottom: 1rem;
     border-bottom: 1px gainsboro solid;
-    height: 30px !important;
+    height: 2.6rem !important;
   }
 
   .el-header span {
@@ -103,6 +96,8 @@
     width: 86%;
     text-align: center;
     font-size: 1.0rem;
+    line-height: 2.6rem;
+    font-weight: 700;
   }
 
   .el-icon-back {

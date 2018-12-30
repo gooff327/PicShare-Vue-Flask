@@ -68,7 +68,7 @@ export default new Router({
       meta: {requireAuth: true}
     },
     {
-      path: '/comment/:id',
+      path: '/comment/:pid',
       name: 'comment',
       component: comment,
       meta: {requireAuth: true}

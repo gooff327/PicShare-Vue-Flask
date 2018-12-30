@@ -219,6 +219,7 @@ def comments():
         rt_comments = query_comments
         return jsonify(rt_comments)
     if request.method == 'POST':
+        print(111)
         pid = request.json.get('pid')
         uid = request.json.get('uid')
         content = request.json.get('commit')

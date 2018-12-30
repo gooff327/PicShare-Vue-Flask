@@ -25,14 +25,13 @@
               <i style="color: #EE4957" @click="likeEvent(key.pid)" v-if="admire[key.pid] ===true" class="fa fa-heart"
                  aria-hidden="true"></i>
               <i @click="likeEvent(key.pid)" v-else class="fa fa-heart-o" aria-hidden="true"></i>
-              <i @click="commentEvent(key)" class="fa fa-comment-o" aria-hidden="true"></i>
+              <i @click="commentEvent(key.pid)" class="fa fa-comment-o" aria-hidden="true"></i>
               <i @click="shareEvent(key.pid)" class="fa fa-paper-plane-o" aria-hidden="true"></i>
            </span>
           </div>
         </el-card>
       </div>
     </div>
-    <comment ref="comment"></comment>
   </div>
 </template>
 
@@ -148,8 +147,8 @@
           }
         }.bind(this))
       },
-      commentEvent: function (object) {
-        this.$refs.comment.commentEvent(object)
+      commentEvent: function (pid) {
+        this.$router.push(`/comment/${pid}`)
       },
       likeMessage: function (pid) {
         console.log('send like message', pid)

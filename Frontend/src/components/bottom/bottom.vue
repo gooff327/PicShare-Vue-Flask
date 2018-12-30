@@ -9,7 +9,7 @@
       <el-button size="small" type="default" class="plus" onclick="document.getElementById('image-uploader').click();">
         <i class="fa fa-plus-circle"></i></el-button>
       <el-button size="small" type="default" @click="showMessage" class="function">
-        <el-badge :value="200" :max="99" class="item">
+        <el-badge :value="this.hiddenValue" :max="99" class="item">
           <i class="fa fa-envelope"></i>
         </el-badge>
         <p>消 息</p></el-button>
@@ -24,8 +24,12 @@
     name: 'bottom',
     data () {
       return {
-        newButtonBool: {}
+        newButtonBool: {},
+        hiddenValue: ''
       }
+    },
+    created: function () {
+      this.getMessage()
     },
     methods: {
       updateEvent: function (event) {
@@ -46,6 +50,14 @@
             this.$router.push('/create/details')
           }
         }
+      },
+      getMessage: function () {
+        let url = this.GLOBAL.BASE_URL + '/api/v1/get/messages'
+        this.$axios.get(url).then(function (response) {
+          this.GLOBAL.MESSAGES = response.data['messages']
+          this.GLOBAL.COUNT = this.GLOBAL.initMessage(this.GLOBAL.MESSAGES)
+          this.hiddenValue = this.GLOBAL.COUNT.sum
+        }.bind(this))
       },
       showFollowingProduces: function () {
         this.$router.push('/following')
