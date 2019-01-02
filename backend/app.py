@@ -463,6 +463,7 @@ def query_passages(start_index, last_index, types, keyword):
 def save_avatar(img, username):
     imageName = username + '.jpg'
     path = basedir + "/static/img/avatar/"
+    print(path)
     filepath = path + imageName
     img.save(filepath)
 
