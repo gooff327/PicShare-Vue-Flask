@@ -497,6 +497,6 @@ def remove_admire_message(pid):
 
 
 if __name__ == '__main__':
-    # from werkzeug.contrib.fixers import ProxyFix
-    # app.wsgi_app = ProxyFix(app.wsgi_app)
-    app.run(host='192.168.12.1', port=5000)
+    from werkzeug.contrib.fixers import ProxyFix
+    app.wsgi_app = ProxyFix(app.wsgi_app)
+    app.run()

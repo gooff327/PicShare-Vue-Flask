@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:5000'
+const BASE_URL = 'http://204.44.85.176:8000'
 var USER = {}
 var UPDATE = false
 var UPLOAD_FILE = ''
