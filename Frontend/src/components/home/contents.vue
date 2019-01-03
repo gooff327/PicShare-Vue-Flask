@@ -20,19 +20,18 @@
             <div class="imageDesc">{{key.desc}}</div>
           </div>
           <div class="bottom">
-            <span class="bottomText">{{key.pv}} 次浏览</span>
+            <span class="bottomText">{{key.pv}} 个人觉得很赞</span>
             <span class="botttomIcon">
               <i style="color: #EE4957" @click="likeEvent(key.pid)" v-if="admire[key.pid] ===true" class="fa fa-heart"
                  aria-hidden="true"></i>
               <i @click="likeEvent(key.pid)" v-else class="fa fa-heart-o" aria-hidden="true"></i>
-              <i @click="commentEvent(key)" class="fa fa-comment-o" aria-hidden="true"></i>
+              <i @click="commentEvent(key.pid)" class="fa fa-comment-o" aria-hidden="true"></i>
               <i @click="shareEvent(key.pid)" class="fa fa-paper-plane-o" aria-hidden="true"></i>
            </span>
           </div>
         </el-card>
       </div>
     </div>
-    <comment ref="comment"></comment>
   </div>
 </template>
 
@@ -61,6 +60,7 @@
     },
     watch: {
       $route (to, from) {
+        this.getAdmireList()
         if (from.path === '/following') {
           let position = this.scroll.y
           store.commit('changefPosition', position)
@@ -122,7 +122,7 @@
         var url = this.GLOBAL.BASE_URL + '/api/v1/admire'
         this.$axios.get(url).then(function (res) {
           console.log(res)
-          if (res.data.code === 520) {
+          if (res.data.code === 521) {
             this.admire = res.data.admire
           }
         }.bind(this))
@@ -134,13 +134,27 @@
         this.admire[pid] === true ? this.admire[pid] = false : this.admire[pid] = true
         console.log(this.admire)
         let url = this.GLOBAL.BASE_URL + '/api/v1/admire'
-        let data = JSON.stringify(this.admire)
+        let admireList = JSON.stringify(this.admire)
+        let admireThis = JSON.stringify({pid: pid, result: this.admire[pid]})
+        let data = {
+          admireList: admireList,
+          admireThis: admireThis
+        }
         this.$axios.post(url, data, {headers: {'Content-Type': 'Application/json'}}).then(function (response) {
-          console.log(response)
-        })
+          console.log('admire', response)
+          if (response.data.code === 520 && this.admire[pid] === true) {
+            this.likeMessage(pid) // send like message to server
+          }
+        }.bind(this))
       },
-      commentEvent: function (object) {
-        this.$refs.comment.commentEvent(object)
+      commentEvent: function (pid) {
+        this.$router.push(`/comment/${pid}`)
+      },
+      likeMessage: function (pid) {
+        console.log('send like message', pid)
+        // let url = this.GLOBAL.BASE_URL + '/api/v1/admire/messages'
+        // let passageId = pid
+        // this.$axios.post(url,)
       }
     },
     props: {

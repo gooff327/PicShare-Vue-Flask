@@ -93,7 +93,6 @@ output:
 
 @auth.verify_password
 def verify_password(username_or_token, password):
-    print(username_or_token, password)
     if request.path == '/api/v1/login':
         user = Users.query.filter_by(username=username_or_token).first()
         if not user or not user.verify_password(password):
@@ -140,7 +139,6 @@ def resource():
     db.create_all()
     datas = {}
     current_path = request.args.get('currentPath')
-    print(current_path)
     start_index = int(request.args.get('startIndex'))
     last_index = int(request.args.get('lastIndex'))
     if current_path == 'home':
@@ -166,7 +164,6 @@ output:
 @app.route('/api/v1/admire', methods=['GET', 'POST'])
 @auth.login_required
 def admire():
-    print(g.user.admire)
     if g.user.admire == None:
         admire = {}
     else:
@@ -186,11 +183,18 @@ def admire():
         admire = json.loads(user.admire)
         db.session.commit()
         db.session.close()
-        return jsonify({"admire": admire, "tips": "Successed!", "code": 520})
+        return jsonify({"admire": admire, "tips": "Successed!", "code": 521})
     if request.method == 'POST':
         user = Users.query.filter_by(username=g.user.username).first()
         data = request.json
-        user.admire = json.dumps(data)
+        admire_list = json.loads(data['admireList'])
+        admire_this = json.loads(data['admireThis'])
+        print(admire_this)
+        if admire_this['result']:
+            add_admire_message(admire_this['pid'])
+        else:
+            remove_admire_message(admire_this['pid'])
+        user.admire = json.dumps(admire_list)
         db.session.commit()
         db.session.close()
         return jsonify({"Tips": "Successed!", "code": 520})
@@ -200,21 +204,22 @@ def admire():
 def comments():
     if request.method == 'GET':
         pid = request.args.get('pid')
-        comments = Comments.query.filter_by(pid=pid).all()
+        query_comments = Comments.query.filter_by(pid=pid).all()
         rt_comments = {}
-        for n in range(len(comments)):
+        for n in range(len(query_comments)):
             try:
-                avatarPath = config.AVATARDIR + comments[n].username + '.jpg'
+                avatarPath = config.AVATARDIR + query_comments[n].username + '.jpg'
                 avatar = send_image(avatarPath)
             except FileNotFoundError:
-                avatarPath = config.AVATARDIR + comments[n].username + '.png'
+                avatarPath = config.AVATARDIR + query_comments[n].username + '.png'
                 avatar = send_image(avatarPath)
-            comments[n] = comments[n].to_json()
-            comments[n]['avatar'] = avatar
-            comments[n]['datetime'] = str(comments[n]['datetime'])[2:10]
-        rt_comments = comments
+            query_comments[n] = query_comments[n].to_json()
+            query_comments[n]['avatar'] = avatar
+            query_comments[n]['datetime'] = str(query_comments[n]['datetime'])[2:10]
+        rt_comments = query_comments
         return jsonify(rt_comments)
     if request.method == 'POST':
+        print(111)
         pid = request.json.get('pid')
         uid = request.json.get('uid')
         content = request.json.get('commit')
@@ -252,7 +257,7 @@ def new_passage():
 def get_users():
     type = request.args.get('type')
     keyword = int(request.args.get('uid'))
-    if type == 'following':
+    if type == 'followings':
         vid_sub = Relation.query.filter_by(uid=keyword).with_entities(Relation.vid.label('vid')).subquery()
         users = db.session.query(Users, vid_sub.c.vid).join(vid_sub, Users.uid == vid_sub.c.vid).with_entities(
             Users).all()
@@ -355,6 +360,28 @@ def edit_profile():
     return jsonify({'tips': 'Successed!', 'user': rt_user})
 
 
+@app.route('/api/v1/get/messages')
+@auth.login_required
+def get_messages():
+    rt_messages = {}
+    admire_messages = Message.query.filter_by(vid=g.user.uid, m_type=1).all()
+    admire_messages = resolve_messages(admire_messages)
+    comment_messages = Message.query.filter_by(vid=g.user.uid, m_type=2).all()
+    comment_messages = resolve_messages(comment_messages)
+    follow_messages = Message.query.filter_by(vid=g.user.uid, m_type=3).all()
+    follow_messages = resolve_messages(follow_messages)
+    private_messages = Message.query.filter_by(vid=g.user.uid, m_type=4).all()
+    private_messages = resolve_messages(private_messages)
+    forward_messages = Message.query.filter_by(vid=g.user.uid, m_type=5).all()
+    forward_messages = resolve_messages(forward_messages)
+    rt_messages['admire_messages'] = admire_messages
+    rt_messages['comment_messages'] = comment_messages
+    rt_messages['follow_messages'] = follow_messages
+    rt_messages['private_messages'] = private_messages
+    rt_messages['forward_messages'] = forward_messages
+    return jsonify({'messages': rt_messages})
+
+
 @app.route('/api/v1/logout')
 @auth.login_required
 def logout():
@@ -383,6 +410,16 @@ def resolve_followers_relation(relations):
         rt_relations[relation['uid']] = relation['status']
     print(rt_relations)
     return rt_relations
+
+
+def resolve_messages(messages):
+    rt_messages = {}
+    for i in range(0, len(messages)):
+        # 过滤掉自己给自己的赞
+        if not messages[i].vid == messages[i].uid:
+            messages[i] = messages[i].to_json()
+            rt_messages[i] = messages[i]
+    return rt_messages
 
 
 def query_passages(start_index, last_index, types, keyword):
@@ -426,6 +463,7 @@ def query_passages(start_index, last_index, types, keyword):
 def save_avatar(img, username):
     imageName = username + '.jpg'
     path = basedir + "/static/img/avatar/"
+    print(path)
     filepath = path + imageName
     img.save(filepath)
 
@@ -437,7 +475,29 @@ def send_image(path):
     return image[2:-1]
 
 
+# when user like others passages,make a message into server for sending t authors
+def add_admire_message(pid):
+    db.create_all()
+    uid = g.user.uid
+    vid = Resource.query.filter_by(pid=pid).first().uid  # get author uid
+    m_type = 1
+    pid = pid
+    m_content = None
+    m_status = True
+    if not (Message.query.filter_by(uid=g.user.uid, pid=pid).first()):
+        admire_message = Message(uid=uid, vid=vid, pid=pid, m_type=m_type, m_content=m_content, m_status=m_status)
+    db.session.add(admire_message)
+    db.session.commit()
+
+
+def remove_admire_message(pid):
+    admire_message = Message.query.filter_by(pid=pid, uid=g.user.uid).first()
+    if admire_message:
+        db.session.delete(admire_message)
+        db.session.commit()
+
+
 if __name__ == '__main__':
-    # from werkzeug.contrib.fixers import ProxyFix
-    # app.wsgi_app = ProxyFix(app.wsgi_app)
-    app.run(host='192.168.12.1', port=5000)
+    from werkzeug.contrib.fixers import ProxyFix
+    app.wsgi_app = ProxyFix(app.wsgi_app)
+    app.run()

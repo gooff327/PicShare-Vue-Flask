@@ -124,3 +124,34 @@ class Relation(db.Model):
         # if "_sa_instance_state" in dict:
         #     del dict["_sa_instance_state"]
         return dict
+
+
+# m_type:
+# 1 admire messages
+# 2 comment messages
+# 3 follow messages
+# 4 private messages
+# 5 forward messages
+class Message(db.Model):
+    __tablename__ = 'message'
+    mid = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    uid = db.Column(db.Integer, nullable=False)
+    vid = db.Column(db.Integer, nullable=False)
+    pid = db.Column(db.Integer)
+    m_type = db.Column(db.Integer, nullable=False)
+    m_content = db.Column(db.String(100))
+    m_status = db.Column(db.Boolean, default=True)
+
+    def __init__(self, uid, vid, pid, m_type, m_content, m_status):
+        self.uid = uid
+        self.vid = vid
+        self.pid = pid
+        self.m_type = m_type
+        self.m_content = m_content
+        self.m_status = m_status
+
+    def to_json(self):
+        dict = self.__dict__
+        if "_sa_instance_state" in dict:
+            del dict["_sa_instance_state"]
+        return dict

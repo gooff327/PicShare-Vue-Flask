@@ -1,165 +1,185 @@
 <template>
-  <el-dialog
-    :visible.sync="commentPanel"
-    :fullscreen="true"
-    :show-close="false">
-    <div slot="title" class="commentTitle">
-      <i @click="commentPanel=false" class="el-icon-back"></i>
+  <el-row>
+    <el-col :span="24" class="commentTitle">
+      <i @click="goBack" class="el-icon-back"></i>
       <span class="dialogTitle">评 论</span>
-    </div>
-    <div v-if="this.comments.length === undefined || this.comments.length === 0" class="commentTips">
+    </el-col>
+    <el-col :span="24" v-if="this.comments.length === undefined || this.comments.length === 0" class="commentTips">
       <h1 class="emptyContent" v-text="tips"></h1>
-    </div>
-    <div v-else v-for="comment in this.comments" class="commentInfo" :key="comment.cid">
-      <img class="commentAvatars" :src="['data:Image/png;base64,'+comment.avatar]" alt="">
-      <span class="commentUsername">{{comment.username}} : <span class="commentContent">{{comment.comments}}</span></span>
-      <span class="commentDate">{{comment.datetime}}</span>
-    </div>
-    <div slot="footer" class="dialog-footer">
+    </el-col>
+    <el-col :span="24" v-else v-for="comment in this.comments" class="commentInfo" :key="comment.cid">
+      <el-col :span="3">
+        <img class="commentAvatars" :src="['data:Image/png;base64,'+comment.avatar]" alt="">
+      </el-col>
+      <el-col :span="4">
+        <span class="commentUsername">{{comment.username}} : </span>
+      </el-col>
+      <el-col :span="12">
+        <span class="commentContent">{{comment.comments}}</span>
+      </el-col>
+      <el-col :span="4">
+        <el-badge :value="comment.datetime" class="commentDatetime"/>
+      </el-col>
+    </el-col>
+
+    <div class="dialog-footer">
       <img class="commentAvatar" :src="['data:Image/png;base64,'+this.GLOBAL.USER.avatar]" alt="">
-      <el-input class="inputComment" type="textarea" :autosize="{ minRows: 1, maxRows: 6 }" v-model="inputContent" placeholder="添 加 评 论 ..."></el-input>
-      <el-button class="submitBtn" :disabled="!this.inputContent"  size="mini" type="primary"   @click="submit">评 论</el-button>
+      <el-input class="inputComment" type="textarea" :autosize="{ minRows: 1, maxRows: 6 }" v-model="inputContent"
+                placeholder="添 加 评 论 ..."></el-input>
+      <el-button class="submitBtn" :disabled="!this.inputContent" size="mini" type="primary" @click="submit">评 论
+      </el-button>
     </div>
-  </el-dialog>
+  </el-row>
 </template>
 
 <script>
-    export default {
-        name: 'comment',
-      data () {
-          return {
-            tips: '',
-            commentPanel: false,
-            inputContent: this.inputContent,
-            comments: []
-          }
+  export default {
+    name: 'comment',
+    data () {
+      return {
+        tips: '',
+        commentPanel: false,
+        inputContent: this.inputContent,
+        comments: [],
+        pid: ''
+      }
+    },
+    created: function () {
+      this.getComment(this.$route.params.pid)
+    },
+    methods: {
+      goBack: function () {
+        this.$router.back()
       },
-      methods: {
-        commentEvent: function (passage) {
-          this.comments = []
-          this.tips = '加载中...'
-          this.commentPanel = true
-          let url = this.GLOBAL.BASE_URL + '/api/v1/comments'
-          this.$axios.get(url, {
-            params: {
-              pid: `${passage.pid}`
-            }
-          }).then(function (response) {
-            console.log(response)
-            this.comments = response.data
-            if (this.comments.length === undefined || this.comments.length === 0) {
-              this.tips = '当前还没有评论哦！'
-            }
-          }.bind(this))
-        },
-        submit: function () {
-          if (this.inputContent === '' || this.inputContent === undefined) {
-            this.$message.error('不能提交空内容')
-          } else {
-            let url = this.GLOBAL.BASE_URL + '/api/v1/comments'
-            this.$axios.post(url, {
-              pid: `${this.passage.pid}`,
-              uid: `${this.GLOBAL.USER.uid}`,
-              username: `${this.GLOBAL.USER.username}`,
-              commit: `${this.inputContent}`
-            }).then(function (response) {
-              if (response.data.tips === 'Successed!') {
-                this.inputContent = ''
-                let url = this.GLOBAL.BASE_URL + '/api/v1/comments'
-                this.$axios.get(url, {
-                  params: {
-                    pid: `${this.passage.pid}`
-                  }
-                }).then(function (response) {
-                  console.log(response)
-                  this.comments = response.data.reverse()
-                }.bind(this))
-              }
-              this.$message({
-                type: 'success',
-                message: '评 论 成 功 ！',
-                center: true,
-                duration: 1000})
-            }.bind(this))
+      getComment: function (pid) {
+        this.comments = []
+        this.pid = pid
+        console.log('pid', pid)
+        this.tips = '加载中...'
+        this.commentPanel = true
+        let url = this.GLOBAL.BASE_URL + '/api/v1/comments'
+        this.$axios.get(url, {
+          params: {
+            pid: `${pid}`
           }
+        }).then(function (response) {
+          console.log(response)
+          this.comments = response.data
+          if (this.comments.length === undefined || this.comments.length === 0) {
+            this.tips = '当前还没有评论哦！'
+          }
+        }.bind(this))
+      },
+      submit: function () {
+        let url = this.GLOBAL.BASE_URL + '/api/v1/comments'
+        console.log(url)
+        let data = {
+          pid: `${this.pid}`,
+          uid: `${this.GLOBAL.USER.uid}`,
+          username: `${this.GLOBAL.USER.username}`,
+          commit: `${this.inputContent}`
         }
+        console.log(data)
+        this.$axios.post(url, data).then(function (response) {
+          if (response.data.tips === 'Successed!') {
+            this.inputContent = ''
+            this.getComment(this.pid)
+          }
+          this.$message({
+            type: 'success',
+            message: '评 论 成 功 ！',
+            center: true,
+            duration: 1000
+          })
+        }.bind(this))
       }
     }
+  }
 </script>
 
 <style scoped>
-  .commentTitle{
+  .commentTitle {
     position: fixed;
-    line-height: 50px;
+    line-height: 3rem;
     top: 0;
     width: 100%;
-    background-color: rgba(255,255,255,0.4);
+    text-align: center;
+    background-color: white;
+    z-index: 10;
   }
-  .commentTitle i{
-    position: relative;
-    font-size: larger;
+
+  .commentTitle i {
+    display: inline-block;
+    position: fixed;
+    top: 1rem;
+    left: 1.2rem;
+    width: 8%;
+    height: 8vw;
+    line-height: 8vw;
     font-weight: bolder;
   }
-  .dialogTitle{
-    width: 78%;
+
+  .dialogTitle {
     display: inline-block;
-    font-weight: normal;
-    text-align: center;
-  }
-  .commentAvatar{
-    margin: 0;
-    padding: 0;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    float: left;
-  }
-  .commentTips{
-    display: block;
-    margin-bottom: 0.6rem;
-    text-align: center;
-  }
-  .commentInfo{
-    display: block;
-    margin-bottom: 0.6rem;
-  }
-  .commentUsername{
-    line-height: 40px;
-    width: 80%;
-    font-size: 1rem;
     font-weight: bold;
-    position: relative;
-    left: 10px;
-    top: -10px;
+    line-height: 3rem;
   }
-  .commentContent{
-    font-size: 1rem;
-    font-weight: normal;
-  }
-  .commentDate{
+
+  .commentAvatar {
     display: inline-block;
-    text-align: left;
-    font-size: 0.4rem;
-    font-weight: lighter;
-    color: gray;
-    width: 80%;
-    position: relative;
-    left: 50px;
-    top: -20px;
-  }
-  .commentAvatars{
     margin: 0;
     padding: 0;
+    width: 2rem;
+    height: 2rem;
     border-radius: 50%;
     float: left;
-    width: 42px;
-    height: 42px;
   }
-  .submitBtn{
+
+  .commentTips {
+    display: block;
+    margin-bottom: 0.6rem;
+    text-align: center;
+  }
+
+  .commentInfo {
+    display: block;
+    margin-left: 0.4rem;
+  }
+
+  .commentUsername {
     display: inline-block;
+    max-width: 100%;
+    font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis; /*超出部分用...代替*/
+  }
+
+  .commentContent {
+    font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+    display: inline-block;
+    width: 90% !important;
+    float: left !important;
+    word-wrap: break-word;
+    color: rgba(64, 64, 64, 0.9);
+  }
+
+  .commentAvatars {
+    width: 2.4rem;
+    height: 2.4rem;
+  }
+
+  .submitBtn {
+    display: inline-block;
+    position: fixed;
+    bottom: 0.6rem;
+    right: 1rem;
     height: 33px;
   }
-  .inputComment{
+
+  .inputComment {
+    position: fixed;
+    bottom: 0.6rem;
     width: 60%;
     padding: 0 0 0 0;
     margin: 0;
@@ -167,13 +187,14 @@
     padding-right: 0.6rem;
     padding-left: 0.6rem;
   }
-  .dialog-footer{
+
+  .dialog-footer {
     position: fixed;
     bottom: 0px;
     width: 100%;
     padding-top: 6px;
     text-align: left;
     height: 42px;
-    background-color: rgba(255,255,255,0.8)
+    background-color: rgba(255, 255, 255, 0.8)
   }
 </style>

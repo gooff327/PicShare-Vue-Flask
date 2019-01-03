@@ -125,7 +125,7 @@
                   dangerouslyUseHTMLString: true,
                   center: true,
                   duration: 1500,
-                  message: 'Welcome !' + '<b>' + `${this.loginForm.username}` + '</b>',
+                  message: 'Welcome!' + '<b>' + `${this.loginForm.username}` + '</b>',
                   type: 'success'
                 })
               }.bind(this))

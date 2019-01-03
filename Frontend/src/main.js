@@ -14,6 +14,7 @@ import 'vue-photo-preview/dist/skin.css'
 import 'font-awesome/css/font-awesome.css'
 import BScroll from 'better-scroll'
 import $ from 'jquery'
+
 Vue.use($)
 Vue.use(preview)
 Vue.prototype.$BScroll = BScroll
@@ -55,6 +56,6 @@ new Vue({
   el: '#app',
   router,
   store,
-  components: { App },
+  components: {App},
   template: '<App/>'
 })

@@ -145,6 +145,7 @@
               this.$emit('closeTop', true)
               this.topBody = true
             } else {
+              this.wrapperStyle = 'wrapper'
               this.dropDown = false
             }
           })
@@ -186,7 +187,7 @@
         this.wrapper2 = 'wrapper'
       },
       showFollowing: function () {
-        this.$router.push({path: this.$route.path + '/following', query: {uid: this.uid}})
+        this.$router.push({path: this.$route.path + '/followings', query: {uid: this.uid}})
       },
       showFollowers: function () {
         this.$router.push({path: this.$route.path + '/followers', query: {uid: this.uid}})
@@ -216,7 +217,7 @@
     position: relative;
     top: 0;
     left: 0;
-    height: 51vh;
+    height: 50vh;
     z-index: 10;
     overflow: hidden;
   }
