@@ -1,5 +1,4 @@
 gunicon==19.6.0
-psycopg2==2.6.1
 Flask==1.0.2
 Flask-Cors==3.0.6
 Flask-HTTPAuth==3.2.4
