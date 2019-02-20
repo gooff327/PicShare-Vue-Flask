@@ -1,12 +1,10 @@
 <template>
   <div>
-    <brand-header></brand-header>
     <home-contents @loadMore="getMore" @refresh="refresh" :contents='contents'></home-contents>
     <nav-bottom :selected=style_active></nav-bottom>
   </div>
 </template>
 <script>
-  import homeHeader from '../header/homeHeader'
   import contentsPanel from './contents'
   import navBottom from '../bottom/bottom'
   import $ from 'jquery'
@@ -14,7 +12,6 @@
   export default {
     name: 'home',
     components: {
-      'brandHeader': homeHeader,
       'homeContents': contentsPanel,
       'navBottom': navBottom
     },

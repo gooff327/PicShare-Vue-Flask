@@ -1,11 +1,13 @@
-const BASE_URL = 'http://204.44.85.176:8000'
-var USER = {}
-var UPDATE = false
-var UPLOAD_FILE = ''
-var HOMECONTENTS = {}
-var FOLLOWINGCONTENTS = {}
-var MESSAGES = {}
-var COUNT = {
+// for deploy
+// const BASE_URL = window.location.host
+const BASE_URL = 'http://192.168.1.2:5000'
+let USER = {}
+const UPDATE = false
+const UPLOAD_FILE = ''
+const HOMECONTENTS = {}
+const FOLLOWINGCONTENTS = {}
+const MESSAGES = {}
+const COUNT = {
   admireCount: 0,
   privateCount: 0,
   forwardCount: 0,
@@ -23,7 +25,7 @@ function initMessage (messages) {
   count.commentCount = unreadCount(messages['comment_messages'])
   count.followCount = unreadCount(messages['follow_messages'])
   count.sum = Number(count.admireCount + count.privateCount + count.followCount + count.commentCount + count.forwardCount)
-  console.log('sum',count.sum)
+  console.log('sum', count.sum)
   return count
 }
 

@@ -8,6 +8,7 @@ import upload from '../components/Upload/editor'
 import comment from '../components/Common/comment'
 import following from '../components/home/following'
 import followlist from '../components/User/followlist'
+import messageDetail from '../components/Message/messageDetail'
 
 Vue.use(Router)
 
@@ -41,6 +42,30 @@ export default new Router({
       path: '/message',
       name: 'message',
       component: message,
+      meta: {requireAuth: true}
+    },
+    {
+      path: '/message/admire',
+      name: 'm_admire',
+      component: messageDetail,
+      meta: {requireAuth: true}
+    },
+    {
+      path: '/message/follow',
+      name: 'm_follow',
+      component: messageDetail,
+      meta: {requireAuth: true}
+    },
+    {
+      path: '/message/private',
+      name: 'm_private',
+      component: messageDetail,
+      meta: {requireAuth: true}
+    },
+    {
+      path: '/message/forward',
+      name: 'm_forward',
+      component: messageDetail,
       meta: {requireAuth: true}
     },
     {

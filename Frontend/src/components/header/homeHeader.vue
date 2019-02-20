@@ -1,12 +1,6 @@
 <template>
 <div class="brand">
-  <el-dropdown>
-    <iframe class="icons" src="../../../static/icons/github.svg"  frameborder="0"></iframe>    <el-dropdown-menu slot="dropdown">
-    <el-dropdown-item><a class="dropmenu" href="http://github.com/gooff327">Github</a></el-dropdown-item>
-    <el-dropdown-item><p class="dropmenu" @click="toAdmin">Administor</p></el-dropdown-item>
-    </el-dropdown-menu>
-  </el-dropdown>
-  <span class="centerText">Gooff's 技术杂货铺</span>
+  <img src="../../../static/icons/logo.png">
 </div>
 </template>
 
@@ -22,35 +16,11 @@
 </script>
 
 <style scoped>
-.brand{
-  height: 37px;
-  display: block;
-}
-.brand,a{
-}
-.centerText{
-  font-family: "DejaVu Sans";
-  position: absolute;
-  right: 134px;
-  top: 14px;
-
-}
-.dropmenu{
-  text-decoration: none;
-  color: grey;
-}
-
-.icons{
-  /*position: absolute;*/
-  /*top: 0;*/
-  /*left: 150px;*/
-  /*width: 48px;*/
-  margin: 0;
-  padding: 0;
-  height: 36px;
-  width: 36px;
-  align-items: center;
-  display: inline-block;
+.brand img{
+  position: relative;
+  top: 0;
+  width: 95%;
+  height: 2rem;
 }
 
 </style>

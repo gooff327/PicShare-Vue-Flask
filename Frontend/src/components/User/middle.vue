@@ -218,7 +218,7 @@
     top: 0;
     left: 0;
     height: 50vh;
-    z-index: 10;
+    z-index: 2;
     overflow: hidden;
   }
 
@@ -227,7 +227,7 @@
     top: 0;
     left: 0;
     height: 90vh;
-    z-index: 10;
+    z-index: 2;
   }
 
   .moreRow {
@@ -240,9 +240,9 @@
     width: 100%;
     text-align: center;
     position: relative;
-    top: 10px;
-    padding-bottom: 20px;
-    padding-top: 10px;
+    top: 0.5rem;
+    padding-bottom: 1rem;
+    padding-top: 0.5rem;
   }
 
   .middle-tab-a {
@@ -262,8 +262,9 @@
     margin: 0;
     width: 33%;
     text-align: center;
-    line-height: 2rem;
+    line-height: 1.4rem;
     float: left;
+    font-size: 0.8rem;
   }
 
   .middle-tab-b span {
@@ -272,7 +273,7 @@
     margin: 0;
     width: 50%;
     text-align: center;
-    line-height: 2rem;
+    line-height: 1.2rem;
     margin-top: 0.4rem;
     margin-bottom: 0.4rem;
   }

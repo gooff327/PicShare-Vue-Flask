@@ -280,11 +280,12 @@
 
   .el-header {
     padding: 0;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    padding-bottom: 6px;
+    margin: 0;
+    /*margin-top: 10px;*/
+    /*margin-bottom: 10px;*/
+    /*padding-bottom: 6px;*/
     border-bottom: 1px gainsboro solid;
-    height: 30px !important;
+    height: 2rem !important;
   }
 
   .el-header span {
@@ -298,17 +299,19 @@
   }
 
   .fa-cog, .el-icon-back {
+    display: inline-block;
     position: relative;
     width: 6%;
-    line-height: 100%;
-    padding-left: 1%;
+    line-height: 1rem;
     font-size: 1rem;
+    vertical-align: top;
   }
 
   .headTitle {
     width: 80%;
     text-align: center;
-    font-size: 1.0rem;
+    font-size: 1rem;
+    font-weight: 500;
   }
 
   .fa-user-plus {
@@ -319,15 +322,15 @@
   }
 
   .user-avatar {
-    width: 70px;
-    height: 70px;
+    width: 3.5rem;
+    height: 3.5rem;
     border-radius: 50%;
   }
 
   .user-username {
     display: inline-block;
     width: 100%;
-    font-size: 1.2rem;
+    font-size: 0.8rem;
     text-align: center;
     padding-bottom: 0.6rem;
   }
@@ -351,8 +354,8 @@
     width: 100%;
     text-align: center;
     color: #409EFF;
-    margin-top: 8px;
-    margin-bottom: 8px;
+    margin-top: 0.4rem;
+    margin-bottom: 0.4rem;
   }
 
   .edit-avatar span {
@@ -366,15 +369,15 @@
   }
 
   .edit-avatar span img {
-    width: 100px;
-    height: 100px;
+    width: 5rem;
+    height: 5rem;
     border-radius: 50%;
   }
 
   .informations span {
     display: inline-block;
     width: 100%;
-    line-height: 40px;
+    line-height: 2rem;
   }
 
   .el-icon-back {

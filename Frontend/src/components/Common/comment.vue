@@ -8,7 +8,7 @@
       <h1 class="emptyContent" v-text="tips"></h1>
     </el-col>
     <el-col :span="24" v-else v-for="comment in this.comments" class="commentInfo" :key="comment.cid">
-      <el-col :span="3">
+      <el-col :span="3" class="avatarWrapper">
         <img class="commentAvatars" :src="['data:Image/png;base64,'+comment.avatar]" alt="">
       </el-col>
       <el-col :span="4">
@@ -18,7 +18,7 @@
         <span class="commentContent">{{comment.comments}}</span>
       </el-col>
       <el-col :span="4">
-        <el-badge :value="comment.datetime" class="commentDatetime"/>
+        <span v-text="comment.datetime" class="commentDatetime"></span>
       </el-col>
     </el-col>
 
@@ -100,7 +100,7 @@
 <style scoped>
   .commentTitle {
     position: fixed;
-    line-height: 3rem;
+    line-height: 1.5rem;
     top: 0;
     width: 100%;
     text-align: center;
@@ -124,6 +124,9 @@
     font-weight: bold;
     line-height: 3rem;
   }
+  .avatarWrapper{
+    margin-right: 0.4rem;
+  }
 
   .commentAvatar {
     display: inline-block;
@@ -143,7 +146,9 @@
 
   .commentInfo {
     display: block;
-    margin-left: 0.4rem;
+    position: relative;
+    top: 3rem;
+    padding-bottom: 0.5rem;
   }
 
   .commentUsername {
@@ -152,21 +157,39 @@
     font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
     overflow: hidden;
     white-space: nowrap;
+    font-size: 0.8rem;
+    font-weight: 200;
+    line-height: 2.4rem;
     text-overflow: ellipsis; /*超出部分用...代替*/
   }
 
   .commentContent {
     font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+    font-weight: normal;
     display: inline-block;
     width: 90% !important;
     float: left !important;
+    padding-top: 0.65rem;
     word-wrap: break-word;
     color: rgba(64, 64, 64, 0.9);
+    font-size: 0.8rem;
   }
+  .commentDatetime{
+    margin-top: 0.82rem;
+    font-size: 0.6rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid;
+    border-radius: 0.3rem;
+    line-height: 0.6rem;
+    background-color: lightgray;
+    color: #fffdf3}
 
   .commentAvatars {
     width: 2.4rem;
     height: 2.4rem;
+    border-radius: 50%;
   }
 
   .submitBtn {
@@ -192,7 +215,8 @@
     position: fixed;
     bottom: 0px;
     width: 100%;
-    padding-top: 6px;
+    padding-top: 0.5rem;
+    padding-bottom: 0.4rem;
     text-align: left;
     height: 42px;
     background-color: rgba(255, 255, 255, 0.8)

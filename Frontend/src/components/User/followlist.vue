@@ -112,7 +112,7 @@
     margin-bottom: 10px;
     padding-bottom: 6px;
     border-bottom: 1px gainsboro solid;
-    height: 30px !important;
+    height: 2rem !important;
   }
 
   .el-header span {
@@ -135,12 +135,12 @@
   .userList {
     margin-top: 1rem;
     display: block;
-    line-height: 60px;
+    line-height: 3rem;
   }
 
   .userList img {
-    width: 50px;
-    height: 50px;
+    width: 2.5rem;
+    height: 2.5rem;
     border-radius: 50%;
     vertical-align: top;
   }
@@ -151,19 +151,19 @@
   }
 
   .userList div {
-    line-height: 40px !important;
+    line-height: 2rem !important;
   }
 
   .usernameWrapper, .briefWrapper {
     display: block;
     width: 100%;
-    line-height: 14px;
-    font-size: 0.4rem;
+    line-height: 0.9rem;
+    font-size: 0.9rem;
     font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
   }
 
   .usernameWrapper {
-    margin-top: 10px;
+    margin-top: 1rem;
   }
 
   .briefWrapper {

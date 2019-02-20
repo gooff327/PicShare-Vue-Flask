@@ -2,7 +2,7 @@ from filecmp import cmp
 
 from flask import Flask, request, jsonify, g, json, make_response, render_template
 from flask_cors import CORS
-from sqlalchemy import func
+from sqlalchemy import func, and_
 from ext import db
 from config import config
 import base64
@@ -43,16 +43,20 @@ def index():
 
 @app.route('/api/v1/post/avatar', methods=['GET', 'POST'])
 def get_avatar():
-    username = ((request.form).to_dict()).get('username')
-    img = request.files.get('file')
-    save_avatar(img, username)
+    if ((request.form).to_dict()).get('username'):
+        username = ((request.form).to_dict()).get('username')
+        img = request.files.get('file')
+        save_avatar(img, username)
+    else:
+        filename = ((request.form).to_dict()).get('filename')
+        img = request.files.get('avatar')
+        save_avatar(img, filename)
     # img_name = '1.jpg'
     # if not img and img_name:
     #     return make_response('上传失败！')
     # with open(img_name, 'wb')as f:
     #     f.write(img)
     #     f.close()
-    return jsonify({'id': '1'})
 
 
 @app.route('/api/v1/register', methods=['GET', 'POST'])
@@ -204,7 +208,7 @@ def admire():
 def comments():
     if request.method == 'GET':
         pid = request.args.get('pid')
-        query_comments = Comments.query.filter_by(pid=pid).all()
+        query_comments = Comments.query.filter_by(pid=pid).order_by(Comments.datetime.desc()).all() # 此处应该注意查询时排序
         rt_comments = {}
         for n in range(len(query_comments)):
             try:
@@ -341,7 +345,7 @@ def edit_profile():
     sex = ((request.form).to_dict()).get('sex')
     phone = ((request.form).to_dict()).get('phone')
     user = Users.query.filter_by(uid=g.user.uid).first()
-    if avatar != None:
+    if avatar is not None:
         save_avatar(avatar, g.user.username)
     else:
         pass
@@ -363,23 +367,40 @@ def edit_profile():
 @app.route('/api/v1/get/messages')
 @auth.login_required
 def get_messages():
+    m_type = None
+    message_type = request.args.get('messageType')
+    type_dict = {
+        'admire': 1,
+        'comment': 2,
+        'follow': 3,
+        'private': 4,
+        'forward': 5,
+    }
+    if message_type in type_dict.keys():
+        m_type = type_dict.get(message_type)
     rt_messages = {}
-    admire_messages = Message.query.filter_by(vid=g.user.uid, m_type=1).all()
-    admire_messages = resolve_messages(admire_messages)
-    comment_messages = Message.query.filter_by(vid=g.user.uid, m_type=2).all()
-    comment_messages = resolve_messages(comment_messages)
-    follow_messages = Message.query.filter_by(vid=g.user.uid, m_type=3).all()
-    follow_messages = resolve_messages(follow_messages)
-    private_messages = Message.query.filter_by(vid=g.user.uid, m_type=4).all()
-    private_messages = resolve_messages(private_messages)
-    forward_messages = Message.query.filter_by(vid=g.user.uid, m_type=5).all()
-    forward_messages = resolve_messages(forward_messages)
-    rt_messages['admire_messages'] = admire_messages
-    rt_messages['comment_messages'] = comment_messages
-    rt_messages['follow_messages'] = follow_messages
-    rt_messages['private_messages'] = private_messages
-    rt_messages['forward_messages'] = forward_messages
-    return jsonify({'messages': rt_messages})
+    if m_type is not None:
+        messages = Message.query.filter(
+            and_(Message.vid == g.user.uid, Message.m_type == m_type, Message.uid != g.user.uid)).all()
+        rt_messages = resolve_message_detail(messages)
+        return jsonify({'messageDetails': rt_messages})
+    else:
+        admire_messages = Message.query.filter_by(vid=g.user.uid, m_type=1).all()
+        admire_messages = resolve_messages(admire_messages)
+        comment_messages = Message.query.filter_by(vid=g.user.uid, m_type=2).all()
+        comment_messages = resolve_messages(comment_messages)
+        follow_messages = Message.query.filter_by(vid=g.user.uid, m_type=3).all()
+        follow_messages = resolve_messages(follow_messages)
+        private_messages = Message.query.filter_by(vid=g.user.uid, m_type=4).all()
+        private_messages = resolve_messages(private_messages)
+        forward_messages = Message.query.filter_by(vid=g.user.uid, m_type=5).all()
+        forward_messages = resolve_messages(forward_messages)
+        rt_messages['admire_messages'] = admire_messages
+        rt_messages['comment_messages'] = comment_messages
+        rt_messages['follow_messages'] = follow_messages
+        rt_messages['private_messages'] = private_messages
+        rt_messages['forward_messages'] = forward_messages
+        return jsonify({'messages': rt_messages})
 
 
 @app.route('/api/v1/logout')
@@ -422,8 +443,28 @@ def resolve_messages(messages):
     return rt_messages
 
 
+def resolve_message_detail(messages):
+    users = {}
+    passages = {}
+    rt_messages = {}
+    for i in range(0, len(messages)):
+        user_key = messages[i].uid
+        passage_key = messages[i].pid
+        if messages[i].uid not in users.keys and messages[i].pid not in passages.keys():
+            temp_user = Users.query.filter_by(uid=messages[i].uid).first().to_json()
+            temp_passage = Resource.query.filter_by(pid=messages[i].pid).first().to_json()
+            users[user_key] = {'username': temp_user['username'],
+                               'avatar': send_image(config.AVATARDIR + temp_user['avatar'])}
+            passage = {'img': send_image(temp_passage['img']), 'desc': temp_passage['desc']}
+            passages[passage_key] = passage
+        rt_messages = messages
+        rt_messages[i] = messages[i].to_json()
+        print(len(passages))
+    return rt_messages, users, passages
+
+
 def query_passages(start_index, last_index, types, keyword):
-    datas = {}
+    data = {}
     res = []
     if types == 1:
         passages = Resource.query.order_by(Resource.date.desc()).all()
@@ -443,7 +484,7 @@ def query_passages(start_index, last_index, types, keyword):
     if last_index > amount:
         passages = passages[start_index:]
     elif start_index > amount:
-        res.append(datas)
+        res.append(data)
         res.append(amount)
         return res
     else:
@@ -454,8 +495,8 @@ def query_passages(start_index, last_index, types, keyword):
         imgPath = passage.img
         passage.img = send_image(imgPath)
     for n in range(len(passages)):
-        datas[start_index + n] = passages[n].to_json()
-    res.append(datas)
+        data[start_index + n] = passages[n].to_json()
+    res.append(data)
     res.append(amount)
     return res
 
@@ -499,5 +540,6 @@ def remove_admire_message(pid):
 
 if __name__ == '__main__':
     from werkzeug.contrib.fixers import ProxyFix
+
     app.wsgi_app = ProxyFix(app.wsgi_app)
     app.run()

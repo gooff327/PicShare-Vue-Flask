@@ -52,8 +52,9 @@ class Users(db.Model):
 
     def to_json(self):
         dict = self.__dict__
-        if "_sa_instance_state" in dict:
-            del dict["_sa_instance_state"]
+        print(type(dict))
+        if "_sa_instance_state" in dict.keys():
+            dict.pop('_sa_instance_state')
         return dict
 
 

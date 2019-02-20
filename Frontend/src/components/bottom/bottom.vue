@@ -1,6 +1,6 @@
 <template>
   <div class="footerbar">
-    <el-button-group>
+    <el-button-group class="buttonWrapper">
       <el-button size="small" type="default" class="function homeBtn" @click="showHomePanel"><i class="fa fa-home"></i>
         <p>主 页</p></el-button>
       <el-button size="small" type="default" class="function" @click="showFollowingProduces"><i
@@ -9,7 +9,7 @@
       <el-button size="small" type="default" class="plus" onclick="document.getElementById('image-uploader').click();">
         <i class="fa fa-plus-circle"></i></el-button>
       <el-button size="small" type="default" @click="showMessage" class="function">
-        <el-badge :value="this.hiddenValue" :max="99" class="item">
+        <el-badge :hidden="this.sumValue <= 0"  :value="this.sumValue" :max="99" class="item">
           <i class="fa fa-envelope"></i>
         </el-badge>
         <p>消 息</p></el-button>
@@ -25,7 +25,7 @@
     data () {
       return {
         newButtonBool: {},
-        hiddenValue: ''
+        sumValue: ''
       }
     },
     created: function () {
@@ -56,7 +56,7 @@
         this.$axios.get(url).then(function (response) {
           this.GLOBAL.MESSAGES = response.data['messages']
           this.GLOBAL.COUNT = this.GLOBAL.initMessage(this.GLOBAL.MESSAGES)
-          this.hiddenValue = this.GLOBAL.COUNT.sum
+          this.sumValue = this.GLOBAL.COUNT.sum
         }.bind(this))
       },
       showFollowingProduces: function () {
@@ -67,6 +67,7 @@
       },
       showMessage: function () {
         this.$router.push('/message')
+        this.getMessage()
       },
       showPersonalData: function () {
         this.$router.push(`/user/${this.GLOBAL.USER.username}`)
@@ -82,19 +83,21 @@
 
 <style scoped>
   .footerbar {
+    padding-top: 0.5rem;
+    width: 100vw;
     position: fixed;
-    width: 100%;
     bottom: 0;
-    background-color: rgba(255, 255, 255, 0.1);
+    left: 0;
+    background-color: rgb(255, 255, 255);
+    z-index: 3;
   }
 
-  .el-button-group {
-    width: 100%;
-    background-color: rgba(255, 255, 255, 0.1);
+  .buttonWrapper {
+    width: 100vw;
+    background-color: rgb(255, 255, 255);
   }
 
   .el-button:active, button:hover {
-    background: #fff;
     color: #606266;
   }
 

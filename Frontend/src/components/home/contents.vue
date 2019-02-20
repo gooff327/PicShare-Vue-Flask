@@ -2,7 +2,7 @@
 <template>
   <div>
     <transition name="fadein">
-      <span class="drop-down" v-cloak v-if="dropDown">松手刷新</span>
+      <top-headers class="headers"></top-headers>
     </transition>
     <div ref="wrapper" class="wrapper">
       <div class="contentWrapper">
@@ -39,6 +39,8 @@
   import comment from '../../components/Common/comment'
   import BScroll from 'better-scroll'
   import store from '../../vuex/user'
+  import header from '../../components/header/homeHeader'
+  import $ from 'jquery'
 
   export default {
     data () {
@@ -53,6 +55,7 @@
       }
     },
     components: {
+      'top-headers': header,
       'comment': comment
     },
     created: function () {
@@ -117,6 +120,7 @@
         } else {
           this.scroll.refresh()
         }
+        this.setHight()
       },
       getAdmireList: function () {
         var url = this.GLOBAL.BASE_URL + '/api/v1/admire'
@@ -147,6 +151,10 @@
           }
         }.bind(this))
       },
+      setHight: function () {
+        let bottomH = $('footerbar').height()
+        console.log('h', bottomH)
+      },
       commentEvent: function (pid) {
         this.$router.push(`/comment/${pid}`)
       },
@@ -166,16 +174,6 @@
   }
 </script>
 <style scoped>
-  .drop-down {
-    color: #34BE5B;
-    display: inline-block;
-    width: 100%;
-    text-align: center;
-    position: fixed;
-    top: 46px;
-    left: 0;
-  }
-
   .fadein-enter-active, .fadein-leave-active {
     transition: opacity .5s
   }
@@ -198,11 +196,17 @@
     display: none;
   }
 
+  .headers {
+    position: fixed;
+    top: 0rem;
+    z-index: 1;
+  }
+
   .wrapper {
     position: absolute;
-    z-index: 100;
+    z-index: 2;
     left: 0;
-    top: 40px;
+    top: 0px;
     overflow: hidden;
     height: 86vh;
   }
@@ -217,7 +221,7 @@
     max-height: 40%;
     padding-left: 0.5rem;
     padding-right: 0.5rem;
-    font-size: 16px;
+    font-size: 0.8rem;
     font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
     border-bottom-left-radius: 4px;
     border-bottom-right-radius: 4px;
@@ -229,15 +233,15 @@
     display: inline-block;
     max-width: 70%;
     font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
-    font-size: 0.8rem;
-    padding-top: 0.8rem;
+    font-size: 0.7rem;
+    padding-top: 0.4rem;
     padding-left: 0.4rem;
   }
 
   .avatar {
     display: inline-block;
-    width: 36px;
-    height: 36px;
+    width: 1.8rem;
+    height: 1.8rem;
     border-radius: 50%;
     float: left;
   }
@@ -251,7 +255,7 @@
   }
 
   .bottomText {
-    font-size: 0.8rem;
+    font-size: 0.6rem;
     color: gray;
     margin: 0;
     padding: 0;

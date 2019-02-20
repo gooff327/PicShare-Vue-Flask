@@ -9,7 +9,7 @@
 </template>
 
 <script>
-  import headers from './components/header/header'
+  import headers from './components/header/homeHeader'
   import login from './components/Login'
 
   export default {
