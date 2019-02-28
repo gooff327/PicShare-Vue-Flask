@@ -9,7 +9,7 @@
       <el-form-item v-if="regVisible" prop="Avatar">
         <el-upload
           class="avatar-uploader"
-          action="http://192.168.1.2:5000/api/v1/post/avatar"
+          action="http://gooff.me/api/v1/post/avatar"
           :auto-upload="false"
           :on-change="setPreview"
           ref="uploadAvatar"

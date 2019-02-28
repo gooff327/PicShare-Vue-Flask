@@ -1,6 +1,6 @@
 // for deploy
 // const BASE_URL = window.location.host
-const BASE_URL = 'http://192.168.1.2:5000'
+const BASE_URL = 'http://gooff.me'
 let USER = {}
 const UPDATE = false
 const UPLOAD_FILE = ''

@@ -31,21 +31,20 @@
 
 <style scoped>
   .el-header {
-    padding: 0;
-    margin: 0;
-    padding-bottom: 1rem;
+    padding: 0 !important;
+    margin: 0 !important;
     border-bottom: 1px gainsboro solid;
-    height: 2.6rem !important;
+    height: 2rem !important;
   }
 
   .el-header span {
-    vertical-align: center;
+    vvertical-align: center;
     display: inline-block;
     color: rgba(43, 43, 43, 0.93);
     width: 86%;
     text-align: center;
     font-size: 1.0rem;
-    line-height: 2.6rem;
+    line-height: 2rem;
     font-weight: 700;
   }
 
