@@ -132,6 +132,7 @@
         }.bind(this))
       },
       showUserDetails: function (username) {
+        this.GLOBAL.showLoading()
         this.$router.push(`/user/${username}`)
       },
       likeEvent: function (pid) {
@@ -208,7 +209,7 @@
     left: 0;
     top: 0px;
     overflow: hidden;
-    height: 86vh;
+    max-height: 94vh;
   }
 
   .imageDesc {

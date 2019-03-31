@@ -9,7 +9,7 @@
       <el-form-item v-if="regVisible" prop="Avatar">
         <el-upload
           class="avatar-uploader"
-          action="http://gooff.me/api/v1/post/avatar"
+          action="http://127.0.0.1:5000/api/v1/post/avatar"
           :auto-upload="false"
           :on-change="setPreview"
           ref="uploadAvatar"
@@ -122,6 +122,7 @@
         this.$axios.post(url, data, config)
       },
       submitUser (Form) {
+        this.GLOBAL.showLoading()
         this.$refs[Form].validate((valid) => {
             if (this.btnSwitch === false) {
               var logurl = this.GLOBAL.BASE_URL + '/api/v1/login'
@@ -168,12 +169,12 @@
                 switch (code) {
                   case 200:
                     this.$notify({
-                      title: 'Messages:',
-                      message: `${this.loginForm.username},you can log in now!`,
-                      position: 'bottom',
-                      type: 'success'
-                    }
-                  )
+                        title: 'Messages:',
+                        message: `${this.loginForm.username},you can log in now!`,
+                        position: 'bottom',
+                        type: 'success'
+                      }
+                    )
                     this.$refs.uploadAvatar.submit()
                     this.reUpload() // 修复头像上传失败
                     this.$router.go(0)

@@ -169,6 +169,7 @@
           this.amounts['following'] = this.currentUser.following
           this.amounts['followers'] = this.currentUser.followers
           this.isConcerned(this.currentUser.uid)
+          this.GLOBAL.closeLoading()
         }.bind(this))
       },
       closeTop: function (boolean) {

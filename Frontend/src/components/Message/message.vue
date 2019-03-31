@@ -12,7 +12,8 @@
           </span>
           <span class="icon-desc">@我的动态  <el-badge :hidden="this.GLOBAL.COUNT.forwardCount === 0"
                                                    :value="this.GLOBAL.COUNT.forwardCount" :max="99"
-                                                   class="badge"/></span>
+                                                   class="badge"/>
+          </span>
         </div>
       </el-col>
       <el-col :span="24" @click="admireDetails">
@@ -22,7 +23,8 @@
           </span>
           <span class="icon-desc">我收到的赞  <el-badge :hidden="this.GLOBAL.COUNT.admireCount === 0"
                                                    :value="this.GLOBAL.COUNT.admireCount" :max="99"
-                                                   class="badge"/></span>
+                                                   class="badge"/>
+          </span>
         </div>
       </el-col>
       <el-col :span="24" @click="privateDetails">
@@ -31,7 +33,8 @@
             <i class="fa fa-envelope-open-o"></i>
           </span>
           <span class="icon-desc">私 信  <el-badge :hidden="this.GLOBAL.COUNT.privateCount === 0"
-                                                :value="this.GLOBAL.COUNT.privateCount" :max="99" class="badge"/></span>
+                                                 :value="this.GLOBAL.COUNT.privateCount" :max="99" class="badge"/>
+          </span>
         </div>
       </el-col>
       <el-col :span="24" @click="followDetails">
@@ -41,17 +44,10 @@
           </span>
           <span class="icon-desc">好友关注  <el-badge :hidden="this.GLOBAL.COUNT.followCount === 0"
                                                   :value="this.GLOBAL.COUNT.followCount" :max="99"
-                                                  class="badge"/></span>
+                                                  class="badge"/>
+          </span>
         </div>
       </el-col>
-      <!--<el-col :span="24" @click="commentDetails">-->
-      <!--<div class="row-wrapper" @click="forwardDetails">-->
-      <!--<span style="background-color: #f17c67" class="icon-wrapper">-->
-      <!--<i class="fa fa-share-alt"></i>-->
-      <!--</span>-->
-      <!--<span class="icon-desc">@我的动态  <el-badge :value="this.GLOBAL.COUNT.sum" :max="99" class="badge"/></span>-->
-      <!--</div>-->
-      <!--</el-col>-->
     </el-row>
   </el-container>
 </template>
@@ -66,6 +62,7 @@
     },
     methods: {
       goBack: function () {
+        this.GLOBAL.showLoading()
         this.$router.back()
       },
       admireDetails: function () {
@@ -94,11 +91,11 @@
       },
       forwardDetails: function () {
         this.$router.push({
-        name: 'm_forward',
-        params: {
-          label: '@我的动态'
-        }
-      })
+          name: 'm_forward',
+          params: {
+            label: '@我的动态'
+          }
+        })
       },
       commentDetails: function () {
       }

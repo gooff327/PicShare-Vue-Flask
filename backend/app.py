@@ -208,7 +208,7 @@ def admire():
 def comments():
     if request.method == 'GET':
         pid = request.args.get('pid')
-        query_comments = Comments.query.filter_by(pid=pid).order_by(Comments.datetime.desc()).all() # 此处应该注意查询时排序
+        query_comments = Comments.query.filter_by(pid=pid).order_by(Comments.datetime.desc()).all()  # 此处应该注意查询时排序
         rt_comments = {}
         for n in range(len(query_comments)):
             try:
@@ -403,7 +403,38 @@ def get_messages():
         return jsonify({'messages': rt_messages})
 
 
-@app.route('/api/v1/logout')
+@app.route('/api/v1/messages/query', methods=['POST'])
+@auth.login_required
+def query_items():
+    query_list = request.json
+    result = {}
+    result['users'] = query_by_list(Users, query_list['users'])
+    result['passages'] = query_by_list(Resource, query_list['passages'])
+    return jsonify(result)
+
+def query_by_list(cls, query_list):
+    result = {}
+    if cls == Users:
+        for el in query_list:
+            content = cls.query.filter_by(uid=el).first().to_json()
+            avatar_path = config.AVATARDIR + content['avatar']
+            content['avatar'] = send_image(avatar_path)
+            result[content['uid']] = content
+    elif cls == Resource:
+        for el in query_list:
+            content = cls.query.filter_by(pid=el).first().to_json()
+            img_path = content['img']
+            content['img'] = send_image(img_path)
+            result[content['pid']] = content
+    return result
+
+
+@app.route('/api/v1/put/message/status', methods=['PUT'])
+@auth.login_required
+def change_message_status():
+    return jsonify('ok')
+
+app.route('/api/v1/logout')
 @auth.login_required
 def logout():
     username = request.args.get('username')
@@ -540,5 +571,6 @@ def remove_admire_message(pid):
 
 if __name__ == '__main__':
     from werkzeug.contrib.fixers import ProxyFix
+
     app.wsgi_app = ProxyFix(app.wsgi_app)
     app.run()

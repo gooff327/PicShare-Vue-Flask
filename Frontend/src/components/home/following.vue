@@ -11,6 +11,9 @@
       return {
       }
     },
+    created: function () {
+      this.GLOBAL.closeLoading()
+    },
     components: {
       'v-home': homeWrapper
     }

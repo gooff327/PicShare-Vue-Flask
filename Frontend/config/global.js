@@ -1,6 +1,6 @@
-// for deploy
-// const BASE_URL = window.location.host
-const BASE_URL = 'http://gooff.me'
+import {Loading} from 'element-ui'
+
+const BASE_URL = 'http://127.0.0.1:5000'
 let USER = {}
 const UPDATE = false
 const UPLOAD_FILE = ''
@@ -15,6 +15,24 @@ const COUNT = {
   followCount: 0,
   sum: 0
 }
+const MESSAGES_CONTENT = {}
+let reqList = {}
+let usersList = []
+let passagesList = []
+let loadingInstance
+
+function showLoading (obj) {
+  if (obj) {
+    loadingInstance = Loading.service(obj)
+  }
+  else {
+    loadingInstance = Loading.service({text: '加载中，请耐心等待...', background: 'rgba(255,250,250,0.8)',lock:true})
+  }
+}
+
+function closeLoading () {
+  setTimeout(loadingInstance.close(),0)
+}
 
 function initMessage (messages) {
   let count = {}
@@ -25,21 +43,29 @@ function initMessage (messages) {
   count.commentCount = unreadCount(messages['comment_messages'])
   count.followCount = unreadCount(messages['follow_messages'])
   count.sum = Number(count.admireCount + count.privateCount + count.followCount + count.commentCount + count.forwardCount)
-  console.log('sum', count.sum)
+  reqList['users'] = usersList
+  usersList = []
+  reqList['passages'] = passagesList
+  passagesList = []
   return count
 }
 
-function unreadCount (Messages) {
+function unreadCount (messages) {
   var count = 0
-  for (var item in Messages) {
-    console.log(Messages[item]['m_status'] === true)
-    if (Messages[item]['m_status'] === true) {
+  for (var item in messages) {
+    setTimeout(resolveMessage(messages[item]), 0)
+    if (messages[item]['m_status'] === true) {
       count++
     }
   }
-  console.log(count)
   return count
 }
+
+function resolveMessage (message) {
+  usersList.push(message.uid)
+  passagesList.push(message.pid)
+}
+
 
 export default {
   BASE_URL,
@@ -50,5 +76,9 @@ export default {
   FOLLOWINGCONTENTS,
   MESSAGES,
   initMessage,
-  COUNT
+  MESSAGES_CONTENT,
+  COUNT,
+  reqList,
+  showLoading,
+  closeLoading
 }

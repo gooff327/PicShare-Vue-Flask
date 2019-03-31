@@ -5,7 +5,7 @@
       <span class="dialogTitle">评 论</span>
     </el-col>
     <el-col :span="24" v-if="this.comments.length === undefined || this.comments.length === 0" class="commentTips">
-      <h1 class="emptyContent" v-text="tips"></h1>
+      <h3 class="emptyContent" v-text="tips"></h3>
     </el-col>
     <el-col :span="24" v-else v-for="comment in this.comments" class="commentInfo" :key="comment.cid">
       <el-col :span="3" class="avatarWrapper">
@@ -139,9 +139,11 @@
   }
 
   .commentTips {
+    padding-top: 3rem;
     display: block;
     margin-bottom: 0.6rem;
     text-align: center;
+    color: gray;
   }
 
   .commentInfo {

@@ -6,7 +6,7 @@ class config:
     USERNAME = 'root'
     PASSWORD = 'gooff'
     # HOST = '204.44.85.176'
-    HOST = '149.28.14.128/'
+    HOST = '127.0.0.1'
     PORT = '3306'
     DATABASE = 'vueflask'
     SQLALCHEMY_DATABASE_URI = DIALECT+'+pymysql://'+USERNAME+':'+PASSWORD+'@'+HOST+':'+PORT+'/'+DATABASE

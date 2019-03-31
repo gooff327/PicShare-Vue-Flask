@@ -9,7 +9,7 @@
       <el-button size="small" type="default" class="plus" onclick="document.getElementById('image-uploader').click();">
         <i class="fa fa-plus-circle"></i></el-button>
       <el-button size="small" type="default" @click="showMessage" class="function">
-        <el-badge :hidden="this.sumValue <= 0"  :value="this.sumValue" :max="99" class="item">
+        <el-badge :hidden="this.sumValue <= 0" :value="this.sumValue" :max="99" class="item">
           <i class="fa fa-envelope"></i>
         </el-badge>
         <p>消 息</p></el-button>
@@ -25,7 +25,9 @@
     data () {
       return {
         newButtonBool: {},
-        sumValue: ''
+        sumValue: '',
+        requestList: {},
+        returnReqContent: {}
       }
     },
     created: function () {
@@ -57,20 +59,44 @@
           this.GLOBAL.MESSAGES = response.data['messages']
           this.GLOBAL.COUNT = this.GLOBAL.initMessage(this.GLOBAL.MESSAGES)
           this.sumValue = this.GLOBAL.COUNT.sum
+          this.getUserAndPassage(this.GLOBAL.reqList)
+          this.returnReqUsersAndPassages(this.requestList)
         }.bind(this))
       },
+
+      returnReqUsersAndPassages: function (reqList) {
+        let url = this.GLOBAL.BASE_URL + '/api/v1/messages/query'
+        this.$axios.post(url, reqList).then(function (response) {
+          this.GLOBAL.MESSAGES_CONTENT = response.data
+          console.log((this.GLOBAL.MESSAGES_CONTENT))
+        }.bind(this))
+      },
+
+      getUserAndPassage: function (reqList) {
+        this.requestList['users'] = Array.from(new Set(reqList.users))
+        this.requestList['passages'] = Array.from(new Set(reqList.passages))
+      },
       showFollowingProduces: function () {
-        this.$router.push('/following')
+        if (this.$route.name !== 'following') {
+          this.GLOBAL.showLoading({text: '好友动态加载中', lock: true})
+          this.$router.push('/following')
+        }
       },
       showHomePanel: function () {
-        this.$router.push('/home')
+        if (this.$route.name !== 'home') {
+          this.GLOBAL.showLoading({text: '主页刷新中', lock: true})
+          this.$router.push('/home')
+        }
       },
       showMessage: function () {
         this.$router.push('/message')
         this.getMessage()
       },
       showPersonalData: function () {
-        this.$router.push(`/user/${this.GLOBAL.USER.username}`)
+        if (this.$route.name !== 'user') {
+          this.GLOBAL.showLoading({text: '个人信息装填中', lock: true})
+          this.$router.push(`/user/${this.GLOBAL.USER.username}`)
+        }
       }
     },
     props: {
@@ -83,7 +109,7 @@
 
 <style scoped>
   .footerbar {
-    padding-top: 0.5rem;
+    padding-top: 0.1rem;
     width: 100vw;
     position: fixed;
     bottom: 0;
@@ -109,7 +135,7 @@
     padding-left: 0;
     padding-right: 0;
     border: 0px;
-    height: 46px;
+    height: 2.3rem;
   }
 
   .function .fa, .function.fa::before {

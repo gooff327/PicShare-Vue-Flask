@@ -18,7 +18,7 @@
     data () {
       return {
         startIndex: 0,
-        lastIndex: 10,
+        lastIndex: 20,
         style_active: 'color = #409EFF;',
         contents: {},
         tempContents: {}
@@ -50,16 +50,19 @@
           this.tempContents = this.contents
           this.contents = response.data
           this.contents = $.extend(this.contents, this.tempContents)
+          this.GLOBAL.closeLoading()
         }.bind(this))
       },
+
       getMore: function () {
-        this.startIndex += 5
-        this.lastIndex += 5
+        this.startIndex += 20
+        this.lastIndex += 20
         this.getUpdate(this.$route.name)
       },
+
       refresh: function () {
         this.startIndex = 0
-        this.lastIndex = 5
+        this.lastIndex = 20
         this.contents = {}
         this.getUpdate(this.$route.name)
       }
