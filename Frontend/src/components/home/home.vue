@@ -18,7 +18,7 @@
     data () {
       return {
         startIndex: 0,
-        lastIndex: 20,
+        lastIndex: 10,
         style_active: 'color = #409EFF;',
         contents: {},
         tempContents: {}
@@ -55,14 +55,14 @@
       },
 
       getMore: function () {
-        this.startIndex += 20
-        this.lastIndex += 20
+        this.startIndex += 10
+        this.lastIndex += 10
         this.getUpdate(this.$route.name)
       },
 
       refresh: function () {
         this.startIndex = 0
-        this.lastIndex = 20
+        this.lastIndex = 10
         this.contents = {}
         this.getUpdate(this.$route.name)
       }
