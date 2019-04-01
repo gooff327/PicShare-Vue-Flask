@@ -9,10 +9,10 @@
         <li class="userList">
           <el-row>
             <el-col :offset="1" :span="4"><img @click="showUserDetails(item.username)" class="smallPic"
-                                               :src="['data:Image/png;base64,'+item.avatar]">
+                                               :src="item.avatar">
+                                               <!--:src="['data:Image/png;base64,'+item.avatar]">-->
             </el-col>
-            <el-col :span="14"><span class="usernameWrapper" v-text="item.username"></span><span class="briefWrapper"
-                                                                                                 v-text="item.brief"></span>
+            <el-col :span="14"><span class="usernameWrapper" v-text="item.username"></span>
             </el-col>
             <el-col :span="4">
               <el-button :disabled="isSelf(item.uid)" :autofocus="false" :round="false" size="mini"
@@ -135,12 +135,12 @@
   .userList {
     margin-top: 1rem;
     display: block;
-    line-height: 3rem;
+    line-height: 2.6rem;
   }
 
   .userList img {
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 2.6rem;
+    height: 2.6rem;
     border-radius: 50%;
     vertical-align: top;
   }
@@ -154,19 +154,14 @@
     line-height: 2rem !important;
   }
 
-  .usernameWrapper, .briefWrapper {
-    display: block;
-    width: 100%;
-    line-height: 0.9rem;
+  .usernameWrapper {
     font-size: 0.9rem;
     font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+    line-height: 2.6rem;
+    margin-left: 0.6rem;
   }
 
   .usernameWrapper {
-    margin-top: 1rem;
   }
 
-  .briefWrapper {
-    color: #606266;
-  }
 </style>

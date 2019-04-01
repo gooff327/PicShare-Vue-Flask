@@ -1,23 +1,48 @@
 from filecmp import cmp
+from qcloud_cos import CosS3Client
 
 from flask import Flask, request, jsonify, g, json, make_response, render_template
 from flask_cors import CORS
 from sqlalchemy import func, and_
 from ext import db
-from config import config
+from private_config import Config
+from private_config import BucketConfig
 import base64
 from Model import *
 import os
 from flask_httpauth import HTTPBasicAuth
 from datetime import datetime
-from urllib.request import urlopen
+
+
+def upload_to_bucket(client, bucket, path, file_name):
+    response = client.put_object_from_local_file(
+        Bucket=bucket,
+        LocalFilePath=path,
+        Key=file_name,
+    )
+    print(response['ETag'])
+    if os.path.exists(path):
+        os.remove(path)
+
+
+def get_file_url(client, bucket, file_name):
+    response = client.get_presigned_download_url(
+        Bucket=bucket,
+        Key=file_name,
+        Expired=3000
+    )
+    return response
+
 
 app = Flask(__name__, static_folder="../dist/static", template_folder="../dist")
-app.config.from_object(config)
+app.config.from_object(Config)
 CORS(app)
 db.init_app(app)
 auth = HTTPBasicAuth()
 basedir = os.path.abspath(os.path.dirname(__file__))
+bucket_client = BucketConfig()
+img_client = CosS3Client(BucketConfig.img_bucket_config(bucket_client))
+avatar_client = CosS3Client(BucketConfig.avatar_bucket_config(bucket_client))
 """
 Api to sign in
 content:application/json
@@ -109,13 +134,13 @@ def verify_password(username_or_token, password):
 def get_token():
     user = {}
     token = g.user.generate_auth_token()
-    avatarPath = config.AVATARDIR + g.user.avatar
+    # avatarPath = config.AVATARDIR + g.user.avatar
     user['following'] = resolve_following_relation(g.user.relation)
     user['username'] = g.user.username
     user['uid'] = g.user.uid
     user['brief'] = g.user.brief
     user['email'] = g.user.email
-    user['avatar'] = send_image(avatarPath)
+    user['avatar'] = get_file_url(avatar_client, Config.avatar_bucket, g.user.avatar)
     user['phone'] = g.user.phone
     user['sex'] = g.user.sex
     return jsonify({'token': token.decode('ascii'), 'user': user})
@@ -206,19 +231,14 @@ def comments():
         query_comments = Comments.query.filter_by(pid=pid).order_by(Comments.datetime.desc()).all()  # 此处应该注意查询时排序
         rt_comments = {}
         for n in range(len(query_comments)):
-            try:
-                avatarPath = config.AVATARDIR + query_comments[n].username + '.jpg'
-                avatar = send_image(avatarPath)
-            except FileNotFoundError:
-                avatarPath = config.AVATARDIR + query_comments[n].username + '.png'
-                avatar = send_image(avatarPath)
+            avatarPath = query_comments[n].username + '.jpg'
+            avatar = get_file_url(avatar_client, Config.avatar_bucket, avatarPath)
             query_comments[n] = query_comments[n].to_json()
             query_comments[n]['avatar'] = avatar
             query_comments[n]['datetime'] = str(query_comments[n]['datetime'])[2:10]
         rt_comments = query_comments
         return jsonify(rt_comments)
     if request.method == 'POST':
-        print(111)
         pid = request.json.get('pid')
         uid = request.json.get('uid')
         content = request.json.get('commit')
@@ -241,11 +261,11 @@ def new_passage():
     img = request.files.get('imageFile')
     imgName = username + '#' + img.filename
     path = basedir + "/static/img/"
-    imagePath = config.IMAGEDIR + imgName
+    imagePath = Config.IMAGEDIR + imgName
     filepath = path + imgName
     img.save(filepath)
-    passage = Resource(uid, imagePath, desc, pv, username, date)
-    print(imagePath)
+    upload_to_bucket(img_client, Config.img_bucket, imagePath, imgName)
+    passage = Resource(uid, imgName, desc, pv, username, date)
     db.session.add(passage)
     db.session.commit()
     return jsonify({'tips': 'Successed!'})
@@ -278,9 +298,8 @@ def resolve_users(users):
         lite_user['uid'] = user.uid
         lite_user['username'] = user.username
         lite_user['brief'] = user.brief
-        avatar_path = config.AVATARDIR + user.avatar
         print(type(user))
-        lite_user['avatar'] = send_image(avatar_path)
+        lite_user['avatar'] = get_file_url(avatar_client, Config.avatar_bucket, user.avatar)
         rt_users.append(lite_user)
     return rt_users
 
@@ -298,7 +317,7 @@ def query_user():
         produces = Resource.query.filter_by(author=key).all()
         followers = Relation.query.filter_by(vid=user.uid).all()
         res = query_passages(start_index, last_index, types=3, keyword=key)
-        avatar_path = config.AVATARDIR + user.avatar
+        # avatar_path = config.AVATARDIR + user.avatar
 
         rt_user['produces'] = len(produces)
         rt_user['followers'] = len(followers)
@@ -306,7 +325,7 @@ def query_user():
         rt_user['username'] = user.username
         rt_user['uid'] = user.uid
         rt_user['brief'] = user.brief
-        rt_user['avatar'] = send_image(avatar_path)
+        rt_user['avatar'] = get_file_url(avatar_client, Config.avatar_bucket, user.avatar)
         rt_user['sex'] = user.sex
         if res[0] == {}:
             return jsonify({'tips': 'All loaded!', 'user': rt_user, 'contents': res[0]})
@@ -348,12 +367,11 @@ def edit_profile():
     user.sex = sex
     user.phone = phone
     db.session.commit()
-    avatarPath = config.AVATARDIR + g.user.avatar
     rt_user['username'] = g.user.username
     rt_user['uid'] = g.user.uid
     rt_user['brief'] = g.user.brief
     rt_user['email'] = g.user.email
-    rt_user['avatar'] = send_image(avatarPath)
+    rt_user['avatar'] = get_file_url(avatar_client, Config.avatar_bucket, g.user.avatar)
     rt_user['phone'] = g.user.phone
     rt_user['sex'] = g.user.sex
     return jsonify({'tips': 'Successed!', 'user': rt_user})
@@ -407,19 +425,18 @@ def query_items():
     result['passages'] = query_by_list(Resource, query_list['passages'])
     return jsonify(result)
 
+
 def query_by_list(cls, query_list):
     result = {}
     if cls == Users:
         for el in query_list:
             content = cls.query.filter_by(uid=el).first().to_json()
-            avatar_path = config.AVATARDIR + content['avatar']
-            content['avatar'] = send_image(avatar_path)
+            content['avatar'] = get_file_url(avatar_client, Config.avatar_bucket, content['avatar'])
             result[content['uid']] = content
     elif cls == Resource:
         for el in query_list:
             content = cls.query.filter_by(pid=el).first().to_json()
-            img_path = content['img']
-            content['img'] = send_image(img_path)
+            content['img'] = get_file_url(img_client, Config.img_bucket, content['img'])
             result[content['pid']] = content
     return result
 
@@ -429,7 +446,10 @@ def query_by_list(cls, query_list):
 def change_message_status():
     return jsonify('ok')
 
+
 app.route('/api/v1/logout')
+
+
 @auth.login_required
 def logout():
     username = request.args.get('username')
@@ -480,8 +500,10 @@ def resolve_message_detail(messages):
             temp_user = Users.query.filter_by(uid=messages[i].uid).first().to_json()
             temp_passage = Resource.query.filter_by(pid=messages[i].pid).first().to_json()
             users[user_key] = {'username': temp_user['username'],
-                               'avatar': send_image(config.AVATARDIR + temp_user['avatar'])}
-            passage = {'img': send_image(temp_passage['img']), 'desc': temp_passage['desc']}
+                               'avatar': get_file_url(avatar_client, Config.img_bucket, temp_user['avatar'])
+                               }
+            passage = {'img': get_file_url(img_client, Config.img_bucket, temp_passage['img']),
+                       'desc': temp_passage['desc']}
             passages[passage_key] = passage
         rt_messages = messages
         rt_messages[i] = messages[i].to_json()
@@ -516,10 +538,8 @@ def query_passages(start_index, last_index, types, keyword):
     else:
         passages = passages[start_index:last_index]
     for passage in passages:
-        avatar_path = config.AVATARDIR + passage.uavatar
-        passage.uavatar = send_image(avatar_path)
-        imgPath = passage.img
-        passage.img = send_image(imgPath)
+        passage.uavatar = get_file_url(avatar_client, Config.avatar_bucket, passage.uavatar)
+        passage.img = get_file_url(img_client, Config.img_bucket, passage.img)
     for n in range(len(passages)):
         data[start_index + n] = passages[n].to_json()
     res.append(data)
@@ -530,16 +550,9 @@ def query_passages(start_index, last_index, types, keyword):
 def save_avatar(img, username):
     imageName = username + '.jpg'
     path = basedir + "/static/img/avatar/"
-    print(path)
     filepath = path + imageName
     img.save(filepath)
-
-
-def send_image(path):
-    with open(path, 'rb') as f:
-        image = f.read()
-        image = str(base64.b64encode(image))
-    return image[2:-1]
+    upload_to_bucket(avatar_client, Config.avatar_bucket, filepath, imageName)
 
 
 # when user like others passages,make a message into server for sending t authors

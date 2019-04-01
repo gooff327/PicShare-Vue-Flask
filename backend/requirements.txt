@@ -14,3 +14,4 @@ urllib2-file==0.2.1
 urllib3==1.24
 urlopen==1.0.0
 Werkzeug==0.14.1
+cos-python-sdk-v5

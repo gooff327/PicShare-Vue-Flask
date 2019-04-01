@@ -33,7 +33,8 @@
       <div v-cloak v-show="moreView" ref="moreWrapper" class="wrapper">
         <el-row class="moreRow">
           <el-col v-for="(key,item) in contents" :key="item" :span="8" class="contents">
-            <img class="smallPic" :src="['data:Image/png;base64,'+key.img]">
+            <img class="smallPic" :src="key.img">
+            <!--<img class="smallPic" :src="['data:Image/png;base64,'+key.img]">-->
           </el-col>
         </el-row>
       </div>
@@ -42,7 +43,8 @@
       <div v-cloak v-show="!moreView" ref="lessWrapper" :class="wrapperStyle">
         <el-row>
           <el-col v-for="(key,item) in contents" :key="item" :span="24" class="contents">
-            <img class="bigPic" :src="['data:Image/png;base64,'+key.img]">
+            <img class="bigPic" :src="key.img">
+            <!--<img class="bigPic" :src="['data:Image/png;base64,'+key.img]">-->
           </el-col>
         </el-row>
       </div>

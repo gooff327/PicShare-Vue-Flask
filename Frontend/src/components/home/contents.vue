@@ -9,13 +9,15 @@
         <el-card shadow="hover" :body-style="{padding: '6px' }" class="item" v-for="(key,item) in contents"
                  :key="item">
           <div class="headbar">
-            <img @click="showUserDetails(key.author)" class="avatar" :src="['data:Image/png;base64,'+key.uavatar]"
+            <!--<img @click="showUserDetails(key.author)" class="avatar" :src="['data:Image/png;base64,'+key.uavatar]"-->
+            <img @click="showUserDetails(key.author)" class="avatar" :src="key.uavatar"
                  alt="">
             <span class="username">{{key.author}}</span>
             <i class="el-icon-more-outline"></i>
           </div>
           <div class="contentImage">
-            <img onmouseover="displayDesc" class="innerPic" :src="['data:Image/png;base64,'+key.img]" :preview="key.pid"
+            <!--<img onmouseover="displayDesc" class="innerPic" :src="['data:Image/png;base64,'+key.img]" :preview="key.pid"-->
+            <img onmouseover="displayDesc" class="innerPic" :src="key.img" :preview="key.pid"
                  alt="">
             <div class="imageDesc">{{key.desc}}</div>
           </div>

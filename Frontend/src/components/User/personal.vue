@@ -12,7 +12,8 @@
         <el-row v-show="topBody" v-cloak :gutter="20">
           <el-col :span="6">
             <div class="content-left">
-              <img class="user-avatar" :src="['data:Image/jpg;base64,'+this.currentUser.avatar]" alt="">
+              <img class="user-avatar" :src="this.currentUser.avatar" alt="">
+              <!--<img class="user-avatar" :src="['data:Image/jpg;base64,'+this.currentUser.avatar]" alt="">-->
             </div>
           </el-col>
           <el-col :span="18">
@@ -34,7 +35,8 @@
                 </div>
                 <div class="edit-avatar">
               <span><img v-if="imageURL === ''||imageURL === undefined" class="avatar-preview"
-                         :src="['data:Image/png;base64,'+this.GLOBAL.USER.avatar]" alt="">
+                         :src="this.GLOBAL.USER.avatar" alt="">
+                         <!--:src="['data:Image/png;base64,'+this.GLOBAL.USER.avatar]" alt="">-->
               <img v-else class="avatar-preview" :src=imageURL alt=""></span>
                   <p onclick="document.getElementById('avatar-choose').click();">更换头像</p>
                   <input id="avatar-choose" class="avatar-choose" type="file" @change="avatarChoosed($event)">

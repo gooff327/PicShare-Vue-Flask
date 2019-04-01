@@ -8,7 +8,8 @@
       <section class="top">
         <div class="avatarWrapper">
           <img @click="showUserDetails(users[key.uid]['username'])"
-               :src="['data:Image/png;base64,'+ users[key.uid]['avatar']]" alt="">
+               :src="users[key.uid]['avatar']" alt="">
+               <!--:src="['data:Image/png;base64,'+ users[key.uid]['avatar']]" alt="">-->
         </div>
         <div class="nameWrapper">
           <span @click="showUserDetails(users[key.uid]['username'])" class="username">&nbsp;{{users[key.uid]['username']}}&nbsp;</span>
@@ -25,7 +26,8 @@
           </span>
         </div>
         <div class="imgWrapper">
-          <img :src="['data:Image/png;base64,'+ passages[key.pid]['img']]" :preview=key.pid alt="">
+          <img :src="passages[key.pid]['img']" :preview=key.pid alt="">
+          <!--<img :src="['data:Image/png;base64,'+ passages[key.pid]['img']]" :preview=key.pid alt="">-->
         </div>
       </section>
     </el-card>
@@ -157,7 +159,7 @@
 
   .imgWrapper img {
     flex: 1;
-    max-width: 96%;
+    max-width: 94%;
     border-radius: 4px;
   }
 

@@ -1,9 +1,8 @@
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, SignatureExpired, BadSignature
-from pip._vendor.colorama import Fore
 from sqlalchemy import ForeignKey
 
 from ext import db
-from config import config
+from private_config import Config
 from passlib.apps import custom_app_context
 import json
 
@@ -36,11 +35,11 @@ class Users(db.Model):
         return custom_app_context.verify(password, self.password)
 
     def generate_auth_token(self, expiration=6000):
-        s = Serializer(config.SECRET_KEY, expires_in=expiration)
+        s = Serializer(Config.SECRET_KEY, expires_in=expiration)
         return s.dumps({'uid': self.uid})
 
     def verify_token(token):
-        s = Serializer(config.SECRET_KEY)
+        s = Serializer(Config.SECRET_KEY)
         try:
             data = s.loads(token)
         except SignatureExpired:

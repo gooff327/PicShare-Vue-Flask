@@ -9,7 +9,7 @@
     </el-col>
     <el-col :span="24" v-else v-for="comment in this.comments" class="commentInfo" :key="comment.cid">
       <el-col :span="3" class="avatarWrapper">
-        <img class="commentAvatars" :src="['data:Image/png;base64,'+comment.avatar]" alt="">
+        <img class="commentAvatars" :src="comment.avatar" alt="">
       </el-col>
       <el-col :span="4">
         <span class="commentUsername">{{comment.username}} : </span>
@@ -23,7 +23,8 @@
     </el-col>
 
     <div class="dialog-footer">
-      <img class="commentAvatar" :src="['data:Image/png;base64,'+this.GLOBAL.USER.avatar]" alt="">
+      <img class="commentAvatar" :src="this.GLOBAL.USER.avatar" alt="">
+      <!--<img class="commentAvatar" :src="['data:Image/png;base64,'+this.GLOBAL.USER.avatar]" alt="">-->
       <el-input class="inputComment" type="textarea" :autosize="{ minRows: 1, maxRows: 6 }" v-model="inputContent"
                 placeholder="添 加 评 论 ..."></el-input>
       <el-button class="submitBtn" :disabled="!this.inputContent" size="mini" type="primary" @click="submit">评 论
@@ -46,6 +47,7 @@
     },
     created: function () {
       this.getComment(this.$route.params.pid)
+      console.log('comment', this.GLOBAL.USER)
     },
     methods: {
       goBack: function () {
@@ -124,7 +126,8 @@
     font-weight: bold;
     line-height: 3rem;
   }
-  .avatarWrapper{
+
+  .avatarWrapper {
     margin-right: 0.4rem;
   }
 
@@ -176,7 +179,8 @@
     color: rgba(64, 64, 64, 0.9);
     font-size: 0.8rem;
   }
-  .commentDatetime{
+
+  .commentDatetime {
     margin-top: 0.82rem;
     font-size: 0.6rem;
     display: flex;
@@ -185,12 +189,13 @@
     border: 1px solid;
     border-radius: 0.3rem;
     line-height: 0.6rem;
-    background-color: lightgray;
-    color: #fffdf3}
+    color: darkgray;
+  }
 
   .commentAvatars {
-    width: 2.4rem;
-    height: 2.4rem;
+    margin-right: 0.4rem;
+    width: 2rem;
+    height: 2rem;
     border-radius: 50%;
   }
 
