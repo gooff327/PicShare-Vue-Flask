@@ -9,7 +9,7 @@
       <el-form-item v-if="regVisible" prop="Avatar">
         <el-upload
           class="avatar-uploader"
-          action="http://127.0.0.1:5000/api/v1/post/avatar"
+          :action="this.avatarUrl()"
           :auto-upload="false"
           :on-change="setPreview"
           ref="uploadAvatar"
@@ -112,6 +112,9 @@
       }
     },
     methods: {
+      avatarUrl: function () {
+        return String(this.GLOBAL.BASE_URL + '/api/v1/post/avatar')
+      },
       reUpload () {
         let url = this.avatarPath
         let rename = this.username + '.jpg'

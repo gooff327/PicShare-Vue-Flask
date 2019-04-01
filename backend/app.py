@@ -51,12 +51,7 @@ def get_avatar():
         filename = ((request.form).to_dict()).get('filename')
         img = request.files.get('avatar')
         save_avatar(img, filename)
-    # img_name = '1.jpg'
-    # if not img and img_name:
-    #     return make_response('上传失败！')
-    # with open(img_name, 'wb')as f:
-    #     f.write(img)
-    #     f.close()
+    return None
 
 
 @app.route('/api/v1/register', methods=['GET', 'POST'])

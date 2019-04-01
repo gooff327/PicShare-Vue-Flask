@@ -56,17 +56,10 @@
           // posted: {}
         }
       },
-      // created: function () {
-      //   let url = 'http://127.0.0.1:5000/api/v1/mypassages'
-      //   this.$axios.get(url).then(function (response) {
-      //     this.posted = response.data
-      //     console.log(this.posted)
-      //   }.bind(this))
-      // },
         name: 'admin',
       methods: {
         onSubmit (form) {
-          var adminUrl = 'http://127.0.0.1:5000/api/v1/admin'
+          var adminUrl = `${this.GLOBAL.BASE_URL}+/api/v1/admin`
           this.$axios.post(adminUrl, {
             title: `${this.form.title}`,
             cls: `${this.form.cls}`,
