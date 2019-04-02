@@ -1,7 +1,6 @@
 import {Loading} from 'element-ui'
 
-const BASE_URL = 'http://127.0.0.1:5000'
-// const BASE_URL = 'http://gooff.me'
+let BASE_URL = ''
 let USER = {}
 const UPDATE = false
 const UPLOAD_FILE = ''
@@ -22,17 +21,22 @@ let usersList = []
 let passagesList = []
 let loadingInstance
 
+isDeployEnvironment()
+
+function isDeployEnvironment () {
+  window.location.port === '8080' ? BASE_URL = 'http://127.0.0.1' : BASE_URL = 'http://gooff.me'
+}
+
 function showLoading (obj) {
   if (obj) {
     loadingInstance = Loading.service(obj)
-  }
-  else {
-    loadingInstance = Loading.service({text: '加载中，请耐心等待...', background: 'rgba(255,250,250,0.8)',lock:true})
+  } else {
+    loadingInstance = Loading.service({text: '加载中，请耐心等待...', background: 'rgba(255,250,250,0.8)', lock: true})
   }
 }
 
 function closeLoading () {
-  setTimeout(loadingInstance.close(),0)
+  setTimeout(loadingInstance.close(), 0)
 }
 
 function initMessage (messages) {
@@ -66,7 +70,6 @@ function resolveMessage (message) {
   usersList.push(message.uid)
   passagesList.push(message.pid)
 }
-
 
 export default {
   BASE_URL,

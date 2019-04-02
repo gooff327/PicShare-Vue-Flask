@@ -134,7 +134,6 @@ def verify_password(username_or_token, password):
 def get_token():
     user = {}
     token = g.user.generate_auth_token()
-    # avatarPath = config.AVATARDIR + g.user.avatar
     user['following'] = resolve_following_relation(g.user.relation)
     user['username'] = g.user.username
     user['uid'] = g.user.uid
