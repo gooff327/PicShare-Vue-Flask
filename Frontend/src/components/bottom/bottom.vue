@@ -68,7 +68,7 @@
         let url = this.GLOBAL.BASE_URL + '/api/v1/messages/query'
         this.$axios.post(url, reqList).then(function (response) {
           this.GLOBAL.MESSAGES_CONTENT = response.data
-          console.log((this.GLOBAL.MESSAGES_CONTENT))
+          console.log('MESSAGE', this.GLOBAL.MESSAGES_CONTENT)
         }.bind(this))
       },
 

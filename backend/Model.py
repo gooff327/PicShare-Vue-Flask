@@ -130,7 +130,6 @@ class Relation(db.Model):
 # 1 admire messages
 # 2 comment messages
 # 3 follow messages
-# 4 private messages
 # 5 forward messages
 class Message(db.Model):
     __tablename__ = 'message'

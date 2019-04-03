@@ -9,6 +9,7 @@ import comment from '../components/Common/comment'
 import following from '../components/home/following'
 import followlist from '../components/User/followlist'
 import messageDetail from '../components/Message/messageDetail'
+import contentDetail from '../components/Message/contentDetail'
 
 Vue.use(Router)
 
@@ -44,6 +45,10 @@ export default new Router({
       component: message,
       meta: {requireAuth: true}
     },
+    {path: '/content/detail/:pid',
+      name: 'content',
+      component: contentDetail,
+      meta: {requireAuth: true}},
     {
       path: '/message/admire',
       name: 'm_admire',
@@ -53,6 +58,12 @@ export default new Router({
     {
       path: '/message/follow',
       name: 'm_follow',
+      component: messageDetail,
+      meta: {requireAuth: true}
+    },
+    {
+      path: '/message/comment',
+      name: 'm_comment',
       component: messageDetail,
       meta: {requireAuth: true}
     },

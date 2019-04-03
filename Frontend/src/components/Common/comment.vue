@@ -24,7 +24,6 @@
 
     <div class="dialog-footer">
       <img class="commentAvatar" :src="this.GLOBAL.USER.avatar" alt="">
-      <!--<img class="commentAvatar" :src="['data:Image/png;base64,'+this.GLOBAL.USER.avatar]" alt="">-->
       <el-input class="inputComment" type="textarea" :autosize="{ minRows: 1, maxRows: 6 }" v-model="inputContent"
                 placeholder="添 加 评 论 ..."></el-input>
       <el-button class="submitBtn" :disabled="!this.inputContent" size="mini" type="primary" @click="submit">评 论
@@ -47,7 +46,6 @@
     },
     created: function () {
       this.getComment(this.$route.params.pid)
-      console.log('comment', this.GLOBAL.USER)
     },
     methods: {
       goBack: function () {
@@ -78,6 +76,7 @@
         let data = {
           pid: `${this.pid}`,
           uid: `${this.GLOBAL.USER.uid}`,
+          vid: `${this.$route.params['vid']}`,
           username: `${this.GLOBAL.USER.username}`,
           commit: `${this.inputContent}`
         }
@@ -142,7 +141,7 @@
   }
 
   .commentTips {
-    padding-top: 3rem;
+    padding-top: 40vh;
     display: block;
     margin-bottom: 0.6rem;
     text-align: center;

@@ -15,6 +15,16 @@
                                                    class="badge"/>
           </span>
         </div>
+      </el-col><el-col :span="24" @click="forwardDetails">
+        <div class="row-wrapper" @click="commentDetails">
+          <span style="background-color: #00be70" class="icon-wrapper">
+            <i class="fa fa-comments"></i>
+          </span>
+          <span class="icon-desc">评 论  <el-badge :hidden="this.GLOBAL.COUNT.commentCount === 0"
+                                                   :value="this.GLOBAL.COUNT.commentCount" :max="99"
+                                                   class="badge"/>
+          </span>
+        </div>
       </el-col>
       <el-col :span="24" @click="admireDetails">
         <div class="row-wrapper" @click="admireDetails">
@@ -24,16 +34,6 @@
           <span class="icon-desc">我收到的赞  <el-badge :hidden="this.GLOBAL.COUNT.admireCount === 0"
                                                    :value="this.GLOBAL.COUNT.admireCount" :max="99"
                                                    class="badge"/>
-          </span>
-        </div>
-      </el-col>
-      <el-col :span="24" @click="privateDetails">
-        <div class="row-wrapper" @click="privateDetails">
-          <span style="background-color: #00be70" class="icon-wrapper">
-            <i class="fa fa-envelope-open-o"></i>
-          </span>
-          <span class="icon-desc">私 信  <el-badge :hidden="this.GLOBAL.COUNT.privateCount === 0"
-                                                 :value="this.GLOBAL.COUNT.privateCount" :max="99" class="badge"/>
           </span>
         </div>
       </el-col>
@@ -63,7 +63,7 @@
     methods: {
       goBack: function () {
         this.GLOBAL.showLoading()
-        this.$router.back()
+        this.$router.push('/home')
       },
       admireDetails: function () {
         this.$router.push({
@@ -80,14 +80,7 @@
             label: '好友关注'
           }
         })
-      },
-      privateDetails: function () {
-        this.$router.push({
-          name: 'm_private',
-          params: {
-            label: '私 信'
-          }
-        })
+        console.log('ok')
       },
       forwardDetails: function () {
         this.$router.push({
@@ -98,6 +91,12 @@
         })
       },
       commentDetails: function () {
+        this.$router.push({
+          name: 'm_comment',
+          params: {
+            label: '评 论'
+          }
+        })
       }
 
     }
@@ -107,16 +106,15 @@
 <style scoped>
   .el-header {
     padding: 0 !important;
-    margin: 0 !important;
-    border-bottom: 1px gainsboro solid;
     height: 2rem !important;
+    margin-bottom: 0.6rem;
   }
 
   .el-header span {
     vertical-align: center;
     display: inline-block;
     color: rgba(43, 43, 43, 0.93);
-    width: 86%;
+    width: 80%;
     text-align: center;
     font-size: 1.0rem;
     line-height: 2rem;
@@ -125,10 +123,18 @@
 
   .el-icon-back {
     position: relative;
-    width: 6%;
-    line-height: 100%;
-    padding-left: 1%;
+    display: inline-block;
+    width: 2rem;
+    height: 1.2rem;
+    border-radius: 4px;
+    line-height: 1.2rem;
+    text-align: center;
+    margin-left-left: 2%;
     font-size: 1rem;
+  }
+
+  .el-icon-back:hover {
+    background-color: lightgray;
   }
 
   .row-wrapper {

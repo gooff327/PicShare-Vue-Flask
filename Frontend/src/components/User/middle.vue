@@ -30,21 +30,19 @@
       </el-row>
     </transition>
     <transition name="fadein">
-      <div v-cloak v-show="moreView" ref="moreWrapper" class="wrapper">
+      <div v-cloak v-show="moreView"  class="wrapper">
         <el-row class="moreRow">
           <el-col v-for="(key,item) in contents" :key="item" :span="8" class="contents">
             <img class="smallPic" :src="key.img">
-            <!--<img class="smallPic" :src="['data:Image/png;base64,'+key.img]">-->
           </el-col>
         </el-row>
       </div>
     </transition>
     <transition name="fadein">
-      <div v-cloak v-show="!moreView" ref="lessWrapper" :class="wrapperStyle">
+      <div v-cloak v-show="!moreView">
         <el-row>
           <el-col v-for="(key,item) in contents" :key="item" :span="24" class="contents">
             <img class="bigPic" :src="key.img">
-            <!--<img class="bigPic" :src="['data:Image/png;base64,'+key.img]">-->
           </el-col>
         </el-row>
       </div>
@@ -53,7 +51,6 @@
 </template>
 
 <script>
-  import BScroll from 'better-scroll'
 
   export default {
     name: 'Middle',
@@ -80,98 +77,6 @@
         wrapper2: '',
         wrapperStyle: 'wrapper'
       }
-    },
-    mounted () {
-      this.$nextTick(() => {
-        if (!this.scroll) {
-          this.scroll = new BScroll(this.$refs.moreWrapper, {
-            click: true,
-            bounce: true,
-            scrollY: true,
-            topBody: true,
-            probeType: 3,
-            pullUpLoad: {
-              threshold: 0
-            },
-            pullDownRefresh: {
-              threshold: 20
-            }
-          })
-          this.scroll.on('scroll', (position) => {
-            if (!this.scroll.isInTransition && !this.scroll.isAnimating && position.y > 20) {
-              this.dropDown = true
-            } else {
-              this.dropDown = false
-            }
-          })
-          this.scroll.on('pullingDown', () => {
-            this.$emit('refresh')
-            setTimeout(() => {
-              this.scroll.finishPullDown()
-              this.scroll.refresh()
-            }, 200)
-          })
-          this.scroll.on('pullingUp', () => {
-            console.log('加载数据！')
-            this.$emit('loadData')
-            setTimeout(() => {
-              this.scroll.finishPullUp()
-              this.scroll.refresh()
-            }, 200)
-          })
-        } else {
-          this.scroll.refresh()
-        }
-        if (!this.scrollex) {
-          this.scrollex = new BScroll(this.$refs.lessWrapper, {
-            click: true,
-            bounce: true,
-            scrollY: true,
-            topBody: true,
-            probeType: 3,
-            pullUpLoad: {
-              threshold: 0
-            },
-            pullDownRefresh: {
-              threshold: 20
-            }
-          })
-          this.scrollex.on('scroll', (position) => {
-            if (!this.scrollex.isInTransition && !this.scrollex.isAnimating && position.y > 20) {
-              this.dropDown = true
-            } else if (position.y < 0) {
-              this.topBody = false
-              this.$emit('closeTop', false)
-              this.wrapperStyle = 'fullWrapper'
-            } else if (position.y > 0) {
-              this.$emit('closeTop', true)
-              this.topBody = true
-            } else {
-              this.wrapperStyle = 'wrapper'
-              this.dropDown = false
-            }
-          })
-          this.scrollex.on('pullingDown', () => {
-            this.topBody = true
-            this.$emit('closeTop', true)
-            this.$emit('refresh')
-            setTimeout(() => {
-              this.scrollex.finishPullDown()
-              this.scrollex.refresh()
-            }, 200)
-          })
-          this.scrollex.on('pullingUp', () => {
-            console.log('加载数据！')
-            this.$emit('loadData')
-            setTimeout(() => {
-              this.scrollex.finishPullUp()
-              this.scrollex.refresh()
-            }, 200)
-          })
-        } else {
-          this.scrollex.refresh()
-        }
-      })
     },
     methods: {
       showMore: function () {
@@ -221,7 +126,7 @@
     left: 0;
     height: 50vh;
     z-index: 2;
-    overflow: hidden;
+    overflow: auto;
   }
 
   .fullWrapper {

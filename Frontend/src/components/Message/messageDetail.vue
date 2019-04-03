@@ -1,36 +1,38 @@
 <template>
-  <el-container>
+  <el-container class="wrapper">
     <el-header>
       <i @click="goBack" class="el-icon-back"></i>
-      <span v-text="this.$route.params.label"></span>
+      <span v-text="this.$route.params['label']"></span>
     </el-header>
-    <el-card shadow="hover" class="messageCard" v-for="(key,item) in admireMessages" :key="item">
-      <section class="top">
-        <div class="avatarWrapper">
-          <img @click="showUserDetails(users[key.uid]['username'])"
-               :src="users[key.uid]['avatar']" alt="">
-               <!--:src="['data:Image/png;base64,'+ users[key.uid]['avatar']]" alt="">-->
-        </div>
-        <div class="nameWrapper">
-          <span @click="showUserDetails(users[key.uid]['username'])" class="username">&nbsp;{{users[key.uid]['username']}}&nbsp;</span>
-          <span>
-            觉得很赞
+    <el-row class="contentWrapper">
+      <el-card shadow="hover" class="messageCard"
+               v-for="(key,item) in messageType[this.$route.name]" :key="item">
+        <section class="top">
+          <div class="avatarWrapper">
+            <img @click="showUserDetails(users[key.uid]['username'])"
+                 :src="users[key.uid]['avatar']" alt="">
+          </div>
+          <div class="nameWrapper">
+            <span @click="showUserDetails(users[key.uid]['username'])" class="username">{{users[key.uid]['username']}}&nbsp;</span>
+            <span>
+            {{key['m_content']}}
           </span>
-        </div>
-      </section>
-      <section class="contentCenter">
-        <div class="descWrapper">
-          <span @click="showUserDetails(me['username'])" class="username">&nbsp;{{me.username}}</span>
-          <span>
+          </div>
+        </section>
+        <section @click="contentDetail(key,passages[key.pid],me.username)" v-if="key['m_type']!== 3"
+                 class="contentCenter">
+          <div class="descWrapper">
+            <span @click="showUserDetails(me['username'])" class="username">&nbsp; @{{me.username}}</span>
+            <span>
             <b>: {{passages[key.pid]['desc']}}</b>
           </span>
-        </div>
-        <div class="imgWrapper">
-          <img :src="passages[key.pid]['img']" :preview=key.pid alt="">
-          <!--<img :src="['data:Image/png;base64,'+ passages[key.pid]['img']]" :preview=key.pid alt="">-->
-        </div>
-      </section>
-    </el-card>
+          </div>
+          <div class="imgWrapper">
+            <img :src="passages[key.pid]['img']" :preview=key.pid alt="">
+          </div>
+        </section>
+      </el-card>
+    </el-row>
   </el-container>
 </template>
 
@@ -41,36 +43,45 @@
       return {
         users: this.GLOBAL.MESSAGES_CONTENT['users'],
         passages: this.GLOBAL.MESSAGES_CONTENT['passages'],
-        admireMessages: this.GLOBAL.MESSAGES['admire_messages'],
-        me: this.GLOBAL.USER
-
+        me: this.GLOBAL.USER,
+        messageType: {
+          m_admire: this.GLOBAL.MESSAGES['admire_messages'],
+          m_forward: this.GLOBAL.MESSAGES['forward_messages'],
+          m_follow: this.GLOBAL.MESSAGES['follow_messages'],
+          m_comment: this.GLOBAL.MESSAGES['comment_messages']
+        }
       }
     },
     name: 'messageDetail',
     created: function () {
-      this.changeMessageStatus(this.GLOBAL.MESSAGES[`${this.$route.name.slice(2)}_messages`])
-      this.GLOBAL.COUNT = this.GLOBAL.initMessage(this.GLOBAL.MESSAGES)
-      console.log('$store', this.$store.state.loading)
+      this.changeMessageStatus(`${this.$route.name.slice(2)}Count`, this.messageType[`${this.$route.name}`])
     },
     methods: {
       goBack: function () {
-        this.$router.back()
+        this.$router.push('/message')
+      },
+      contentDetail: function (key, passage, username) {
+        switch (key['m_type']) {
+          case 3:
+            break
+          default:
+            this.$router.push({name: 'content', params: {pid: passage.pid, passage: passage, username: username}})
+        }
       },
       showUserDetails: function (username) {
         this.$router.push(`/user/${username}`)
       },
-      changeMessageStatus: function (totlaMessages) {
+      changeMessageStatus: function (countType, messages) {
         let readList = []
-        for (let i in totlaMessages) {
-          if (totlaMessages[i]['m_status']) {
-            totlaMessages[i]['m_status'] = false
-            readList.push(totlaMessages[i]['mid'])
+        for (let ele in messages) {
+          if (messages[ele]['m_status']) {
+            readList.push(messages[ele].mid)
           }
         }
         if (readList) {
           let url = this.GLOBAL.BASE_URL + '/api/v1/put/message/status'
-          this.$axios.put(url, readList).then(response => {
-            console.log(response)
+          this.$axios.put(url, readList).then(() => {
+            this.GLOBAL.COUNT[countType] = 0
           })
         }
       }
@@ -81,15 +92,15 @@
 <style scoped>
   .el-header {
     padding: 0 !important;
-    margin: 0 !important;
     height: 2rem !important;
+    margin-bottom: 0.6rem;
   }
 
   .el-header span {
     vvertical-align: center;
     display: inline-block;
     color: rgba(43, 43, 43, 0.93);
-    width: 86%;
+    width: 80%;
     text-align: center;
     font-size: 1.0rem;
     line-height: 2rem;
@@ -98,10 +109,18 @@
 
   .el-icon-back {
     position: relative;
-    width: 6%;
-    line-height: 100%;
-    padding-left: 1%;
+    display: inline-block;
+    width: 2rem;
+    height: 1.2rem;
+    border-radius: 4px;
+    line-height: 1.2rem;
+    text-align: center;
+    margin-left-left: 2%;
     font-size: 1rem;
+  }
+
+  .el-icon-back:hover {
+    background-color: lightgray;
   }
 
   .el-card {
@@ -160,7 +179,11 @@
   .imgWrapper img {
     flex: 1;
     max-width: 94%;
+    width: 94%;
+    height: 52.875%;
     border-radius: 4px;
+    object-fit: fill;
+    margin-top: 0.2rem;
   }
 
   .username {

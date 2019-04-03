@@ -282,15 +282,27 @@
   }
 
   .el-header {
-    padding: 0;
-    margin: 0;
-    /*margin-top: 10px;*/
+    margin-top: 0.6rem;
     /*margin-bottom: 10px;*/
     /*padding-bottom: 6px;*/
     border-bottom: 1px gainsboro solid;
     height: 2rem !important;
   }
+  .el-icon-back {
+    position: relative;
+    display: inline-block;
+    width: 2rem;
+    height: 1.2rem;
+    border-radius: 4px;
+    line-height: 1.2rem;
+    text-align: center;
+    margin-left-left: 2%;
+    font-size: 1rem;
+  }
 
+  .el-icon-back:hover {
+    background-color: lightgray;
+  }
   .el-header span {
     vertical-align: center;
     display: inline-block;

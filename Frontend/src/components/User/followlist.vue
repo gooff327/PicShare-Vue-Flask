@@ -123,13 +123,20 @@
     text-align: center;
     font-size: 1.0rem;
   }
-
   .el-icon-back {
     position: relative;
-    width: 6%;
-    line-height: 100%;
-    padding-left: 1%;
+    display: inline-block;
+    width: 2rem;
+    height: 1.2rem;
+    border-radius: 4px;
+    line-height: 1.2rem;
+    text-align: center;
+    margin-left-left: 2%;
     font-size: 1rem;
+  }
+
+  .el-icon-back:hover {
+    background-color: lightgray;
   }
 
   .userList {

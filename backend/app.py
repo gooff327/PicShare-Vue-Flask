@@ -32,6 +32,7 @@ def get_file_url(client, bucket, file_name):
         Expired=3000
     )
     return response
+    # pass
 
 
 app = Flask(__name__, static_folder="../dist/static", template_folder="../dist")
@@ -209,10 +210,12 @@ def admire():
         return jsonify({"admire": admire, "tips": "Successed!", "code": 521})
     if request.method == 'POST':
         user = Users.query.filter_by(username=g.user.username).first()
+        content = '觉得很赞'
         data = request.json
         admire_list = json.loads(data['admireList'])
         admire_this = json.loads(data['admireThis'])
-        print(admire_this)
+        message = Message(m_content=content, uid=g.user.uid, vid=admire_this['uid'], pid=admire_this['pid'], m_type=1,
+                          m_status=1)
         if admire_this['result']:
             add_admire_message(admire_this['pid'])
         else:
@@ -240,11 +243,14 @@ def comments():
     if request.method == 'POST':
         pid = request.json.get('pid')
         uid = request.json.get('uid')
+        vid = request.json.get('vid')
         content = request.json.get('commit')
         username = request.json.get('username')
         timestamp = datetime.now()
         comment = Comments(pid, uid, content, username, timestamp)
+        message = Message(m_type=2, uid=uid, vid=vid, m_content=content, m_status=1, pid=pid)
         db.session.add(comment)
+        db.session.add(message)
         db.session.commit()
         return jsonify({'tips': 'Successed!'})
 
@@ -336,15 +342,20 @@ def query_user():
 def concern_action():
     vid = ((request.form).to_dict()).get('vid')
     status = get_bool_status((request.form).to_dict().get('status'))
-    print(status)
+    concern_content = '关注了你'
+    cancel_concern_content = '对你取消了关注'
     uid = g.user.uid
     relation = Relation.query.filter_by(uid=uid, vid=vid).first()
     if (status == True):
+        message = Message(m_content=concern_content, uid=uid, vid=vid, m_status=1, m_type=3, pid=-1)
         relation = Relation(uid=uid, vid=vid, status=status)
         db.session.add(relation)
+        db.session.add(message)
         db.session.commit()
     elif (status == False):
+        message = Message(m_content=cancel_concern_content, uid=uid, vid=vid, m_status=1, m_type=3, pid=-1)
         db.session.delete(relation)
+        db.session.add(message)
         db.session.commit()
     return jsonify({'tips': 'Successed!'})
 
@@ -385,8 +396,7 @@ def get_messages():
         'admire': 1,
         'comment': 2,
         'follow': 3,
-        'private': 4,
-        'forward': 5,
+        'forward': 4,
     }
     if message_type in type_dict.keys():
         m_type = type_dict.get(message_type)
@@ -403,14 +413,11 @@ def get_messages():
         comment_messages = resolve_messages(comment_messages)
         follow_messages = Message.query.filter_by(vid=g.user.uid, m_type=3).all()
         follow_messages = resolve_messages(follow_messages)
-        private_messages = Message.query.filter_by(vid=g.user.uid, m_type=4).all()
-        private_messages = resolve_messages(private_messages)
-        forward_messages = Message.query.filter_by(vid=g.user.uid, m_type=5).all()
+        forward_messages = Message.query.filter_by(vid=g.user.uid, m_type=4).all()
         forward_messages = resolve_messages(forward_messages)
         rt_messages['admire_messages'] = admire_messages
         rt_messages['comment_messages'] = comment_messages
         rt_messages['follow_messages'] = follow_messages
-        rt_messages['private_messages'] = private_messages
         rt_messages['forward_messages'] = forward_messages
         return jsonify({'messages': rt_messages})
 
@@ -434,15 +441,25 @@ def query_by_list(cls, query_list):
             result[content['uid']] = content
     elif cls == Resource:
         for el in query_list:
-            content = cls.query.filter_by(pid=el).first().to_json()
-            content['img'] = get_file_url(img_client, Config.img_bucket, content['img'])
-            result[content['pid']] = content
+            if el <= 0:
+                pass
+            elif el > 0:
+                content = cls.query.filter_by(pid=el).first().to_json()
+                content['img'] = get_file_url(img_client, Config.img_bucket, content['img'])
+                result[content['pid']] = content
     return result
 
 
 @app.route('/api/v1/put/message/status', methods=['PUT'])
 @auth.login_required
 def change_message_status():
+    read_messages = request.json
+    print(read_messages)
+    for el in read_messages:
+        print(el)
+        message = Message.query.filter_by(mid=el).first()
+        message.m_status = 0
+        db.session.commit()
     return jsonify('ok')
 
 
@@ -561,7 +578,7 @@ def add_admire_message(pid):
     vid = Resource.query.filter_by(pid=pid).first().uid  # get author uid
     m_type = 1
     pid = pid
-    m_content = None
+    m_content = '觉得很赞'
     m_status = True
     if not (Message.query.filter_by(uid=g.user.uid, pid=pid).first()):
         admire_message = Message(uid=uid, vid=vid, pid=pid, m_type=m_type, m_content=m_content, m_status=m_status)
