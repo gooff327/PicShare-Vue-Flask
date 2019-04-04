@@ -31,11 +31,6 @@
         </el-form>
       </el-collapse-item>
       <el-collapse-item title="Manage your passages" name="2">
-        <!--<ul><li v-for="item in posted" :key="item">-->
-          <!--<p>{{item.title}}</p>-->
-          <!--<p>{{item.date}}</p>-->
-          <!--<p>{{item.pv}}</p>-->
-        <!--</li></ul>-->
       </el-collapse-item>
       <el-collapse-item title="Change your password" name="3"></el-collapse-item>
     </el-collapse>

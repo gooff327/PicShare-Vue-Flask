@@ -222,11 +222,27 @@ def admire():
             remove_admire_message(admire_this['pid'])
         user.admire = json.dumps(admire_list)
         db.session.commit()
-        db.session.close()
         return jsonify({"Tips": "Successed!", "code": 520})
 
 
+@app.route('/api/v1/forward', methods=['POST'])
+@auth.login_required
+def forward():
+    data = request.json
+    print(data)
+    passage = Resource.query.filter_by(pid=data['pid']).first()
+    forward_passage = Resource(uid=data['uid'], img=passage.img, author=data['author'], date=datetime.utcnow(),
+                               desc=data["content"], pv=0)
+    forward_message = Message(uid=data['uid'], vid=data['vid'], pid=data['pid'], m_type=4, m_status=1,
+                              m_content=data['content'])
+    db.session.add(forward_passage)
+    db.session.add(forward_message)
+    db.session.commit()
+    return jsonify('ok')
+
+
 @app.route('/api/v1/comments', methods=['GET', 'POST'])
+@auth.login_required
 def comments():
     if request.method == 'GET':
         pid = request.args.get('pid')
@@ -266,10 +282,11 @@ def new_passage():
     img = request.files.get('imageFile')
     imgName = username + '#' + img.filename
     path = basedir + "/static/img/"
-    imagePath = Config.IMAGEDIR + imgName
+    image_path = Config.IMAGEDIR + imgName
     filepath = path + imgName
-    img.save(filepath)
-    upload_to_bucket(img_client, Config.img_bucket, imagePath, imgName)
+    print(filepath)
+    img.save(image_path)
+    upload_to_bucket(img_client, Config.img_bucket, image_path, imgName)
     passage = Resource(uid, imgName, desc, pv, username, date)
     db.session.add(passage)
     db.session.commit()
@@ -565,7 +582,7 @@ def query_passages(start_index, last_index, types, keyword):
 
 def save_avatar(img, username):
     imageName = username + '.jpg'
-    path = basedir + "/static/img/avatar/"
+    path = basedir + "/static/avatar/"
     filepath = path + imageName
     img.save(filepath)
     upload_to_bucket(avatar_client, Config.avatar_bucket, filepath, imageName)

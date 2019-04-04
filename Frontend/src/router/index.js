@@ -10,6 +10,7 @@ import following from '../components/home/following'
 import followlist from '../components/User/followlist'
 import messageDetail from '../components/Message/messageDetail'
 import contentDetail from '../components/Message/contentDetail'
+import forward from '../components/home/forward'
 
 Vue.use(Router)
 
@@ -107,6 +108,12 @@ export default new Router({
       path: '/comment/:pid',
       name: 'comment',
       component: comment,
+      meta: {requireAuth: true}
+    },
+    {
+      path: '/forward/:pid',
+      name: 'forward',
+      component: forward,
       meta: {requireAuth: true}
     }
   ]

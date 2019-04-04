@@ -19,13 +19,13 @@
               <span class="imageDesc" v-if="key.desc">{{key.desc}}</span>
             </div>
             <div class="bottom">
-              <span class="bottomText">{{key.pv}} 个人觉得很赞</span>
+              <span class="bottomText">{{key.date.slice(4,-3)}}发布</span>
               <span class="botttomIcon">
               <i style="color: #EE4957" @click="likeEvent(key)" v-if="admire[key.pid] ===true" class="fa fa-heart"
                  aria-hidden="true"></i>
               <i @click="likeEvent(key)" v-else class="fa fa-heart-o" aria-hidden="true"></i>
               <i @click="commentEvent(key.pid,key.uid)" class="fa fa-comment-o" aria-hidden="true"></i>
-              <i @click="shareEvent(key.pid)" class="fa fa-paper-plane-o" aria-hidden="true"></i>
+              <i @click="forwardEvent(key)" class="fa fa-paper-plane-o" aria-hidden="true"></i>
            </span>
             </div>
           </el-card>
@@ -40,7 +40,6 @@
   import BScroll from 'better-scroll'
   import store from '../../vuex/user'
   import header from '../../components/header/homeHeader'
-  import $ from 'jquery'
 
   export default {
     data () {
@@ -147,16 +146,14 @@
         this.$axios.post(url, data, {headers: {'Content-Type': 'Application/json'}}).then(function (response) {
           console.log('admire', response)
           if (response.data.code === 520 && this.admire[key.pid] === true) {
-            this.likeMessage(key.pid) // send like message to server
           }
         }.bind(this))
       },
-      setHight: function () {
-        let bottomH = $('footerbar').height()
-        console.log('h', bottomH)
-      },
       commentEvent: function (pid, vid) {
         this.$router.push({name: 'comment', params: {pid: pid, vid: vid}})
+      },
+      forwardEvent: function (key) {
+        this.$router.push({name: 'forward', params: {pid: key.pid, passage: key}})
       }
     },
     props: {
@@ -329,5 +326,14 @@
     width: 100%;
     text-align: center;
     color: #34BE5B;
+  }
+
+  .contentWrapper {
+    background-color: #cfcfc0;
+    border-radius: 10px;
+  }
+
+  .el-card {
+    margin-bottom: 3px;
   }
 </style>

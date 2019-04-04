@@ -4,8 +4,7 @@
     <el-header>
       <span v-if="isSelf" class="fa fa-cog"></span>
       <span v-else class="el-icon-back" @click="back"></span>
-      <span class="headTitle">个 人 主 页</span>
-      <span class="fa fa-user-plus"></span>
+      <span class="headTitle">   个 人 主 页</span>
     </el-header>
     <el-main>
       <transition name="fadein">
@@ -327,13 +326,6 @@
     text-align: center;
     font-size: 1rem;
     font-weight: 500;
-  }
-
-  .fa-user-plus {
-    width: 6%;
-    float: right;
-    padding-right: 10px;
-    font-size: 1rem;
   }
 
   .user-avatar {

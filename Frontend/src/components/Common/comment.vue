@@ -5,7 +5,7 @@
       <span class="dialogTitle">评 论</span>
     </el-col>
     <el-col :span="24" v-if="this.comments.length === undefined || this.comments.length === 0" class="commentTips">
-      <h3 class="emptyContent" v-text="tips"></h3>
+      <h4 class="emptyContent" v-text="tips"></h4>
     </el-col>
     <el-col :span="24" v-else v-for="comment in this.comments" class="commentInfo" :key="comment.cid">
       <el-col :span="3" class="avatarWrapper">
@@ -25,7 +25,7 @@
     <div class="dialog-footer">
       <img class="commentAvatar" :src="this.GLOBAL.USER.avatar" alt="">
       <el-input class="inputComment" type="textarea" :autosize="{ minRows: 1, maxRows: 6 }" v-model="inputContent"
-                placeholder="添 加 评 论 ..."></el-input>
+                placeholder="添加评论"></el-input>
       <el-button class="submitBtn" :disabled="!this.inputContent" size="mini" type="primary" @click="submit">评 论
       </el-button>
     </div>
@@ -66,7 +66,7 @@
           console.log(response)
           this.comments = response.data
           if (this.comments.length === undefined || this.comments.length === 0) {
-            this.tips = '当前还没有评论哦！'
+            this.tips = '当前还没有评论！'
           }
         }.bind(this))
       },
