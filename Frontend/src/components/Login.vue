@@ -1,60 +1,59 @@
 <!--suppress ALL -->
 <template>
-  <div>
-    <div class="headers">
-      <v-header></v-header>
-    </div>
-    <el-form :model="loginForm" hide-required-asterisk status-icon :rules="rules" ref="loginForm"
-             class="demo-loginForm">
-      <el-form-item v-if="regVisible" prop="Avatar">
-        <el-upload
-          class="avatar-uploader"
-          :action="this.avatarUrl()"
-          :auto-upload="false"
-          :on-change="setPreview"
-          ref="uploadAvatar"
-          :data="this.loginForm"
-          :show-file-list="false">
-          <img v-if="imageUrl" :src=imageUrl class="avatar">
-          <i v-else class="el-icon-plus avatar-uploader-icon"></i>
-        </el-upload>
-      </el-form-item>
-      <el-form-item label="用户名" prop="username" :rules="[
+  <div class="wrapper">
+  <div class="inputWrapper">
+      <el-form :model="loginForm" hide-required-asterisk status-icon :rules="rules" ref="loginForm"
+               class="demo-loginForm">
+        <el-form-item v-if="regVisible" prop="Avatar">
+          <el-upload
+            class="avatar-uploader"
+            :on-success="this.handleSuccess"
+            :auto-upload="false"
+            :on-change="setPreview"
+            ref="uploadAvatar"
+            :data="this.loginForm"
+            :show-file-list="false">
+            <img v-if="imageUrl" :src=imageUrl class="avatar">
+            <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+          </el-upload>
+        </el-form-item>
+        <el-form-item label="用户名" prop="username" :rules="[
      {required:true,message:'Username can not be empty!',trigger:'blur'},
      {min:5,max:18,message:'Username\'s length is between 5 and 18!',trigger:'blur'}
      ]">
-        <el-input v-model="loginForm.username" placeholder="用户名至少6位"></el-input>
-      </el-form-item>
+          <el-input v-model="loginForm.username" placeholder="用户名至少6位"></el-input>
+        </el-form-item>
 
-      <el-form-item label="密码" prop="pass" :rules="[
+        <el-form-item label="密码" prop="pass" :rules="[
       {required:true,message:'Password can not be empty!',trigger:'blur'},
       {min: 5,max: 18,message:'Password is between 5 to 18',trigger:'blur'}
      ]">
-        <el-input type="password" v-model="loginForm.pass" placeholder="请输入密码"></el-input>
-      </el-form-item>
+          <el-input type="password" v-model="loginForm.pass" placeholder="请输入密码"></el-input>
+        </el-form-item>
 
-      <el-form-item v-if='regVisible' label="确认密码" prop="checkPass">
-        <el-input class="reg" type="password" v-model="loginForm.checkPass" placeholder="请重复输入密码"></el-input>
-      </el-form-item>
+        <el-form-item v-if='regVisible' label="确认密码" prop="checkPass">
+          <el-input class="reg" type="password" v-model="loginForm.checkPass" placeholder="请重复输入密码"></el-input>
+        </el-form-item>
 
-      <el-form-item v-if="regVisible" label="电子邮箱" prop="email" :rules="[
+        <el-form-item v-if="regVisible" label="电子邮箱" prop="email" :rules="[
      {required: true,message:'Email地址不能为空',trigger:'blur'}
      ]">
-        <el-input class="reg" type="email" v-model="loginForm.email" placeholder="example@gamil.com"></el-input>
-      </el-form-item>
-      <br>
-      <div class="btnGroup">
-        <el-button type="info" plain v-if="logBtn" @click="regVisible=!regVisible,btnSwitch = !btnSwitch"
-                   class="logbtn">
-          {{btnSwitch ? '取 消' : '注 册'}}
-        </el-button>
+          <el-input class="reg" type="email" v-model="loginForm.email" placeholder="example@gamil.com"></el-input>
+        </el-form-item>
         <br>
-        <br>
-        <el-button type="primary" @click="submitUser('loginForm')" v-if="logBtn" class="logbtn">{{btnSwitch ? '提 交' :
-          '登录'}}
-        </el-button>
-      </div>
-    </el-form>
+        <div class="btnGroup">
+          <el-button type="info" plain v-if="logBtn" @click="regVisible=!regVisible,btnSwitch = !btnSwitch"
+                     class="logbtn">
+            {{btnSwitch ? '取 消' : '注 册'}}
+          </el-button>
+          <br>
+          <br>
+          <el-button type="primary" @click="submitUser('loginForm')" v-if="logBtn" class="logbtn">{{btnSwitch ? '提 交' :
+            '登录'}}
+          </el-button>
+        </div>
+      </el-form>
+    </div>
   </div>
 </template>
 
@@ -89,9 +88,9 @@
       }
       return {
         imageUrl: '',
+        imageFile: '',
         loginForm: {
           avatar: '',
-          avatarPath: this.GLOBAL.BASE_URL + '/api/v1/post/avatar',
           pass: '',
           username: '',
           email: '',
@@ -112,17 +111,78 @@
       }
     },
     methods: {
-      avatarUrl: function () {
-        return String(this.GLOBAL.BASE_URL + '/api/v1/post/avatar')
+      reUpload: function (url, data, Form) {
+        this.GLOBAL.uploadImageToPicbed(this.imageFile).then(resolve => {
+          if (resolve['data']['url']) {
+            data['avatar'] = resolve['data']['url']
+            this.$axios.post(url, data).then(function (response) {
+              var code = response.data.err_code
+              switch (code) {
+                case 200:
+                  this.$notify({
+                      title: 'Messages:',
+                      message: `${this.loginForm.username},you can log in now!`,
+                      position: 'bottom',
+                      type: 'success'
+                    }
+                  )
+                  this.$refs.uploadAvatar.submit()
+                  this.$router.go(0)
+                  break
+                case 402:
+                  this.$notify.error({
+                    title: 'Messages:',
+                    message: 'This username is unaviliable',
+                    position: 'bottom',
+                    type: 'error'
+                  })
+                  this.$refs[Form].resetFields()
+                  break
+                case 403:
+                  this.$notify.error({
+                    title: 'Messages:',
+                    message: 'This email has signed!',
+                    position: 'bottom',
+                    type: 'error'
+                  })
+                  this.$refs[Form].resetFields()
+                  break
+              }
+            }.bind(this))
+          } else {
+            this.$notify.error({
+              title: 'Error:',
+              message: 'Avatar upload failed!',
+              position: 'bottom',
+              type: 'error'
+            })
+          }
+        })
       },
-      reUpload () {
-        let url = this.avatarPath
-        let rename = this.username + '.jpg'
-        var data = new FormData()
-        data.append('imageFile', this.imageUrl)
-        data.append('filename', rename)
-        let config = {headers: {'Content-Type': 'mutipart/form-data'}}
-        this.$axios.post(url, data, config)
+      loginReq: function (url, data, Form) {
+        this.$axios.get(url, data).then(function (response) {
+          this.GLOBAL.USER = response.data.user
+          var token = response.data.token
+          store.commit('ADD_TOKEN', token)
+          this.$router.push('/home')
+          this.$message({
+            dangerouslyUseHTMLString: true,
+            center: true,
+            duration: 1500,
+            message: 'Welcome!' + '<b>' + `${this.loginForm.username}` + '</b>',
+            type: 'success'
+          })
+        }.bind(this))
+          .catch(function (error) {
+            console.log(error)
+            this.$store.commit('REMOVE_TOKEN', this.$store.state.token)
+            this.$notify.error({
+              title: 'Warning:',
+              message: 'Wrong username or password!',
+              position: 'bottom',
+              type: 'error'
+            })
+          }.bind(this))
       },
       submitUser (Form) {
         this.GLOBAL.showLoading()
@@ -135,80 +195,20 @@
                   password: this.loginForm.pass
                 }
               }
-              this.$axios.get(logurl, data).then(function (response) {
-                this.GLOBAL.USER = response.data.user
-                var token = response.data.token
-                store.commit('ADD_TOKEN', token)
-                this.$router.push('/home')
-                this.$message({
-                  dangerouslyUseHTMLString: true,
-                  center: true,
-                  duration: 1500,
-                  message: 'Welcome!' + '<b>' + `${this.loginForm.username}` + '</b>',
-                  type: 'success'
-                })
-              }.bind(this))
-                .catch(function (error) {
-                  console.log(error)
-                  this.store.commit('REMOVE_TOKEN', this.store.state.token)
-                  this.$notify.error({
-                    title: 'Warning:',
-                    message: 'Wrong username or password!',
-                    position: 'bottom',
-                    type: 'error'
-                  })
-                }.bind(this))
+              this.loginReq(logurl, data, Form)
             } else {
-              var regurl = this.GLOBAL.BASE_URL + '/api/v1/register'
-              var regdata = {
+              let regurl = this.GLOBAL.BASE_URL + '/api/v1/register'
+              let regdata = {
                 username: this.loginForm.username,
                 password: this.loginForm.pass,
-                email: this.loginForm.email,
-                avatar: this.imageUrl
+                email: this.loginForm.email
               }
-              this.$axios.post(regurl, regdata).then(function (response) {
-                var code = response.data.err_code
-                console.log(typeof code)
-                switch (code) {
-                  case 200:
-                    this.$notify({
-                        title: 'Messages:',
-                        message: `${this.loginForm.username},you can log in now!`,
-                        position: 'bottom',
-                        type: 'success'
-                      }
-                    )
-                    this.$refs.uploadAvatar.submit()
-                    this.reUpload() // 修复头像上传失败
-                    this.$router.go(0)
-                    break
-                  case 402:
-                    this.$notify.error({
-                      title: 'Messages:',
-                      message: 'This username is unaviliable',
-                      position: 'bottom',
-                      type: 'error'
-                    })
-                    this.$refs[Form].resetFields()
-                    break
-                  case 403:
-                    this.$notify.error({
-                      title: 'Messages:',
-                      message: 'This email has signed!',
-                      position: 'bottom',
-                      type: 'error'
-                    })
-                    this.$refs[Form].resetFields()
-                    break
-                }
-                console.log(response)
-              }.bind(this))
+              this.reUpload(regurl, regdata, Form)
             }
           }
         )
       },
       setPreview (file) {
-        console.log(file)
         const isJPG = file.raw.type === 'image/jpeg'
         const isLt2M = file.size / 1024 / 1024 < 2
         if (!isJPG) {
@@ -217,6 +217,7 @@
         if (!isLt2M) {
           this.$message.error('大小不能超过 2MB!')
         }
+        this.imageFile = file.raw
         this.imageUrl = (window.URL || window.webkitURL).createObjectURL(file.raw)
         return isJPG && isLt2M
       }
@@ -225,9 +226,25 @@
 </script>
 
 <style scoped>
-  .headers {
-    margin-top: 1rem;
-    margin-bottom: 1rem;
+  .wrapper{
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-image: url("https://img.xjh.me/random_img.php?type=bg&ctype=nature&return=302&device=mobile");
+    /*filter: blur(15px);*/
+    background-size: cover;
+    width: 100%;
+    height: 97vh;
+    z-index: 1;
+
+  }
+  .inputWrapper {
+    width: 70vw;
+    padding: 0vw 5vw 5vw 5vw;
+    background-color: rgba(19,19,14,0.9);
+    border-radius: 6px;
   }
 
   .demo-loginForm {

@@ -11,7 +11,6 @@
               <img @click="showUserDetails(key.author)" class="avatar" :src="key.uavatar"
                    alt="">
               <span class="username">{{key.author}}</span>
-              <i class="el-icon-more-outline"></i>
             </div>
             <div class="contentImage">
               <img onmouseover="displayDesc" class="innerPic" :src="key.img" :preview="key.pid"
@@ -19,7 +18,7 @@
               <span class="imageDesc" v-if="key.desc">{{key.desc}}</span>
             </div>
             <div class="bottom">
-              <span class="bottomText">{{key.date.slice(4,-3)}}发布</span>
+              <span class="bottomText">{{key.date.slice(4,-3)}}</span>
               <span class="botttomIcon">
               <i style="color: #EE4957" @click="likeEvent(key)" v-if="admire[key.pid] ===true" class="fa fa-heart"
                  aria-hidden="true"></i>
@@ -103,7 +102,6 @@
 
           this.scroll.on('pullingDown', () => {
             this.$emit('refresh')
-            console.log('刷新数据')
             setTimeout(() => {
               this.scroll.finishPullDown()
               this.scroll.refresh()
@@ -124,7 +122,6 @@
       getAdmireList: function () {
         var url = this.GLOBAL.BASE_URL + '/api/v1/admire'
         this.$axios.get(url).then(function (res) {
-          console.log(res)
           if (res.data.code === 521) {
             this.admire = res.data.admire
           }
@@ -144,7 +141,6 @@
           admireThis: admireThis
         }
         this.$axios.post(url, data, {headers: {'Content-Type': 'Application/json'}}).then(function (response) {
-          console.log('admire', response)
           if (response.data.code === 520 && this.admire[key.pid] === true) {
           }
         }.bind(this))
@@ -314,13 +310,6 @@
   .fa-heart-o:hover {
     transition: color 1.5s;
   }
-
-  .item {
-    border-radius: 10px;
-    margin-top: 2px;
-    margin-bottom: 2px;
-  }
-
   .moreInfo {
     display: inline-block;
     width: 100%;
@@ -330,10 +319,5 @@
 
   .contentWrapper {
     background-color: #cfcfc0;
-    border-radius: 10px;
-  }
-
-  .el-card {
-    margin-bottom: 3px;
   }
 </style>

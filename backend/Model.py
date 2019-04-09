@@ -75,7 +75,7 @@ class Resource(db.Model):
         self.pv = pv
         self.author = author
         self.date = date
-        self.uavatar = author + '.jpg'
+        self.uavatar = Users.query.filter_by(username=author).first().avatar
 
     def to_json(self):
         dict = self.__dict__

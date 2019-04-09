@@ -36,18 +36,16 @@
     methods: {
       updateEvent: function (event) {
         var file = event.target.files[0]
-        console.log(file)
         if (file) {
           const isJPG = file.type === 'image/jpeg'
-          const isLt4M = file.size / 1024 / 1024 < 4
+          const isLt8M = file.size / 1024 / 1024 < 8
           if (!isJPG) {
             this.$message.error('只能上传 JPG 格式!')
           }
-          if (!isLt4M) {
-            this.$message.error('大小不能超过 4MB!')
+          if (!isLt8M) {
+            this.$message.error('大小不能超过 8MB!')
           }
-          console.log(isJPG, isLt4M)
-          if (isJPG && isLt4M) {
+          if (isJPG && isLt8M) {
             this.GLOBAL.UPLOAD_FILE = file
             this.$router.push('/create/details')
           }
@@ -68,7 +66,6 @@
         let url = this.GLOBAL.BASE_URL + '/api/v1/messages/query'
         this.$axios.post(url, reqList).then(function (response) {
           this.GLOBAL.MESSAGES_CONTENT = response.data
-          console.log('MESSAGE', this.GLOBAL.MESSAGES_CONTENT)
         }.bind(this))
       },
 

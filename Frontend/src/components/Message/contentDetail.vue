@@ -78,7 +78,6 @@
           }
         }).then(function (response) {
           this.comments = response.data
-          console.log(this.comments)
           this.loading = false
         }.bind(this))
       },

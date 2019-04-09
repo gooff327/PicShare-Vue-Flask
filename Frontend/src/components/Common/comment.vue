@@ -54,7 +54,6 @@
       getComment: function (pid) {
         this.comments = []
         this.pid = pid
-        console.log('pid', pid)
         this.tips = '加载中...'
         this.commentPanel = true
         let url = this.GLOBAL.BASE_URL + '/api/v1/comments'
@@ -63,7 +62,6 @@
             pid: `${pid}`
           }
         }).then(function (response) {
-          console.log(response)
           this.comments = response.data
           if (this.comments.length === undefined || this.comments.length === 0) {
             this.tips = '当前还没有评论！'
@@ -72,7 +70,6 @@
       },
       submit: function () {
         let url = this.GLOBAL.BASE_URL + '/api/v1/comments'
-        console.log(url)
         let data = {
           pid: `${this.pid}`,
           uid: `${this.GLOBAL.USER.uid}`,
@@ -80,7 +77,6 @@
           username: `${this.GLOBAL.USER.username}`,
           commit: `${this.inputContent}`
         }
-        console.log(data)
         this.$axios.post(url, data).then(function (response) {
           if (response.data.tips === 'Successed!') {
             this.inputContent = ''

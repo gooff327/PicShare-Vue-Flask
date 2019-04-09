@@ -2,7 +2,7 @@
 <template>
   <el-container>
     <el-header>
-      <span v-if="isSelf" class="fa fa-cog"></span>
+      <span v-if="isSelf" style="color: red" @click="logout" class="fa fa-sign-out"></span>
       <span v-else class="el-icon-back" @click="back"></span>
       <span class="headTitle">   个 人 主 页</span>
     </el-header>
@@ -18,11 +18,14 @@
           <el-col :span="18">
             <div class="content-right">
               <span class="user-username" v-text="this.currentUser.username"></span>
-              <el-button v-show="isSelf" type="primary" class="edit-btn" @click="editorVisible" size="mini">编辑主页</el-button>
+              <el-button v-show="isSelf" type="primary" class="edit-btn" @click="editorVisible" size="mini">编辑主页
+              </el-button>
               <el-button v-show="!isSelf" v-if="this.btnConcern" class="concern-btn" size="mini" @click="concernAction">
                 取消关注
               </el-button>
-              <el-button v-show="!isSelf" v-else class="concern-btn" size="mini" @click="concernAction">关 注</el-button>
+              <el-button v-show="!isSelf" type="primary" v-else class="concern-btn" size="mini" @click="concernAction">关
+                注
+              </el-button>
               <el-dialog
                 :visible.sync="editSelfPanel"
                 :show-close="false"
@@ -35,7 +38,7 @@
                 <div class="edit-avatar">
               <span><img v-if="imageURL === ''||imageURL === undefined" class="avatar-preview"
                          :src="this.GLOBAL.USER.avatar" alt="">
-                         <!--:src="['data:Image/png;base64,'+this.GLOBAL.USER.avatar]" alt="">-->
+                <!--:src="['data:Image/png;base64,'+this.GLOBAL.USER.avatar]" alt="">-->
               <img v-else class="avatar-preview" :src=imageURL alt=""></span>
                   <p onclick="document.getElementById('avatar-choose').click();">更换头像</p>
                   <input id="avatar-choose" class="avatar-choose" type="file" @change="avatarChoosed($event)">
@@ -131,7 +134,6 @@
     watch: {
       '$route' (to, from) {
         if (this.$route.params.username === this.GLOBAL.USER.username) {
-          console.log(1)
           this.isSelf = true
           this.getData(this.GLOBAL.USER.username)
         }
@@ -151,7 +153,6 @@
     methods: {
       getData: function (username) {
         let url = this.GLOBAL.BASE_URL + '/api/v1/query/user'
-        console.log(this.startIndex, this.lastIndex)
         this.$axios.get(url, {
           params: {
             username: username,
@@ -165,7 +166,6 @@
           this.tempContents = $.extend(this.contents, this.tempContents)
           this.contents = this.tempContents
           this.currentUser = response.data.user
-          console.log('currentUser', this.currentUser)
           this.amounts['produces'] = this.currentUser.produces
           this.amounts['following'] = this.currentUser.following
           this.amounts['followers'] = this.currentUser.followers
@@ -192,6 +192,10 @@
           this.$message.error('没有更多数据啦！')
         }
       },
+      logout: function () {
+        this.$store.commit('REMOVE_TOKEN', this.$store.state.token)
+        this.$router.push('/')
+      },
       back: function () {
         this.$router.back()
       },
@@ -200,7 +204,6 @@
       },
       // 关联btn的显示
       isConcerned: function (vid) {
-        console.log('GLOBAL', this.GLOBAL.USER)
         this.btnConcern = this.GLOBAL.USER.following[vid]
       },
       concernAction: function () {
@@ -209,8 +212,6 @@
         let data = new FormData()
         data.append('vid', this.currentUser.uid)
         data.append('status', this.btnConcern)
-        console.log('user', this.GLOBAL.USER)
-        console.log('concern-data', data)
         this.$axios.post(url, data).then(function (response) {
           if (response.data.tips !== 'Successed!') {
             this.$message.error('操作不成功！')
@@ -239,23 +240,35 @@
       },
       submitChange: function () {
         let data = new FormData()
-        data.append('avatar', this.avatarFile)
         data.append('brief', this.brief)
         data.append('phone', this.phone)
         data.append('sex', this.value)
         let url = this.GLOBAL.BASE_URL + '/api/v1/edit/profile'
-        this.$axios.post(url, data).then(function (response) {
-          if (response.data.tips === 'Successed!') {
-            this.$message({
-              type: 'success',
-              message: '修 改 成 功 ！',
-              center: true,
-              duration: 1000
+
+        this.GLOBAL.uploadImageToPicbed(this.avatarFile).then(resolve => {
+          if (resolve['data']['url']) {
+            data.append('avatar', resolve['data']['url'])
+            this.$axios.post(url, data).then(function (response) {
+              if (response.data.tips === 'Successed!') {
+                this.$message({
+                  type: 'success',
+                  message: '修 改 成 功 ！',
+                  center: true,
+                  duration: 1000
+                })
+                this.GLOBAL.USER = response.data.user
+                this.editSelfPanel = false
+              }
+            }.bind(this))
+          } else {
+            this.$notify.error({
+              title: 'Error:',
+              message: 'Avatar upload failed!',
+              position: 'bottom',
+              type: 'error'
             })
-            this.GLOBAL.USER = response.data.user
-            this.editSelfPanel = false
           }
-        }.bind(this))
+        })
       }
     }
   }
@@ -287,6 +300,7 @@
     border-bottom: 1px gainsboro solid;
     height: 2rem !important;
   }
+
   .el-icon-back {
     position: relative;
     display: inline-block;
@@ -302,6 +316,7 @@
   .el-icon-back:hover {
     background-color: lightgray;
   }
+
   .el-header span {
     vertical-align: center;
     display: inline-block;

@@ -61,7 +61,6 @@
       },
       getUserlist: function (type) {
         let uid = this.$route.query.uid
-        console.log(uid)
         let url = this.GLOBAL.BASE_URL + '/api/v1/get/users'
         this.$axios.get(url, {
           params: {
@@ -80,7 +79,6 @@
         }
       },
       showUserDetails: function (username) {
-        console.log(1)
         this.$router.push(`/user/${username}`)
       },
       isConcerned: function (vid) {
@@ -90,7 +88,6 @@
         this.GLOBAL.USER.following[vid] = !this.GLOBAL.USER.following[vid]
         let url = this.GLOBAL.BASE_URL + '/api/v1/concern/action'
         let data = new FormData()
-        console.log(vid)
         data.append('vid', vid)
         data.append('status', this.GLOBAL.USER.following[vid])
         this.$axios.post(url, data).then(function (response) {

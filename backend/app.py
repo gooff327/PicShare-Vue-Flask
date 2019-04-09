@@ -20,7 +20,7 @@ def upload_to_bucket(client, bucket, path, file_name):
         LocalFilePath=path,
         Key=file_name,
     )
-    print(response['ETag'])
+    print(response.json())
     if os.path.exists(path):
         os.remove(path)
 
@@ -91,7 +91,7 @@ def register():
         return jsonify({'username': username, 'password': password, 'tips': 'Reppeat of username!', 'err_code': 402})
     elif Users.query.filter_by(email=email).first():
         return jsonify({'username': username, 'password': password, 'tips': "This email has signed!", 'err_code': 403})
-    avatar = username + '.jpg'
+    avatar = request.json.get("avatar")
     user = Users(username, email, avatar)
     user.hash_password(password)
     db.session.add(user)
@@ -140,7 +140,8 @@ def get_token():
     user['uid'] = g.user.uid
     user['brief'] = g.user.brief
     user['email'] = g.user.email
-    user['avatar'] = get_file_url(avatar_client, Config.avatar_bucket, g.user.avatar)
+    # user['avatar'] = get_file_url(avatar_client, Config.avatar_bucket, g.user.avatar)
+    user['avatar'] = g.user.avatar
     user['phone'] = g.user.phone
     user['sex'] = g.user.sex
     return jsonify({'token': token.decode('ascii'), 'user': user})
@@ -249,8 +250,9 @@ def comments():
         query_comments = Comments.query.filter_by(pid=pid).order_by(Comments.datetime.desc()).all()  # 此处应该注意查询时排序
         rt_comments = {}
         for n in range(len(query_comments)):
-            avatarPath = query_comments[n].username + '.jpg'
-            avatar = get_file_url(avatar_client, Config.avatar_bucket, avatarPath)
+            # avatarPath = query_comments[n].username + '.jpg'
+            avatar = Users.query.filter_by(username=query_comments[n].username).first().avatar
+            # avatar = get_file_url(avatar_client, Config.avatar_bucket, avatarPath)
             query_comments[n] = query_comments[n].to_json()
             query_comments[n]['avatar'] = avatar
             query_comments[n]['datetime'] = str(query_comments[n]['datetime'])[2:10]
@@ -277,17 +279,19 @@ def new_passage():
     username = g.user.username
     uid = g.user.uid
     desc = ((request.form).to_dict()).get('imageDescription')
+    image_path = ((request.form).to_dict()).get('imageUrl')
     pv = 0
     date = datetime.utcnow()
-    img = request.files.get('imageFile')
-    imgName = username + '#' + img.filename
-    path = basedir + "/static/img/"
-    image_path = Config.IMAGEDIR + imgName
-    filepath = path + imgName
-    print(filepath)
-    img.save(image_path)
-    upload_to_bucket(img_client, Config.img_bucket, image_path, imgName)
-    passage = Resource(uid, imgName, desc, pv, username, date)
+    # img = request.files.get('imageFile')
+    # img_name = username + '#' + img.filename
+    # path = basedir + "/static/img/"
+    # image_path = Config.IMAGEDIR + img_name
+    # filepath = path + img_name
+    # print(filepath)
+    # img.save(image_path)
+    # upload_to_bucket(img_client, Config.img_bucket, image_path, img_name)
+    # passage = Resource(uid, img_name, desc, pv, username, date)
+    passage = Resource(uid, image_path, desc, pv, username, date)
     db.session.add(passage)
     db.session.commit()
     return jsonify({'tips': 'Successed!'})
@@ -321,7 +325,8 @@ def resolve_users(users):
         lite_user['username'] = user.username
         lite_user['brief'] = user.brief
         print(type(user))
-        lite_user['avatar'] = get_file_url(avatar_client, Config.avatar_bucket, user.avatar)
+        lite_user['avatar'] = user.avatar
+        # lite_user['avatar'] = get_file_url(avatar_client, Config.avatar_bucket, user.avatar)
         rt_users.append(lite_user)
     return rt_users
 
@@ -332,8 +337,10 @@ def query_user():
     with db.session.no_autoflush:
         db.create_all()
         rt_user = {}
-        start_index = int(request.args.get('startIndex'))
-        last_index = int(request.args.get('lastIndex'))
+        # start_index = int(request.args.get('startIndex'))
+        start_index = 0
+        # last_index = int(request.args.get('lastIndex'))
+        last_index = -1
         key = request.args.get('username')
         user = Users.query.filter_by(username=key).first()
         produces = Resource.query.filter_by(author=key).all()
@@ -347,7 +354,8 @@ def query_user():
         rt_user['username'] = user.username
         rt_user['uid'] = user.uid
         rt_user['brief'] = user.brief
-        rt_user['avatar'] = get_file_url(avatar_client, Config.avatar_bucket, user.avatar)
+        rt_user['avatar'] = user.avatar
+        # rt_user['avatar'] = get_file_url(avatar_client, Config.avatar_bucket, user.avatar)
         rt_user['sex'] = user.sex
         if res[0] == {}:
             return jsonify({'tips': 'All loaded!', 'user': rt_user, 'contents': res[0]})
@@ -381,24 +389,23 @@ def concern_action():
 @auth.login_required
 def edit_profile():
     rt_user = {}
-    avatar = request.files.get('avatar')
+    avatar = ((request.form).to_dict()).get('avatar')
     brief = ((request.form).to_dict()).get('brief')
     sex = ((request.form).to_dict()).get('sex')
     phone = ((request.form).to_dict()).get('phone')
     user = Users.query.filter_by(uid=g.user.uid).first()
-    if avatar is not None:
-        save_avatar(avatar, g.user.username)
-    else:
-        pass
+    user.avatar = avatar
     user.brief = brief
     user.sex = sex
     user.phone = phone
     db.session.commit()
+    rt_user['following'] = resolve_following_relation(g.user.relation)
     rt_user['username'] = g.user.username
     rt_user['uid'] = g.user.uid
     rt_user['brief'] = g.user.brief
     rt_user['email'] = g.user.email
-    rt_user['avatar'] = get_file_url(avatar_client, Config.avatar_bucket, g.user.avatar)
+    # rt_user['avatar'] = get_file_url(avatar_client, Config.avatar_bucket, g.user.avatar)
+    rt_user['avatar'] = g.user.avatar
     rt_user['phone'] = g.user.phone
     rt_user['sex'] = g.user.sex
     return jsonify({'tips': 'Successed!', 'user': rt_user})
@@ -454,7 +461,7 @@ def query_by_list(cls, query_list):
     if cls == Users:
         for el in query_list:
             content = cls.query.filter_by(uid=el).first().to_json()
-            content['avatar'] = get_file_url(avatar_client, Config.avatar_bucket, content['avatar'])
+            # content['avatar'] = get_file_url(avatar_client, Config.avatar_bucket, content['avatar'])
             result[content['uid']] = content
     elif cls == Resource:
         for el in query_list:
@@ -462,7 +469,7 @@ def query_by_list(cls, query_list):
                 pass
             elif el > 0:
                 content = cls.query.filter_by(pid=el).first().to_json()
-                content['img'] = get_file_url(img_client, Config.img_bucket, content['img'])
+                # content['img'] = get_file_url(img_client, Config.img_bucket, content['img'])
                 result[content['pid']] = content
     return result
 
@@ -478,9 +485,6 @@ def change_message_status():
         message.m_status = 0
         db.session.commit()
     return jsonify('ok')
-
-
-app.route('/api/v1/logout')
 
 
 @auth.login_required
@@ -533,9 +537,11 @@ def resolve_message_detail(messages):
             temp_user = Users.query.filter_by(uid=messages[i].uid).first().to_json()
             temp_passage = Resource.query.filter_by(pid=messages[i].pid).first().to_json()
             users[user_key] = {'username': temp_user['username'],
-                               'avatar': get_file_url(avatar_client, Config.img_bucket, temp_user['avatar'])
+                               'avatar': temp_user['avatar']
+                               # 'avatar': get_file_url(avatar_client, Config.img_bucket, temp_user['avatar'])
                                }
-            passage = {'img': get_file_url(img_client, Config.img_bucket, temp_passage['img']),
+            passage = {'img': temp_passage['img'],
+                       # passage = {'img': get_file_url(img_client, Config.img_bucket, temp_passage['img']),
                        'desc': temp_passage['desc']}
             passages[passage_key] = passage
         rt_messages = messages
@@ -570,9 +576,9 @@ def query_passages(start_index, last_index, types, keyword):
         return res
     else:
         passages = passages[start_index:last_index]
-    for passage in passages:
-        passage.uavatar = get_file_url(avatar_client, Config.avatar_bucket, passage.uavatar)
-        passage.img = get_file_url(img_client, Config.img_bucket, passage.img)
+    # for passage in passages:
+    # passage.uavatar = get_file_url(avatar_client, Config.avatar_bucket, passage.uavatar)
+    # passage.img = get_file_url(img_client, Config.img_bucket, passage.img)
     for n in range(len(passages)):
         data[start_index + n] = passages[n].to_json()
     res.append(data)

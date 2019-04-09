@@ -80,7 +80,6 @@
             label: '好友关注'
           }
         })
-        console.log('ok')
       },
       forwardDetails: function () {
         this.$router.push({

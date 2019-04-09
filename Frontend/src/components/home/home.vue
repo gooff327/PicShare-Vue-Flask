@@ -29,10 +29,8 @@
     },
     watch: {
       '$route' (to, from) {
-        if (to.path === '/following') {
-          this.getUpdate(this.$route.name)
-        } else if (to.path === 'home') {
-          this.getUpdate(this.$route.name)
+        if (to.name === 'following') {
+          this.GLOBAL.closeLoading()
         }
       }
     },

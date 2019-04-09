@@ -35,7 +35,6 @@
     },
     methods: {
       goBack: function () {
-        console.log(111)
         this.$router.go(-1)
       },
       submit: function () {

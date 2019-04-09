@@ -1,4 +1,5 @@
 import {Loading} from 'element-ui'
+import axios from 'axios'
 
 let BASE_URL = ''
 let USER = {}
@@ -14,6 +15,7 @@ const COUNT = {
   followCount: 0,
   sum: 0
 }
+let IMAGEURL = ''
 const MESSAGES_CONTENT = {}
 let reqList = {}
 let usersList = []
@@ -24,6 +26,19 @@ isDeployEnvironment()
 
 function isDeployEnvironment () {
   window.location.port === '8080' ? BASE_URL = 'http://127.0.0.1:5000' : BASE_URL = 'http://gooff.me'
+}
+
+async function uploadImageToPicbed (file) {
+  console.log(file)
+  let upInstans = axios.create()
+  let picbedUrl = 'https://sm.ms/api/upload'
+  var data = new FormData()
+  data.append('smfile', file)
+  data.append('ssl', true)
+  await upInstans.post(picbedUrl, data).then(function (response) {
+    IMAGEURL = response.data
+  })
+  return await IMAGEURL
 }
 
 function showLoading (obj) {
@@ -40,12 +55,11 @@ function closeLoading () {
 
 function initMessage (messages) {
   let count = {}
-  console.log('messages', messages)
   count.admireCount = unreadCount(messages['admire_messages'])
   count.forwardCount = unreadCount(messages['forward_messages'])
   count.commentCount = unreadCount(messages['comment_messages'])
   count.followCount = unreadCount(messages['follow_messages'])
-  count.sum = Number(count.admireCount  + count.followCount + count.commentCount + count.forwardCount)
+  count.sum = Number(count.admireCount + count.followCount + count.commentCount + count.forwardCount)
   reqList['users'] = usersList
   usersList = []
   reqList['passages'] = passagesList
@@ -82,5 +96,7 @@ export default {
   COUNT,
   reqList,
   showLoading,
-  closeLoading
+  closeLoading,
+  uploadImageToPicbed,
+  IMAGEURL
 }
