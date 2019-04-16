@@ -2,7 +2,7 @@
 <template>
   <div class="wrapper">
     <div class="inputWrapper">
-      <h3 class="welcome">Welcome!</h3><br>
+      <h3 class="welcome">Welcome to PicShare!</h3><br>
       <el-form :model="loginForm" hide-required-asterisk status-icon :rules="rules" ref="loginForm"
                class="demo-loginForm">
         <el-form-item v-if="regVisible" prop="Avatar">
@@ -247,6 +247,7 @@
     text-align: center;
     color: gainsboro;
     width: 100%;
+    font-family: "PingFang SC";
   }
 
   .inputWrapper {
