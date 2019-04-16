@@ -1,7 +1,8 @@
 <!--suppress ALL -->
 <template>
   <div class="wrapper">
-  <div class="inputWrapper">
+    <div class="inputWrapper">
+      <h3 class="welcome">Welcome!</h3><br>
       <el-form :model="loginForm" hide-required-asterisk status-icon :rules="rules" ref="loginForm"
                class="demo-loginForm">
         <el-form-item v-if="regVisible" prop="Avatar">
@@ -17,26 +18,26 @@
             <i v-else class="el-icon-plus avatar-uploader-icon"></i>
           </el-upload>
         </el-form-item>
-        <el-form-item label="用户名" prop="username" :rules="[
+        <el-form-item prop="username" :rules="[
      {required:true,message:'Username can not be empty!',trigger:'blur'},
      {min:5,max:18,message:'Username\'s length is between 5 and 18!',trigger:'blur'}
      ]">
-          <el-input v-model="loginForm.username" placeholder="用户名至少6位"></el-input>
+          <el-input v-model="loginForm.username" placeholder="用户名"></el-input>
         </el-form-item>
 
-        <el-form-item label="密码" prop="pass" :rules="[
+        <el-form-item prop="pass" :rules="[
       {required:true,message:'Password can not be empty!',trigger:'blur'},
       {min: 5,max: 18,message:'Password is between 5 to 18',trigger:'blur'}
      ]">
-          <el-input type="password" v-model="loginForm.pass" placeholder="请输入密码"></el-input>
+          <el-input type="password" v-model="loginForm.pass" placeholder="密码"></el-input>
         </el-form-item>
 
-        <el-form-item v-if='regVisible' label="确认密码" prop="checkPass">
-          <el-input class="reg" type="password" v-model="loginForm.checkPass" placeholder="请重复输入密码"></el-input>
+        <el-form-item v-if='regVisible' prop="checkPass">
+          <el-input class="reg" type="password" v-model="loginForm.checkPass" placeholder="重复密码"></el-input>
         </el-form-item>
 
-        <el-form-item v-if="regVisible" label="电子邮箱" prop="email" :rules="[
-     {required: true,message:'Email地址不能为空',trigger:'blur'}
+        <el-form-item v-if="regVisible" prop="email" :rules="[
+     {required: true,message:'Email地址',trigger:'blur'}
      ]">
           <el-input class="reg" type="email" v-model="loginForm.email" placeholder="example@gamil.com"></el-input>
         </el-form-item>
@@ -226,7 +227,7 @@
 </script>
 
 <style scoped>
-  .wrapper{
+  .wrapper {
     margin: 0;
     padding: 0;
     display: flex;
@@ -240,10 +241,18 @@
     z-index: 1;
 
   }
+
+  .welcome {
+    display: inline-block;
+    text-align: center;
+    color: gainsboro;
+    width: 100%;
+  }
+
   .inputWrapper {
     width: 70vw;
     padding: 0vw 5vw 5vw 5vw;
-    background-color: rgba(19,19,14,0.9);
+    background-color: rgba(19, 19, 14, 0.6);
     border-radius: 6px;
   }
 
