@@ -2,7 +2,7 @@
 <template>
   <el-container>
     <el-header>
-      <span v-if="isSelf" style="color: red" @click="logout" class="fa fa-sign-out"></span>
+      <span v-if="isSelf" style="color: coral" @click="logout" class="fa fa-sign-out"></span>
       <span v-else class="el-icon-back" @click="back"></span>
       <span class="headTitle">   个 人 主 页</span>
     </el-header>
@@ -286,7 +286,8 @@
   .el-row {
     width: 100% !important;
     margin: 0 !important;
-    padding-top: 0.5rem !important;
+    height: 13% !important;
+    padding-top: 3%;
   }
 
   [v-cloak] {
@@ -294,46 +295,28 @@
   }
 
   .el-header {
-    margin-top: 0.6rem;
-    /*margin-bottom: 10px;*/
-    /*padding-bottom: 6px;*/
-    border-bottom: 1px gainsboro solid;
-    height: 2rem !important;
+    height: 10% !important;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 1%;
+    padding-bottom: 1%;
+    border-bottom: 1px solid rgba(194, 189, 167, 0.2);
+
   }
 
-  .el-icon-back {
-    position: relative;
-    display: inline-block;
-    width: 2rem;
-    height: 1.2rem;
-    border-radius: 4px;
-    line-height: 1.2rem;
-    text-align: center;
-    margin-left-left: 2%;
-    font-size: 1rem;
-  }
-
-  .el-icon-back:hover {
-    background-color: lightgray;
-  }
+ .el-header .fa,.el-header .el-icon-back{
+   position: absolute;
+   left: 8%;
+ }
 
   .el-header span {
-    vertical-align: center;
     display: inline-block;
     color: rgba(43, 43, 43, 0.93);
   }
 
   .el-main {
     padding: 0;
-  }
-
-  .fa-cog, .el-icon-back {
-    display: inline-block;
-    position: relative;
-    width: 6%;
-    line-height: 1rem;
-    font-size: 1rem;
-    vertical-align: top;
   }
 
   .headTitle {
@@ -354,11 +337,11 @@
     width: 100%;
     font-size: 0.8rem;
     text-align: center;
-    padding-bottom: 0.6rem;
+    padding-bottom: 1%;
   }
 
   .content-left {
-    padding-bottom: 1rem;
+    padding-bottom: 2%;
   }
 
   .content-right .el-button {
@@ -400,12 +383,6 @@
     display: inline-block;
     width: 100%;
     line-height: 2rem;
-  }
-
-  .el-icon-back {
-    position: relative;
-    font-size: larger;
-    font-weight: bolder;
   }
 
   .nav-bottom {

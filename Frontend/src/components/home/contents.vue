@@ -12,13 +12,13 @@
                    alt="">
               <span class="username">{{key.author}}</span>
             </div>
-            <div class="contentImage">
+            <div class="contentImage" ondblclick="likeEvent(key)">
               <img onmouseover="displayDesc" class="innerPic" :src="key.img" :preview="key.pid"
                    alt="">
               <span class="imageDesc" v-if="key.desc">{{key.desc}}</span>
             </div>
             <div class="bottom">
-              <span class="bottomText">{{key.date.slice(4,-3)}}</span>
+              <span class="bottomText">{{key.date.slice(11,-3)}}</span>
               <span class="botttomIcon">
               <i style="color: #EE4957" @click="likeEvent(key)" v-if="admire[key.pid] ===true" class="fa fa-heart"
                  aria-hidden="true"></i>
@@ -117,7 +117,7 @@
         } else {
           this.scroll.refresh()
         }
-        this.setHight()
+        // this.setHeight()
       },
       getAdmireList: function () {
         var url = this.GLOBAL.BASE_URL + '/api/v1/admire'
@@ -178,7 +178,8 @@
     vertical-align: top;
     height: 20%;
     font-size: 20%;
-    padding-bottom: 0.2rem;
+    margin-bottom: 0.2rem;
+    margin-top: 0.2rem;
     width: 100%;
     position: relative;
   }
@@ -245,27 +246,25 @@
     padding: 0;
   }
 
-  .botttom {
-    vertical-align: top;
+  .bottom {
+    margin-top: 0.6rem;
   }
 
   .botttomIcon {
     display: inline-block;
     float: right;
-    padding-right: 0.4rem;
-    margin-bottom: 0.4rem;
+    padding-right: 1rem;
+    margin-bottom: 0.6rem;
   }
 
   .fa {
     padding-right: 0.4rem;
-    padding-left: 0.4rem;
-    padding-bottom: 0.4rem;
+    padding-left: 0.6rem;
+    padding-bottom: 0.2rem;
   }
 
   .contentImage {
     margin-top: 0.2rem;
-    /*min-width: 100%;*/
-    /*max-height: 50%;*/
     width: 96vw;
     height: 54vw;
     position: relative;

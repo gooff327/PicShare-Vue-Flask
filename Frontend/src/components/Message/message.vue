@@ -1,7 +1,6 @@
 <template>
   <el-container>
     <el-header>
-      <i @click="goBack" class="el-icon-back"></i>
       <span>消 息</span>
     </el-header>
     <el-row>
@@ -49,22 +48,21 @@
         </div>
       </el-col>
     </el-row>
+    <nav-bottom></nav-bottom>
   </el-container>
 </template>
 
 <script>
+  import navBottom from '../bottom/bottom'
   export default {
     name: 'message',
     data () {
       return {}
     },
+    components: {navBottom},
     created: function () {
     },
     methods: {
-      goBack: function () {
-        this.GLOBAL.showLoading()
-        this.$router.push('/home')
-      },
       admireDetails: function () {
         this.$router.push({
           name: 'm_admire',
@@ -107,16 +105,13 @@
     padding: 0 !important;
     height: 2rem !important;
     margin-bottom: 0.6rem;
+    text-align: center;
+    border-bottom: 1px solid rgba(194, 189, 167, 0.2);
   }
 
   .el-header span {
-    vertical-align: center;
-    display: inline-block;
     color: rgba(43, 43, 43, 0.93);
-    width: 80%;
-    text-align: center;
     font-size: 1.0rem;
-    line-height: 2rem;
     font-weight: 700;
   }
 
@@ -166,6 +161,6 @@
     line-height: 2rem;
     width: 76%;
     margin-left: 0.6rem;
-    border-bottom: 1px solid rgb(226, 226, 226);
+    border-bottom: 1px solid rgba(194, 189, 167, 0.2);
   }
 </style>

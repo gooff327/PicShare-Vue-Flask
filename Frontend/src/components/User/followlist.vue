@@ -104,24 +104,26 @@
 
 <style scoped>
   .el-header {
+    position: relative;
+    width: 100vw;
     padding: 0;
-    margin-top: 10px;
     margin-bottom: 10px;
     padding-bottom: 6px;
-    border-bottom: 1px gainsboro solid;
+    border-bottom: 1px rgba(194,189,167,0.2) solid;
     height: 2rem !important;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
   }
 
   .el-header span {
     vertical-align: center;
-    display: inline-block;
     color: rgba(43, 43, 43, 0.93);
-    width: 86%;
-    text-align: center;
     font-size: 1.0rem;
   }
   .el-icon-back {
-    position: relative;
+    position: absolute;
+    left: 5%;
     display: inline-block;
     width: 2rem;
     height: 1.2rem;

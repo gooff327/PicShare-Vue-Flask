@@ -30,19 +30,20 @@
       </el-row>
     </transition>
     <transition name="fadein">
-      <div v-cloak v-show="moreView"  class="wrapper">
+      <div v-cloak v-show="moreView" id="moreView" class="wrapper">
         <el-row class="moreRow">
-          <el-col v-for="(key,item) in contents" :key="item" :span="8" class="contents">
-            <img class="smallPic" :src="key.img">
+          <el-col v-for="(key,item) in contents" :key="item" :span="8"
+                  class="contents">
+            <img @click="contentDetail(key)" class="smallPic" :src="key.img">
           </el-col>
         </el-row>
       </div>
     </transition>
     <transition name="fadein">
-      <div v-cloak v-show="!moreView">
+      <div v-cloak v-show="!moreView" id="lessView" ref="lessView" class="fullWrapper">
         <el-row>
           <el-col v-for="(key,item) in contents" :key="item" :span="24" class="contents">
-            <img class="bigPic" :src="key.img">
+            <img @click="contentDetail(key)" class="bigPic" :src="key.img">
           </el-col>
         </el-row>
       </div>
@@ -51,6 +52,7 @@
 </template>
 
 <script>
+  import BScroll from 'better-scroll'
 
   export default {
     name: 'Middle',
@@ -68,36 +70,43 @@
     data () {
       return {
         moreView: true,
+        lessEl: '',
+        moreEl: '',
         activeSelect: 'active-icon',
         activeMore: 'active-icon',
         activeLess: '',
         dropDown: false,
         topBody: true,
-        wrapper1: 'wrapper',
-        wrapper2: '',
         wrapperStyle: 'wrapper'
       }
+    },
+    mounted () {
+      this.lessEl = document.getElementById('lessView')
+      this.moreEl = document.getElementById('moreView')
+      this.$nextTick(() => {
+        this.scrollLess = new BScroll(this.lessEl, {click: true, probeType: 3})
+        this.scrollMore = new BScroll(this.moreEl, {click: true, probeType: 3})
+      })
     },
     methods: {
       showMore: function () {
         this.activeLess = ''
         this.activeMore = this.activeSelect
         this.moreView = true
-        this.wrapper1 = 'wrapper'
-        this.wrapper2 = ''
       },
       showLess: function () {
         this.activeMore = ''
         this.activeLess = this.activeSelect
         this.moreView = false
-        this.wrapper1 = ''
-        this.wrapper2 = 'wrapper'
       },
       showFollowing: function () {
         this.$router.push({path: this.$route.path + '/followings', query: {uid: this.uid}})
       },
       showFollowers: function () {
         this.$router.push({path: this.$route.path + '/followers', query: {uid: this.uid}})
+      },
+      contentDetail: function (passage) {
+        this.$router.push({name: 'content', params: {pid: passage.pid, passage: passage, username: passage.author}})
       }
     }
   }
@@ -120,11 +129,15 @@
     opacity: 0
   }
 
+  /*.el-row{*/
+  /*height: 14%;*/
+  /*}*/
+
   .wrapper {
     position: relative;
     top: 0;
     left: 0;
-    height: 50vh;
+    height: 60vh;
     z-index: 2;
     overflow: auto;
   }
@@ -133,8 +146,9 @@
     position: relative;
     top: 0;
     left: 0;
-    height: 90vh;
+    height: 60vh;
     z-index: 2;
+    overflow: auto;
   }
 
   .moreRow {
@@ -153,13 +167,13 @@
   }
 
   .middle-tab-a {
-    border-top: 1px solid gainsboro;
+    border-top: 1px solid rgba(194, 189, 167, 0.2);
     padding: 0 !important;
   }
 
   .middle-tab-b {
-    border-top: 1px solid gainsboro;
-    border-bottom: 1px solid gainsboro;
+    border-top: 1px solid rgba(194, 189, 167, 0.2);
+    border-bottom: 1px solid rgba(194, 189, 167, 0.2);
     padding: 0 !important;
   }
 
@@ -211,6 +225,10 @@
 
   .active-icon {
     color: #409EFF;
+  }
+
+  .el-row {
+    background-color: white;
   }
 
 </style>

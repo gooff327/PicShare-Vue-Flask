@@ -1,21 +1,31 @@
 <template>
   <div class="footerbar">
     <el-button-group class="buttonWrapper">
+      <div>
       <el-button size="small" type="default" class="function homeBtn" @click="showHomePanel"><i class="fa fa-home"></i>
         <p>主 页</p></el-button>
+      </div>
+      <div>
       <el-button size="small" type="default" class="function" @click="showFollowingProduces"><i
         class="fa fa-handshake-o"></i>
         <p>关 注</p></el-button>
+      </div>
+      <div>
       <el-button size="small" type="default" class="plus" onclick="document.getElementById('image-uploader').click();">
         <i class="fa fa-plus-circle"></i></el-button>
+      </div>
+      <div>
       <el-button size="small" type="default" @click="showMessage" class="function">
         <el-badge :hidden="this.sumValue <= 0" :value="this.sumValue" :max="99" class="item">
           <i class="fa fa-envelope"></i>
         </el-badge>
         <p>消 息</p></el-button>
+      </div>
+      <div>
       <el-button size="small" type="default" @click="showPersonalData" class="function"><i class="fa fa-user-o"></i>
         <p>我 的</p></el-button>
       <input id="image-uploader" class="image-uploader" type="file" @change="updateEvent($event)">
+      </div>
     </el-button-group>
   </div>
 </template>
@@ -115,40 +125,34 @@
     z-index: 3;
   }
 
-  .buttonWrapper {
-    width: 100vw;
-    background-color: rgb(255, 255, 255);
+  .buttonWrapper{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 10%;
   }
+  /*.buttonWrapper {*/
+    /*width: 100vw;*/
+    /*background-color: rgb(255, 255, 255);*/
+  /*}*/
 
-  .el-button:active, button:hover {
+  .el-button:hover span{
     color: #606266;
   }
 
   .function {
-    position: relative;
-    bottom: 2px;
-    width: 20%;
-    float: left;
-    padding-left: 0;
-    padding-right: 0;
     border: 0px;
-    height: 2.3rem;
   }
 
   .function .fa, .function.fa::before {
     font-size: 26px;
     padding: 0;
     margin: 0;
-    position: relative;
-    top: -6px;
-    width: 100%;
   }
 
   .footerbar p {
-    position: relative;
     font-size: smaller;
-    top: -16px;
-    margin-bottom: 0px;
+    margin: 0px;
   }
 
   .plus {
