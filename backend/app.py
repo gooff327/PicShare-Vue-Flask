@@ -72,11 +72,11 @@ def get_avatar():
     if ((request.form).to_dict()).get('username'):
         username = ((request.form).to_dict()).get('username')
         img = request.files.get('file')
-        save_avatar(img, username)
+        # save_avatar(img, username)
     else:
         filename = ((request.form).to_dict()).get('filename')
         img = request.files.get('avatar')
-        save_avatar(img, filename)
+        # save_avatar(img, filename)
     return None
 
 

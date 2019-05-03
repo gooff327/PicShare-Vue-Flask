@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" serverName="vultr">
+    <serverData>
+      <paths name="vultr">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$/Frontend" web="/" />
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+    </serverData>
+  </component>
+</project>

@@ -56,7 +56,7 @@
         let config = {headers: {'Content-Type': 'mutipart/form-data'}}
         let url = this.GLOBAL.BASE_URL + '/api/v1/post/newpassage'
         this.GLOBAL.uploadImageToPicbed(this.GLOBAL.UPLOAD_FILE).then(resolve => {
-          data.append('imageUrl', resolve)
+          data.append('imageUrl', resolve['data']['url'])
           this.backendReq(url, data, config)
         })
       }
