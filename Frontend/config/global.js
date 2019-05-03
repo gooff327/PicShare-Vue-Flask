@@ -25,7 +25,7 @@ let loadingInstance
 isDeployEnvironment()
 
 function isDeployEnvironment () {
-  window.location.port === '8080' ? BASE_URL = 'http://127.0.0.1:5000' : BASE_URL = window.location.host
+  window.location.port === '8080' ? BASE_URL = 'http://127.0.0.1:5000' : BASE_URL = window.location.origin
 }
 
 async function uploadImageToPicbed (file) {
