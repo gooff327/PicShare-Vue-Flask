@@ -146,12 +146,18 @@
     display: block;
     width: 100%;
     margin-top: 0.6rem;
-    background-color: rgba(132, 131, 130, 0.15);
+    /*background-color: rgba(132, 131, 130, 0.15);*/
     border-radius: 4px;
+    border: 1px solid  rgba(132, 131, 130, 0.15);
+    margin-bottom: 0.2rem;
   }
 
   .comment {
     padding-bottom: 2.6rem;
+
+  }
+  .descWrapper{
+    margin: 0 0.5rem 0 0.5rem;
 
   }
 

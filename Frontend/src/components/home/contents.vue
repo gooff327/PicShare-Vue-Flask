@@ -2,31 +2,35 @@
 <template>
   <transition appear>
     <div>
-      <top-headers class="headers"></top-headers>
       <div ref="wrapper" class="wrapper">
         <div class="contentWrapper">
           <el-card shadow="hover" :body-style="{padding: '6px' }" class="item" v-for="(key,item) in contents"
                    :key="item">
             <div class="headbar">
-              <img @click="showUserDetails(key.author)" class="avatar" :src="key.uavatar"
+              <img @click="showUserDetails(key.author)" class="avatar" v-lazy="key.uavatar"
                    alt="">
               <span class="username">{{key.author}}</span>
             </div>
-            <div class="contentImage" ondblclick="likeEvent(key)">
-              <img onmouseover="displayDesc" class="innerPic" :src="key.img" :preview="key.pid"
+            <section class="contentImage" ondblclick="likeEvent(key)">
+              <img onmouseover="displayDesc" class="innerPic" v-lazy="key.img" :preview="key.pid"
                    alt="">
-              <span class="imageDesc" v-if="key.desc">{{key.desc}}</span>
-            </div>
-            <div class="bottom">
-              <span class="bottomText">{{key.date.slice(11,-3)}}</span>
+            </section>
+            <section @click="contentDetail(key)" class="descWrapper">
+              <span class="imageDesc" v-if="key.desc.length<40">{{key.desc}}</span>
+              <span class="imageDesc" v-else>{{key.desc.slice(0,37)}} ... ...</span>
+            </section>
+            <section class="bottom">
+              <span  @click="contentDetail(key)" class="bottomText">{{key.date.slice(11,-3)}}</span>
               <span class="botttomIcon">
-              <i style="color: #EE4957" @click="likeEvent(key)" v-if="admire[key.pid] ===true" class="fa fa-heart"
-                 aria-hidden="true"></i>
-              <i @click="likeEvent(key)" v-else class="fa fa-heart-o" aria-hidden="true"></i>
-              <i @click="commentEvent(key.pid,key.uid)" class="fa fa-comment-o" aria-hidden="true"></i>
-              <i @click="forwardEvent(key)" class="fa fa-paper-plane-o" aria-hidden="true"></i>
+                <img v-if="admire[key.pid] ===true" @click="likeEvent(key)"
+                     src="../../../static/icons/admire_colored.svg" style="width: 1.5rem" alt="">
+                <img v-else @click="likeEvent(key)" src="../../../static/icons/admire.svg" style="width: 1.5rem" alt="">
+                <img @click="commentEvent(key.pid,key.uid)" src="../../../static/icons/comment.svg"
+                     style="width: 1.5rem" alt="">
+                <img @click="forwardEvent(key)" src="../../../static/icons/forward.svg"
+                     style="width: 1.5rem;color: green;" alt="">
            </span>
-            </div>
+            </section>
           </el-card>
         </div>
       </div>
@@ -38,7 +42,6 @@
   import comment from '../../components/Common/comment'
   import BScroll from 'better-scroll'
   import store from '../../vuex/user'
-  import header from '../../components/header/homeHeader'
 
   export default {
     data () {
@@ -53,7 +56,6 @@
       }
     },
     components: {
-      'top-headers': header,
       'comment': comment
     },
     created: function () {
@@ -150,6 +152,9 @@
       },
       forwardEvent: function (key) {
         this.$router.push({name: 'forward', params: {pid: key.pid, passage: key}})
+      },
+      contentDetail: function (passage) {
+        this.$router.push({name: 'content', params: {pid: passage.pid, passage: passage, username: passage.author}})
       }
     },
     props: {
@@ -176,12 +181,13 @@
   .headbar {
     display: inline-block;
     vertical-align: top;
-    height: 20%;
     font-size: 20%;
-    margin-bottom: 0.2rem;
-    margin-top: 0.2rem;
+    margin-bottom: -0.1rem;
+    margin-top: -0.2rem;
     width: 100%;
+    margin-left: 0.6rem;
     position: relative;
+    z-index: 2;
   }
 
   .headers {
@@ -197,21 +203,18 @@
     top: 0px;
     overflow: hidden;
     max-height: 94vh;
+    border: 1px solid white;
+  }
+
+  .descWrapper {
+    margin-top: 0.6rem;
+    margin-left: 0.6rem;
   }
 
   .imageDesc {
-    position: absolute;
-    bottom: 0;
-    color: white;
-    background-color: rgba(0, 0, 0, 0.6);
-    width: 96vw;
-    text-align: center;
-    max-height: 40%;
+    display: block;
     font-size: 0.8rem;
     font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-    padding-top: 0.1rem;
   }
 
   .username {
@@ -219,8 +222,7 @@
     max-width: 70%;
     font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
     font-size: 0.7rem;
-    padding-top: 0.4rem;
-    padding-left: 0.4rem;
+    padding-left: 0.2rem;
   }
 
   .avatar {
@@ -228,15 +230,8 @@
     width: 1.8rem;
     height: 1.8rem;
     border-radius: 50%;
-    float: left;
-  }
-
-  .el-icon-more-outline {
-    display: inline-block;
-    height: 20%;
-    float: right;
-    padding-top: 4%;
-    padding-right: 6%;
+    transform: translate(0, 45%);
+    border: 2px solid white;
   }
 
   .bottomText {
@@ -244,23 +239,20 @@
     color: gray;
     margin: 0;
     padding: 0;
-  }
-
-  .bottom {
-    margin-top: 0.6rem;
+    margin-left: 0.6rem;
   }
 
   .botttomIcon {
     display: inline-block;
     float: right;
-    padding-right: 1rem;
+    padding-right: 0.6rem;
     margin-bottom: 0.6rem;
   }
 
   .fa {
-    padding-right: 0.4rem;
-    padding-left: 0.6rem;
-    padding-bottom: 0.2rem;
+    padding-right: 0.3rem;
+    padding-left: 0.3rem;
+    /*padding-bottom: 0.2rem;*/
   }
 
   .contentImage {
@@ -290,8 +282,8 @@
     border-radius: 4px;
   }
 
-  .fa-heart:hover {
-    animation: admire 0.6s normal;
+  .fa-heart:touch {
+    animation: admire 1s normal;
   }
 
   @keyframes admire {
@@ -309,6 +301,7 @@
   .fa-heart-o:hover {
     transition: color 1.5s;
   }
+
   .moreInfo {
     display: inline-block;
     width: 100%;

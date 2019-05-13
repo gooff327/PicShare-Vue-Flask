@@ -14,6 +14,7 @@ import 'vue-photo-preview/dist/skin.css'
 import 'font-awesome/css/font-awesome.css'
 import BScroll from 'better-scroll'
 import $ from 'jquery'
+import VueLazyLoad from 'vue-lazyload'
 
 Vue.use($)
 Vue.use(preview)
@@ -23,6 +24,13 @@ Vue.prototype.$axios = axios
 Vue.use(global_)
 Vue.use(VueAxios)
 Vue.use(ElementUI)
+console.log()
+Vue.use(VueLazyLoad, {
+  preload: 1.3,
+  error: './static/icons/error.svg',
+  loading: './static/icons/loading.svg',
+  attempt: 3
+})
 Vue.config.productionTip = false
 router.beforeEach((to, from, next) => {
   if (to.meta.requireAuth) {

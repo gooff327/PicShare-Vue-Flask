@@ -34,7 +34,7 @@
         <el-row class="moreRow">
           <el-col v-for="(key,item) in contents" :key="item" :span="8"
                   class="contents">
-            <img @click="contentDetail(key)" class="smallPic" :src="key.img">
+            <img @click="contentDetail(key)" class="smallPic" v-lazy="key.img">
           </el-col>
         </el-row>
       </div>
@@ -43,7 +43,7 @@
       <div v-cloak v-show="!moreView" id="lessView" ref="lessView" class="fullWrapper">
         <el-row>
           <el-col v-for="(key,item) in contents" :key="item" :span="24" class="contents">
-            <img @click="contentDetail(key)" class="bigPic" :src="key.img">
+            <img @click="contentDetail(key)" class="bigPic" v-lazy="key.img">
           </el-col>
         </el-row>
       </div>
@@ -144,9 +144,10 @@
 
   .fullWrapper {
     position: relative;
-    top: 0;
+    bottom: 0;
     left: 0;
-    height: 60vh;
+    top: 0;
+    height: 70vh;
     z-index: 2;
     overflow: auto;
   }

@@ -1,10 +1,17 @@
 <!--suppress ALL -->
 <template>
-  <div class="wrapper">
+  <div id="wrapper" :class="this.randomWrapper()">
     <div class="inputWrapper">
-      <h3 class="welcome">Welcome to PicShare!</h3><br>
-      <el-form :model="loginForm" hide-required-asterisk status-icon :rules="rules" ref="loginForm"
-               class="demo-loginForm">
+      <h3 class="welcome">Welcome to PicShare!</h3>
+      <br>
+      <el-form
+        :model="loginForm"
+        hide-required-asterisk
+        status-icon
+        :rules="rules"
+        ref="loginForm"
+        class="demo-loginForm"
+      >
         <el-form-item v-if="regVisible" prop="Avatar">
           <el-upload
             class="avatar-uploader"
@@ -13,43 +20,64 @@
             :on-change="setPreview"
             ref="uploadAvatar"
             :data="this.loginForm"
-            :show-file-list="false">
-            <img v-if="imageUrl" :src=imageUrl class="avatar">
+            :show-file-list="false"
+          >
+            <img v-if="imageUrl" :src="imageUrl" class="avatar">
             <i v-else class="el-icon-plus avatar-uploader-icon"></i>
           </el-upload>
         </el-form-item>
-        <el-form-item prop="username" :rules="[
+        <el-form-item
+          prop="username"
+          :rules="[
      {required:true,message:'Username can not be empty!',trigger:'blur'},
      {min:5,max:18,message:'Username\'s length is between 5 and 18!',trigger:'blur'}
-     ]">
+     ]"
+        >
           <el-input v-model="loginForm.username" placeholder="用户名"></el-input>
         </el-form-item>
 
-        <el-form-item prop="pass" :rules="[
+        <el-form-item
+          prop="pass"
+          :rules="[
       {required:true,message:'Password can not be empty!',trigger:'blur'},
       {min: 5,max: 18,message:'Password is between 5 to 18',trigger:'blur'}
-     ]">
+     ]"
+        >
           <el-input type="password" v-model="loginForm.pass" placeholder="密码"></el-input>
         </el-form-item>
 
-        <el-form-item v-if='regVisible' prop="checkPass">
+        <el-form-item v-if="regVisible" prop="checkPass">
           <el-input class="reg" type="password" v-model="loginForm.checkPass" placeholder="重复密码"></el-input>
         </el-form-item>
 
-        <el-form-item v-if="regVisible" prop="email" :rules="[
+        <el-form-item
+          v-if="regVisible"
+          prop="email"
+          :rules="[
      {required: true,message:'Email地址',trigger:'blur'}
-     ]">
-          <el-input class="reg" type="email" v-model="loginForm.email" placeholder="example@gamil.com"></el-input>
+     ]"
+        >
+          <el-input
+            class="reg"
+            type="email"
+            v-model="loginForm.email"
+            placeholder="example@gamil.com"
+          ></el-input>
         </el-form-item>
         <br>
         <div class="btnGroup">
-          <el-button type="info" plain v-if="logBtn" @click="regVisible=!regVisible,btnSwitch = !btnSwitch"
-                     class="logbtn">
-            {{btnSwitch ? '取 消' : '注 册'}}
+          <el-button
+            type="info"
+            plain
+            v-if="logBtn"
+            @click="regVisible=!regVisible,btnSwitch = !btnSwitch"
+            class="logbtn"
+          >{{btnSwitch ? '取 消' : '注 册'}}
           </el-button>
           <br>
           <br>
-          <el-button type="primary" @click="submitUser('loginForm')" v-if="logBtn" class="logbtn">{{btnSwitch ? '提 交' :
+          <el-button type="primary" @click="submitUser('loginForm')" v-if="logBtn" class="logbtn">
+            {{btnSwitch ? '提 交' :
             '登录'}}
           </el-button>
         </div>
@@ -66,6 +94,9 @@
     name: 'Login',
     components: {
       'v-header': headers
+    },
+    created () {
+      this.randInt = Math.floor((Math.random() * 5) + 1)
     },
     data () {
       var validatePass = (rule, value, callback) => {
@@ -88,6 +119,7 @@
         }
       }
       return {
+        randInt: '',
         imageUrl: '',
         imageFile: '',
         loginForm: {
@@ -103,54 +135,58 @@
         regVisible: false,
         logBtn: true,
         rules: {
-          pass: [
-            {validator: validatePass, trigger: 'blur'}
-          ],
-          checkPass: [
-            {validator: validatePass2, trigger: 'blur'}]
+          pass: [{validator: validatePass, trigger: 'blur'}],
+          checkPass: [{validator: validatePass2, trigger: 'blur'}]
         }
       }
     },
     methods: {
+      randomWrapper () {
+        return `wrapper-style-${this.randInt}`
+      },
       reUpload: function (url, data, Form) {
         this.GLOBAL.uploadImageToPicbed(this.imageFile).then(resolve => {
           if (resolve['data']['url']) {
             data['avatar'] = resolve['data']['url']
-            this.$axios.post(url, data).then(function (response) {
-              var code = response.data.err_code
-              switch (code) {
-                case 200:
-                  this.$notify({
+            this.$axios.post(url, data).then(
+              function (response) {
+                var code = response.data.err_code
+                switch (code) {
+                  case 200:
+                    this.$notify({
                       title: 'Messages:',
                       message: `${this.loginForm.username},you can log in now!`,
                       position: 'bottom',
                       type: 'success'
-                    }
-                  )
-                  this.$refs.uploadAvatar.submit()
-                  this.$router.go(0)
-                  break
-                case 402:
-                  this.$notify.error({
-                    title: 'Messages:',
-                    message: 'This username is unaviliable',
-                    position: 'bottom',
-                    type: 'error'
-                  })
-                  this.$refs[Form].resetFields()
-                  break
-                case 403:
-                  this.$notify.error({
-                    title: 'Messages:',
-                    message: 'This email has signed!',
-                    position: 'bottom',
-                    type: 'error'
-                  })
-                  this.$refs[Form].resetFields()
-                  break
-              }
-            }.bind(this))
+                    })
+                    this.$refs.uploadAvatar.submit()
+                    this.$router.go(0)
+                    break
+                  case 402:
+                    this.GLOBAL.closeLoading()
+                    this.$notify.error({
+                      title: 'Messages:',
+                      message: 'This username is unaviliable',
+                      position: 'bottom',
+                      type: 'error'
+                    })
+                    this.$refs[Form].resetFields()
+                    break
+                  case 403:
+                    this.GLOBAL.closeLoading()
+                    this.$notify.error({
+                      title: 'Messages:',
+                      message: 'This email has signed!',
+                      position: 'bottom',
+                      type: 'error'
+                    })
+                    this.$refs[Form].resetFields()
+                    break
+                }
+              }.bind(this)
+            )
           } else {
+            this.GLOBAL.closeLoading()
             this.$notify.error({
               title: 'Error:',
               message: 'Avatar upload failed!',
@@ -161,53 +197,60 @@
         })
       },
       loginReq: function (url, data, Form) {
-        this.$axios.get(url, data).then(function (response) {
-          this.GLOBAL.USER = response.data.user
-          var token = response.data.token
-          store.commit('ADD_TOKEN', token)
-          this.$router.push('/home')
-          this.$message({
-            dangerouslyUseHTMLString: true,
-            center: true,
-            duration: 1500,
-            message: 'Welcome!' + '<b>' + `${this.loginForm.username}` + '</b>',
-            type: 'success'
-          })
-        }.bind(this))
-          .catch(function (error) {
-            console.log(error)
-            this.$store.commit('REMOVE_TOKEN', this.$store.state.token)
-            this.$notify.error({
-              title: 'Warning:',
-              message: 'Wrong username or password!',
-              position: 'bottom',
-              type: 'error'
-            })
-          }.bind(this))
+        this.$axios
+          .get(url, data)
+          .then(
+            function (response) {
+              this.GLOBAL.USER = response.data.user
+              var token = response.data.token
+              store.commit('ADD_TOKEN', token)
+              this.$router.push('/home')
+              this.$message({
+                dangerouslyUseHTMLString: true,
+                center: true,
+                duration: 1500,
+                message:
+                  'Welcome!' + '<b>' + `${this.loginForm.username}` + '</b>',
+                type: 'success'
+              })
+            }.bind(this)
+          )
+          .catch(
+            function (error) {
+              this.GLOBAL.closeLoading()
+              console.log(error)
+              this.$store.commit('REMOVE_TOKEN', this.$store.state.token)
+              this.$notify.error({
+                title: 'Warning:',
+                message: 'Wrong username or password!',
+                position: 'bottom',
+                type: 'error'
+              })
+            }.bind(this)
+          )
       },
       submitUser (Form) {
         this.GLOBAL.showLoading()
-        this.$refs[Form].validate((valid) => {
-            if (this.btnSwitch === false) {
-              var logurl = this.GLOBAL.BASE_URL + '/api/v1/login'
-              var data = {
-                'auth': {
-                  username: this.loginForm.username,
-                  password: this.loginForm.pass
-                }
-              }
-              this.loginReq(logurl, data, Form)
-            } else {
-              let regurl = this.GLOBAL.BASE_URL + '/api/v1/register'
-              let regdata = {
+        this.$refs[Form].validate(valid => {
+          if (this.btnSwitch === false) {
+            var logurl = this.GLOBAL.BASE_URL + '/api/v1/login'
+            var data = {
+              auth: {
                 username: this.loginForm.username,
-                password: this.loginForm.pass,
-                email: this.loginForm.email
+                password: this.loginForm.pass
               }
-              this.reUpload(regurl, regdata, Form)
             }
+            this.loginReq(logurl, data, Form)
+          } else {
+            let regurl = this.GLOBAL.BASE_URL + '/api/v1/register'
+            let regdata = {
+              username: this.loginForm.username,
+              password: this.loginForm.pass,
+              email: this.loginForm.email
+            }
+            this.reUpload(regurl, regdata, Form)
           }
-        )
+        })
       },
       setPreview (file) {
         const isJPG = file.raw.type === 'image/jpeg'
@@ -219,7 +262,9 @@
           this.$message.error('大小不能超过 2MB!')
         }
         this.imageFile = file.raw
-        this.imageUrl = (window.URL || window.webkitURL).createObjectURL(file.raw)
+        this.imageUrl = (window.URL || window.webkitURL).createObjectURL(
+          file.raw
+        )
         return isJPG && isLt2M
       }
     }
@@ -227,19 +272,39 @@
 </script>
 
 <style scoped>
-  .wrapper {
+  #wrapper {
     margin: 0;
     padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-image: url("https://img.xjh.me/random_img.php?type=bg&ctype=nature&return=302&device=mobile");
+    /*background-image: url("https://img.xjh.me/random_img.php?type=bg&ctype=nature&return=302&device=mobile");*/
+    /*background-image: url("../../static/backgrounds/bg2.svg");*/
     /*filter: blur(15px);*/
     background-size: cover;
     width: 100%;
     height: 97vh;
     z-index: 1;
+  }
 
+  .wrapper-style-1 {
+    background-image: url("../../static/backgrounds/bg1.svg");
+  }
+
+  .wrapper-style-2 {
+    background-image: url("../../static/backgrounds/bg2.svg");
+  }
+
+  .wrapper-style-3 {
+    background-image: url("../../static/backgrounds/bg3.svg");
+  }
+
+  .wrapper-style-4 {
+    background-image: url("../../static/backgrounds/bg4.svg");
+  }
+
+  .wrapper-style-5 {
+    background-image: url("../../static/backgrounds/bg5.svg");
   }
 
   .welcome {
@@ -258,7 +323,8 @@
   }
 
   .demo-loginForm {
-    font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+    font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
   }
 
   .demo-loginForm {
@@ -288,7 +354,7 @@
   }
 
   .avatar-uploader .el-upload:hover {
-    border-color: #409EFF;
+    border-color: #409eff;
   }
 
   .avatar-uploader-icon {

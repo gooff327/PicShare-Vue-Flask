@@ -6,7 +6,6 @@
     <router-view v-if="!$route.meta.keepAlive"></router-view>
   </div>
 </template>
-
 <script>
   import headers from './components/header/homeHeader'
   import login from './components/Login'
@@ -36,5 +35,4 @@
 </script>
 
 <style>
-
 </style>
