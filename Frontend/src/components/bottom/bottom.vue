@@ -142,6 +142,7 @@
 
   .function {
     border: 0px;
+    padding: 0;
   }
 
   .function .fa, .function.fa::before {
@@ -152,7 +153,8 @@
 
   .footerbar p {
     font-size: smaller;
-    margin: 0px;
+    margin-top: 4px;
+    margin-bottom: 2px;
   }
 
   .plus {
