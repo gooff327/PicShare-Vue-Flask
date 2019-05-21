@@ -13,7 +13,7 @@ class Users(db.Model):
     username = db.Column(db.String(80), unique=True)
     password = db.Column(db.String(120))
     email = db.Column(db.String(120), unique=True)
-    avatar = db.Column(db.String(50))
+    avatar = db.Column(db.String(200))
     admire = db.Column(db.String(4096), default=None)
     brief = db.Column(db.String(200))
     phone = db.Column(db.String(20))
@@ -61,12 +61,12 @@ class Resource(db.Model):
     __tablename__ = 'timeline'
     pid = db.Column(db.Integer, primary_key=True, autoincrement=True)
     uid = db.Column(db.Integer, )
-    img = db.Column(db.String(100))
+    img = db.Column(db.String(200))
     desc = db.Column(db.String(100))
     pv = db.Column(db.Integer)
     author = db.Column(db.String(30))
     date = db.Column(db.DateTime)
-    uavatar = db.Column(db.String(50))
+    uavatar = db.Column(db.String(200))
 
     def __init__(self, uid, img, desc, pv, author, date):
         self.uid = uid
