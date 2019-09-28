@@ -8,7 +8,7 @@
 ------
 
 **登录&注册**
-![图片描述][2]
+![图片描述](https://upload-images.jianshu.io/upload_images/18344780-97b0794077c35b22.png?imageMogr2/auto-orient/strip|imageView2/2/w/777/format/webp)
 **首页&内容发布**
 ![图片描述](https://i.loli.net/2019/06/17/5d07493b691ed83770.png)
 **评论&转发**
